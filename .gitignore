@@ -1,0 +1,17 @@
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Claude Code local
+.claude/settings.local.json
+
+# Temporary
+*.tmp
+*.bak
