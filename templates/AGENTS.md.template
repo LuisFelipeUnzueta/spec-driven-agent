@@ -1,5 +1,7 @@
 # AGENTS.md
 
+<!-- Gerado por SpecDrivenAgent — consulte VERSION no repositorio fonte -->
+
 ## Visao Geral
 Framework de desenvolvimento assistido por IA (SpecDrivenAgent).
 Workflows: SDD (features grandes), miniSpec (features medias), TaskCard (tarefas pontuais).

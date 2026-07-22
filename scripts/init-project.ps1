@@ -3,6 +3,7 @@
     Inicializa o SpecDrivenAgent em um projeto existente.
 .DESCRIPTION
     Cria estrutura de override, sincroniza framework, gera AGENTS.md e cria CLAUDE.md basico.
+    Auto-detecta modo de instalacao (submodule ou clone).
 .PARAMETER ProjectPath
     Caminho do projeto-alvo.
 .PARAMETER FrameworkPath
@@ -19,7 +20,18 @@ if (-not $FrameworkPath) {
     $FrameworkPath = Join-Path $PSScriptRoot ".."
 }
 
-Write-Host "=== SpecDrivenAgent - Inicializar Projeto ===" -ForegroundColor Cyan
+# Ler versao
+$versionFile = Join-Path $FrameworkPath "VERSION"
+$version = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "dev" }
+
+# Detectar modo
+$resolved = Resolve-Path $FrameworkPath
+$isSubmodule = $resolved.Path -match '\.sda\\?$|\.sda$'
+$modo = if ($isSubmodule) { "submodule (.sda/)" } else { "clone direto" }
+
+Write-Host "=== SpecDrivenAgent v$version - Inicializar Projeto ===" -ForegroundColor Cyan
+Write-Host "Modo detectado: $modo" -ForegroundColor Cyan
+Write-Host ""
 
 # 1. Criar estrutura de override
 $dirs = @(
@@ -66,7 +78,7 @@ Consulte `.claude/skills/` para skills do framework SpecDrivenAgent.
 }
 
 Write-Host ""
-Write-Host "Inicializacao concluida!" -ForegroundColor Green
+Write-Host "Inicializacao concluida! (SpecDrivenAgent v$version)" -ForegroundColor Green
 Write-Host "Proximos passos:"
 Write-Host "  1. Revise os arquivos em .claude/"
 Write-Host "  2. Adicione overrides em .agents/rules/ e .agents/skills/"

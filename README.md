@@ -29,14 +29,16 @@ git clone https://github.com/seu-usuario/SpecDrivenAgent.git
 
 ## Setup no Projeto
 
-### Usando o script de inicializacao
+### Usando o script de inicializacao (recomendado)
+
+O script auto-detecta o modo de instalacao (submodule ou clone) e configura tudo automaticamente.
 
 ```powershell
-# Se usando submodule:
-./.sda/scripts/init-project.ps1 -ProjectPath .
+# Submodule (.sda/) — detecta automaticamente:
+.\.sda\scripts\init-project.ps1 -ProjectPath .
 
-# Se usando clone:
-./SpecDrivenAgent/scripts/init-project.ps1 -ProjectPath . -FrameworkPath ./SpecDrivenAgent
+# Clone direto — especifique o caminho:
+.\SpecDrivenAgent\scripts\init-project.ps1 -ProjectPath . -FrameworkPath .\SpecDrivenAgent
 ```
 
 ### Manual
@@ -51,6 +53,13 @@ git clone https://github.com/seu-usuario/SpecDrivenAgent.git
 seu-projeto/
 ├── .sda/                      # Git submodule (framework fonte)
 │   ├── framework/
+│   │   ├── agents/
+│   │   │   ├── sda-qa-validator.md          # Gate 1 — orquestrador
+│   │   │   ├── sda-qa-validator/            # Modulos de validacao
+│   │   │   ├── sda-staff-architecture-review.md
+│   │   │   └── sda-qa-test-generator.md
+│   │   ├── rules/
+│   │   └── skills/
 │   ├── scripts/
 │   └── templates/
 ├── .claude/                  # Claude Code (gerado)
@@ -61,7 +70,9 @@ seu-projeto/
 │   ├── rules/
 │   └── skills/
 ├── AGENTS.md                 # OpenAI Codex (gerado)
-└── CLAUDE.md                 # Claude Code (manual)
+├── CLAUDE.md                 # Claude Code (manual)
+├── VERSION                   # Versao semver do framework
+└── CHANGELOG.md              # Historico de alteracoes
 ```
 
 ## Workflows
@@ -92,13 +103,19 @@ O prefixo `sda-` e reservado para o framework. Use o nome do seu projeto como pr
 ## Atualizacao
 
 ```powershell
-# Se usando submodule:
+# Submodule:
 cd .sda && git pull && cd ..
-./.sda/scripts/sync-claude.ps1 -Force
+.\.sda\scripts\sync-claude.ps1 -Force
 
-# Se usando clone:
-./.sda/scripts/update-framework.ps1 -FrameworkPath ./SpecDrivenAgent
+# Clone direto:
+.\SpecDrivenAgent\scripts\update-framework.ps1 -FrameworkPath .\SpecDrivenAgent
 ```
+
+## Versao
+
+Versao atual: **1.0.0**
+
+Consulte [CHANGELOG.md](CHANGELOG.md) para historico de alteracoes.
 
 ## Licenca
 
