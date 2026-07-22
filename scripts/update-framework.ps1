@@ -19,7 +19,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "=== SpecDrivenAgent - Atualizar Framework ===" -ForegroundColor Cyan
 
 # Verificar se ha submodule
-$submodulePath = Join-Path $ProjectPath ".agent-spec"
+$submodulePath = Join-Path $ProjectPath ".sda"
 if (Test-Path (Join-Path $submodulePath ".git")) {
     Write-Host "Detectado submodule, fazendo pull..." -ForegroundColor Yellow
     Push-Location $submodulePath

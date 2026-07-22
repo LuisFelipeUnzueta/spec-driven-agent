@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
     Sincroniza o framework SpecDrivenAgent para o diretorio .claude/ do projeto.
+    Se usando submodule, o diretorio e .sda/ (nao .agent-spec/).
 .DESCRIPTION
     Copia agents, rules e skills de framework/ para .claude/agents/, .claude/rules/, .claude/skills/.
     Nao sobrescreve arquivos de override locais (prefixo diferente de sda-).

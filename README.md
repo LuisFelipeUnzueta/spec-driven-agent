@@ -18,7 +18,7 @@ SpecDrivenAgent e um framework que estrutura o fluxo de trabalho de desenvolvime
 
 ```bash
 cd seu-projeto
-git submodule add https://github.com/seu-usuario/SpecDrivenAgent.git .agent-spec
+git submodule add https://github.com/seu-usuario/SpecDrivenAgent.git .sda
 ```
 
 ### Opcao 2: Clone direto
@@ -33,7 +33,7 @@ git clone https://github.com/seu-usuario/SpecDrivenAgent.git
 
 ```powershell
 # Se usando submodule:
-./.agent-spec/scripts/init-project.ps1 -ProjectPath .
+./.sda/scripts/init-project.ps1 -ProjectPath .
 
 # Se usando clone:
 ./SpecDrivenAgent/scripts/init-project.ps1 -ProjectPath . -FrameworkPath ./SpecDrivenAgent
@@ -49,7 +49,7 @@ git clone https://github.com/seu-usuario/SpecDrivenAgent.git
 
 ```
 seu-projeto/
-├── .agent-spec/              # Git submodule (framework fonte)
+├── .sda/                      # Git submodule (framework fonte)
 │   ├── framework/
 │   ├── scripts/
 │   └── templates/
@@ -93,11 +93,11 @@ O prefixo `sda-` e reservado para o framework. Use o nome do seu projeto como pr
 
 ```powershell
 # Se usando submodule:
-cd .agent-spec && git pull && cd ..
-./.agent-spec/scripts/sync-claude.ps1 -Force
+cd .sda && git pull && cd ..
+./.sda/scripts/sync-claude.ps1 -Force
 
 # Se usando clone:
-./.agent-spec/scripts/update-framework.ps1 -FrameworkPath ./SpecDrivenAgent
+./.sda/scripts/update-framework.ps1 -FrameworkPath ./SpecDrivenAgent
 ```
 
 ## Licenca

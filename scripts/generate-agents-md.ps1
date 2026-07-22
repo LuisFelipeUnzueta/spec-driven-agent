@@ -3,6 +3,7 @@
     Gera o arquivo AGENTS.md para uso com OpenAI Codex.
 .DESCRIPTION
     Consolida workflows, rules, skills e agents do SpecDrivenAgent em um unico AGENTS.md.
+    Se usando submodule, o diretorio e .sda/ (nao .agent-spec/).
 .PARAMETER ProjectPath
     Caminho do projeto-alvo. Padrao: diretorio atual.
 .PARAMETER FrameworkPath

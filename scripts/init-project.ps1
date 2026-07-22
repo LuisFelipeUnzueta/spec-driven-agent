@@ -36,7 +36,8 @@ foreach ($dir in $dirs) {
 # 2. Sincronizar framework
 Write-Host ""
 Write-Host "Sincronizando framework..." -ForegroundColor Yellow
-& (Join-Path $PSScriptRoot "sync-claude.ps1") -ProjectPath $ProjectPath -FrameworkPath (Join-Path $FrameworkPath "framework")
+$fwPath = if (Test-Path (Join-Path $FrameworkPath "framework")) { Join-Path $FrameworkPath "framework" } else { $FrameworkPath }
+& (Join-Path $PSScriptRoot "sync-claude.ps1") -ProjectPath $ProjectPath -FrameworkPath $fwPath
 
 # 3. Gerar AGENTS.md
 Write-Host ""
