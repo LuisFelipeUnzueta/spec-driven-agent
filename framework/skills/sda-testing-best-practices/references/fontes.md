@@ -1,4 +1,4 @@
-﻿# Fontes
+# Fontes
 
 > Reference de `sda-testing-best-practices`. Bibliografia consolidada.
 
@@ -18,7 +18,7 @@
 - **Michael Feathers** — *Working Effectively with Legacy Code*. Test boundary, seam concepts.
 
 ### Real systems e contract testing
-- **Pact** — [Documentation on contract testing](https://docs.pact.io/). Provider/consumer model.
+- **Pact** — [Documentation on contract testing](https://docs.pact.io/). Provider/consumer profile.
 - **Testcontainers** — [testcontainers.com](https://testcontainers.com/). DB efêmero por teste.
 - **MSW (Mock Service Worker)** — [mswjs.io](https://mswjs.io/). Mock na fronteira HTTP do browser.
 

@@ -1,12 +1,11 @@
-﻿# TASKCARD - Execução Rápida (com Guardrails LLM)
+# TASKCARD - Execução Rápida (com Guardrails LLM)
 
 ## 1. Identificação
 - **ID**: TC-XXX
 - **Nome da Task**: [nome descritivo]
-- **model**: sonnet            <!-- sonnet (default) | opus (área crítica/complexa). Ver sda-taskcard-generate/SKILL.md → "FASE 3 — Heurística de model, risk e gates". NUNCA haiku. -->
 - **risk**: low                 <!-- low | medium | high -->
-- **gates**: [qa, tech_review]  <!-- [qa, tech_review] (default) | [qa] | none (task trivial: docs/config sem código executável) -->
-- **Variante**: [web | mobile | backend]  <!-- frente da TaskCard (FASE 0.-1 da generate). Também enviada como parâmetro `frente` ao sda-qa-test-generator e usada como fallback de variante pela /sda-debt-resolution. -->
+- **validation**: full  <!-- full (default) | qa | none (task trivial: docs/config sem código executável) -->
+- **Variante**: [web | mobile | backend]  <!-- frente da TaskCard (FASE 0.-1 da generate). Também enviada como parâmetro `frente` ao sda-qa-test-generator e usada como fallback de variante pela sda-debt-resolution. -->
 - **mode**: standard            <!-- standard | crud-fastpath (gerada pelo CRUD Fast-Path da FASE 6.5) -->
 - **source**: [recommended | overridden | no_discovery]  <!-- aderência à recomendação do pre-refinement (FASE 0.4 da generate). Instrumentação minerável. -->
 - **source_note**:              <!-- só quando source: overridden — recomendação original que o usuário divergiu. N/A caso contrário. -->
@@ -213,5 +212,5 @@ Decisões rápidas, alertas, trade-offs ou qualquer detalhe que ajude o reviewer
 
 <!-- LLM-ONLY: subseção canônica de rastreabilidade Feature→ADR (sda-adr-workflow-rules.md).
   Uma linha por ADR consultada na FASE 1 da generate, formato: `ADR-NNNN — descrição curta da decisão`.
-  A /sda-adr-review audita pelo nome exato desta subseção. Se nenhuma ADR se aplica, escreva "Nenhuma". -->
+  A sda-adr-review audita pelo nome exato desta subseção. Se nenhuma ADR se aplica, escreva "Nenhuma". -->
 - ADR-NNNN — [descrição curta da decisão]

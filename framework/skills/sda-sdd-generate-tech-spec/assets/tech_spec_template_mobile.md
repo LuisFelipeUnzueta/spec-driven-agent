@@ -1,4 +1,4 @@
-﻿# TECH_SPEC -- Especificação Técnica (Mobile)
+# TECH_SPEC -- Especificação Técnica (Mobile)
 
 ## 1. Identificação
 - **Feature/Projeto**:

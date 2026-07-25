@@ -1,0 +1,5 @@
+{
+  "name": "sda-qa-test-generator",
+  "description": "Gera poucos casos de teste de alto valor a partir de critérios de aceite e padrões reais do projeto.",
+  "profile": "normal"
+}

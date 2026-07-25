@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-generate-design
-description: Design Engineer. A partir de um documento de definição (PRD do SDD ou Intent do miniSpec), gera o design.md da feature — o COMO VISUAL (telas, layout, estados visuais, responsividade, motion, tema, a11y visual, assets) — e mantém o design-system.md global (tokens, biblioteca de componentes). Etapa OPCIONAL do pipeline, exclusiva das frentes web/mobile (backend é recusado com orientação). Ancora no design system real do projeto (tema, tokens, componentes existentes) antes de propor qualquer coisa; aceita links de Figma/mockups como referência sem depender deles. As seções de Fluxos de Interface e Comportamento Visual da TECH_SPEC/SCOPE passam a referenciar este documento em vez de redefinir a UI. Use quando o usuário pedir para especificar o design/UI de uma feature, criar design.md, registrar mockups/Figma no fluxo, ou antes da tech spec de uma feature com interface relevante. Resolve design.feature.path e design_system.global.path e salva os arquivos. User-invocable via /sda-generate-design.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <caminho do prd.md OU intent.md> [links de Figma/protótipos ou descrição livre do design imaginado]
+description: Gera o contrato visual de uma feature web ou mobile a partir do produto e do design system existente.
 ---
 
 # Skill: sda-generate-design
@@ -55,17 +52,17 @@ A skill recebe **um argumento obrigatório** e **um opcional**:
 |---|---|
 | `prd.md` (ou contém `/prd.md` no path) | **SDD** |
 | `intent.md` (ou contém `/intent.md` no path) | **miniSpec** |
-| Qualquer outro nome | **Erro** — pare e pergunte via `AskUserQuestion` |
+| Qualquer outro nome | **Erro** — pare e pergunte via `interação com o usuário` |
 
 ### 0.2 Confirmar a frente (web | mobile) — SEMPRE PERGUNTAR
 
-Pré-leia o `tech-alignment.md` (se existir, via `tech_alignment.path`) e o estado do pipeline (`_run/sdd_state.yaml`/`_run/minispec_state.yaml`, se existirem) apenas para **sugerir o default**. Em seguida pergunte via `AskUserQuestion`:
+Pré-leia o `tech-alignment.md` (se existir, via `tech_alignment.path`) e o estado do pipeline (`_run/state.json`/`_run/state.json`, se existirem) apenas para **sugerir o default**. Em seguida pergunte via `interação com o usuário`:
 
 > "Qual é a frente desta feature? O design.md só se aplica a interfaces."
 > Opções: `Web` | `Mobile` | `Backend (não se aplica)`
 
 - **`Web` ou `Mobile`** → siga, carregando o template correspondente na FASE 4.
-- **`Backend`** → **encerre com orientação**: "Features backend não têm design.md — estados de API que o frontend consome são especificados na tech spec backend e no contrato de handoff (`/sda-backend-contract-handoff`). Nada foi criado." **Não crie arquivo nenhum.**
+- **`Backend`** → **encerre com orientação**: "Features backend não têm design.md — estados de API que o frontend consome são especificados na tech spec backend e no contrato de handoff (`sda-backend-contract-handoff`). Nada foi criado." **Não crie arquivo nenhum.**
 
 > **Por que perguntar e não inferir**: mesma regra dura do framework (ver `sda-sdd-generate-tech-spec` FASE 0) — inferência silenciosa de frente já carregou template errado em features mistas. A pergunta custa 1 turn.
 
@@ -76,7 +73,7 @@ Pré-leia o `tech-alignment.md` (se existir, via `tech_alignment.path`) e o esta
 | `design.feature.path` | `/docs/specs/features/{feature}/{version}/design.md` |
 | `design_system.global.path` | `/docs/specs/design-system.md` |
 
-Substitua `{feature}` e `{version}` **extraídos do path do documento de definição recebido**. **NUNCA** use paths hardcoded — a estrutura canônica vive em `.claude/rules/sda-workflow-rules.md` (seção "Design — Dois Níveis"), incluindo a regra de **o que vai pro GLOBAL vs FEATURE** e a precedência de leitura.
+Substitua `{feature}` e `{version}` **extraídos do path do documento de definição recebido**. **NUNCA** use paths hardcoded — a estrutura canônica vive em `.agents/skills/_shared/rules/sda-workflow-rules.md` (seção "Design — Dois Níveis"), incluindo a regra de **o que vai pro GLOBAL vs FEATURE** e a precedência de leitura.
 
 ---
 
@@ -92,7 +89,7 @@ Antes de propor, você DEVE entender o terreno visual do projeto:
    - **Biblioteca de componentes**: diretório de componentes/widgets/views compartilhados (qualquer convenção: `components/`, `shared/widgets/`, `ui/`, `partials/`, storybook/showcase) e biblioteca externa em uso (qualquer uma — descubra pelo manifest de dependências do projeto, não por palpite).
    - **Padrões visuais estabelecidos**: como o projeto já faz loading, erro, empty state, modais e formulários — leia 1-2 telas existentes como exemplares e imite o padrão.
 5. **Consultar ADRs ativas** via `docs/adr/INDEX.md` (se existir) — em especial as de tag `ui`. Design **não pode conflitar** com ADR ativa sem sinalizar.
-6. **Destrinchar as referências do usuário** (arg2, se houver): links de Figma (se um MCP de Figma estiver disponível na sessão, ofereça importar frames — **nunca exija nem bloqueie por isso**; sem MCP, peça ao usuário descrever ou colar screenshots), imagens (leia com a ferramenta Read), descrições livres.
+6. **Destrinchar as referências do usuário** (arg2, se houver): links de Figma (se um MCP de Figma estiver disponível na sessão, ofereça importar frames — **nunca exija nem bloqueie por isso**; sem MCP, peça ao usuário descrever ou colar screenshots), imagens (leia com a ferramenta leitura), descrições livres.
 
 > **Nunca proponha componente novo sem antes confirmar que não existe um equivalente** no design system/biblioteca do projeto. Reuso vence criação — componente novo é exceção justificada e candidato a promoção para o global.
 
@@ -100,7 +97,7 @@ Antes de propor, você DEVE entender o terreno visual do projeto:
 
 ## FASE 2 — Proposta de Design (uma decisão por vez)
 
-Com a ancoragem feita, **proponha o design** tela a tela. Use `AskUserQuestion` para decidir direção, **liderando sempre com a sua recomendação** — nunca devolva um questionário vazio.
+Com a ancoragem feita, **proponha o design** tela a tela. Use `interação com o usuário` para decidir direção, **liderando sempre com a sua recomendação** — nunca devolva um questionário vazio.
 
 Sequência típica (pule o que já estiver decidido pelas referências do usuário ou pelo design system):
 
@@ -128,9 +125,9 @@ Antes de escrever, classifique cada decisão coletada usando a tabela da rule co
 - **Feature** (default): telas, layouts, estados, interações e assets desta feature → `design.md`.
 - **Global**: token novo, componente novo reutilizável, padrão de feedback que passa a valer para o produto → candidato ao `design-system.md`.
 
-Para cada candidato a global, **confirme com o usuário antes de promover** (alterar o global afeta todas as features). Se o `design-system.md` ainda não existe e surgiram decisões globais, proponha criá-lo com o mínimo necessário — **não** faça engenharia reversa do design system inteiro do projeto de uma vez (crescimento lazy, como o glossário de domínio). Se o usuário quiser consolidar o design system completo de uma vez (codebase + Figma + docs soltos), indique **`/sda-design-system-bootstrap`** — é a dona desse fluxo standalone.
+Para cada candidato a global, **confirme com o usuário antes de promover** (alterar o global afeta todas as features). Se o `design-system.md` ainda não existe e surgiram decisões globais, proponha criá-lo com o mínimo necessário — **não** faça engenharia reversa do design system inteiro do projeto de uma vez (crescimento lazy, como o glossário de domínio). Se o usuário quiser consolidar o design system completo de uma vez (codebase + Figma + docs soltos), indique **`sda-design-system-bootstrap`** — é a dona desse fluxo standalone.
 
-Decisões de design **transversais com trade-off real** (ex.: "adotar skeleton em vez de spinner em todo o produto") são também candidatas a ADR (tag `ui`) — sinalize e recomende `/sda-adr-create`. **Não crie a ADR.**
+Decisões de design **transversais com trade-off real** (ex.: "adotar skeleton em vez de spinner em todo o produto") são também candidatas a ADR (tag `ui`) — sinalize e recomende `sda-adr-create`. **Não crie a ADR.**
 
 ---
 
@@ -157,7 +154,7 @@ Todas as seções do template devem ser preenchidas. Se uma seção não se apli
    - Conteúdo global foi separado e confirmado? Conflitos com ADR/tema existente estão sinalizados?
    - Acentuação pt-BR correta?
 5. **Salvar** como **`design.md`** (literal, minúsculo) no path resolvido. Se houver conteúdo global confirmado, salvar/atualizar **`design-system.md`** (update cirúrgico — apenas as entradas novas, nunca reescrever o arquivo inteiro).
-6. **Atualizar o estado do pipeline** (se o arquivo de estado existir — `_run/sdd_state.yaml` ou `_run/minispec_state.yaml`): marque `steps.design.status: completed` e registre `variant`. Se o state não existir, **não crie** — a skill de PRD/Intent é a dona da criação.
+6. **Atualizar o estado do pipeline** (se o arquivo de estado existir — `_run/state.json` ou `_run/state.json`): marque `steps.design.status: completed` e registre `variant`. Se o state não existir, **não crie** — a skill de PRD/Intent é a dona da criação.
 
 ---
 
@@ -186,7 +183,7 @@ Esse design está aprovado? (sim / ajustar)
 
 **IMPORTANTE:**
 - **NÃO** inicie automaticamente a próxima etapa (TECH_SPEC para SDD, SCOPE para miniSpec).
-- **NÃO** sugira o próximo comando do framework — apenas `/sda-adr-create` quando houver candidata a ADR.
+- **NÃO** sugira o próximo comando do framework — apenas `sda-adr-create` quando houver candidata a ADR.
 - Após confirmação, encerre.
 
 ---
@@ -203,7 +200,7 @@ Esse design está aprovado? (sim / ajustar)
 8. **Estados visuais CONCRETOS** — "skeleton de card 3 linhas", "toast com ação Tentar novamente", nunca "mostrar loading/erro" genérico. Estado genérico não é verificável pelo QA.
 9. **Figma/mockup é referência, nunca pré-requisito** — sem MCP de Figma, siga com links + descrição. Nunca bloqueie.
 10. **Separação GLOBAL vs FEATURE** conforme a rule comum; promoção ao global só com confirmação do usuário; update do global é cirúrgico.
-11. **NÃO crie ADR diretamente** — recomende `/sda-adr-create` para decisões transversais de design (tag `ui`).
+11. **NÃO crie ADR diretamente** — recomende `sda-adr-create` para decisões transversais de design (tag `ui`).
 12. **PROPONHA** — lidere com recomendação ancorada; não crave a primeira ideia nem devolva questionário vazio. UMA pergunta por vez.
 13. **SEMPRE salvar arquivo físico ANTES de apresentar** o resumo.
 14. **NUNCA inicie automaticamente a próxima etapa** nem sugira o próximo comando do framework.
@@ -225,7 +222,7 @@ Esse design está aprovado? (sim / ajustar)
 ## Checklist Final (validar antes de salvar)
 
 - [ ] Framework detectado pelo nome do arquivo de entrada (PRD ou Intent)
-- [ ] Frente confirmada via `AskUserQuestion` (web/mobile; backend recusado com orientação)
+- [ ] Frente confirmada via `interação com o usuário` (web/mobile; backend recusado com orientação)
 - [ ] Paths resolvidos via `design.feature.path` / `design_system.global.path`
 - [ ] PRD/Intent lido (QUE/PORQUÊ fechados) + discovery e tech-alignment varridos
 - [ ] `design-system.md` global lido (se existir) + design system real do codebase varrido (tema, tokens, componentes)
@@ -234,7 +231,7 @@ Esse design está aprovado? (sim / ajustar)
 - [ ] Toda tela do PRD/Intent mapeada, com layout + estados visuais concretos (loading/sucesso/erro/vazio [+ offline mobile])
 - [ ] Componentes classificados: reuso (com origem) vs novos (com justificativa)
 - [ ] Conteúdo global separado e confirmado com o usuário; update do global cirúrgico
-- [ ] Candidatos a ADR (tag `ui`) sinalizados com `/sda-adr-create` (não criados)
+- [ ] Candidatos a ADR (tag `ui`) sinalizados com `sda-adr-create` (não criados)
 - [ ] Nenhuma decisão de produto; nenhuma mecânica técnica (estado/API/arquivos de código)
 - [ ] Comentários `<!-- LLM-ONLY -->` removidos; acentuação pt-BR correta
 - [ ] `design.md` salvo no path resolvido ANTES do resumo; estado do pipeline atualizado (se existir)
@@ -243,4 +240,4 @@ Esse design está aprovado? (sim / ajustar)
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

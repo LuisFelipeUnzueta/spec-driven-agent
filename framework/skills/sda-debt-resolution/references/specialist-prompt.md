@@ -1,6 +1,6 @@
 # Prompt do Especialista — Classificação de Débitos
 
-> Referência consumida por `SKILL.md` na FASE 2 (Análise via Especialista). Leia este arquivo antes de invocar `Agent({...})`.
+> Referência consumida por `SKILL.md` na FASE 2 (Análise via Especialista). Leia este arquivo antes de invocar `Delegue({...})`.
 
 ---
 
@@ -14,7 +14,7 @@ A LLM não escolhe quais débitos entrarão — apenas **opina** sobre o valor d
 
 ## Prompt completo
 
-Use exatamente este texto como `prompt` na invocação `Agent({...})`. Substitua `<DÉBITOS_JSON>` pela serialização real coletada em FASE 1.
+Use exatamente este texto como `prompt` na invocação `Delegue({...})`. Substitua `<DÉBITOS_JSON>` pela serialização real coletada em FASE 1.
 
 ```
 Você está classificando débitos técnicos acumulados em uma feature do projeto.
@@ -54,10 +54,10 @@ Para CADA débito, emita uma classificação:
 
 ## Critérios de qualidade da sua classificação
 
-- **Inspecione o arquivo** mencionado em cada débito quando o título não dá contexto suficiente. Use Read/Grep para entender o cenário real antes de classificar.
+- **Inspecione o arquivo** mencionado em cada débito quando o título não dá contexto suficiente. Use leitura/busca textual para entender o cenário real antes de classificar.
 - **Considere o pattern do projeto** — leia outros arquivos similares na mesma camada (ex.: outros handlers do mesmo sub-pacote) para calibrar o que é "convenção" vs "exceção".
 - **Justifique em 1 linha objetiva** — citando custo + risco + valor. Sem floreio.
-- **Estime custo realisticamente** — em minutos de wall-clock de um executor sonnet aplicando a correção. Não inclua tempo de QA/Tech Review.
+- **Estime custo realisticamente** — em minutos de wall-clock de um executor normal aplicando a correção. Não inclua tempo de QA/Tech Review.
 
 ## Formato de saída (OBRIGATÓRIO JSON, sem markdown ao redor)
 
@@ -99,7 +99,7 @@ Para CADA débito, emita uma classificação:
 
 Após receber o JSON do agente, o orquestrador (SKILL.md FASE 2.4) deve:
 
-1. **Parsear como JSON estrito** — se falhar, registrar erro em `_run/run-report.md` e re-perguntar (1 retry).
+1. **Parsear como JSON estrito** — se falhar, registrar erro em `_run/report.md` e re-perguntar (1 retry).
 2. **Validar que `classificacoes[]` tem mesma quantidade de entradas que a lista enviada** — se faltar algum ID, re-perguntar pedindo APENAS os faltantes.
 3. **Validar valores enumerados** — `classificacao` e `risco_regressao` precisam estar nos sets permitidos.
 4. **Após 2 tentativas falhas** — marcar débitos não classificados como `perfumaria` por default conservador, com justificativa "agente não classificou".
@@ -110,8 +110,8 @@ Após receber o JSON do agente, o orquestrador (SKILL.md FASE 2.4) deve:
 
 O agente especialista invocado herda o `subagent_type` escolhido na descoberta interativa. Para classificação de débitos:
 
-- **Sonnet basta** — pattern recognition + estimativa de custo, não exige raciocínio profundo.
-- **Não use Opus** salvo se o usuário pedir explicitamente — custo extra não justifica para essa tarefa.
-- **Nunca Haiku** — mesmo regra do framework principal.
+- **normal basta** — pattern recognition + estimativa de custo, não exige raciocínio profundo.
+- **Não use critical** salvo se o usuário pedir explicitamente — custo extra não justifica para essa tarefa.
+- **Nunca economico** — mesmo regra do framework principal.
 
-O `model` é passado pela skill via `Agent(model="sonnet", ...)` independentemente do default do agente.
+O `profile` é passado pela skill via `Delegue(profile="normal", ...)` independentemente do default do agente.

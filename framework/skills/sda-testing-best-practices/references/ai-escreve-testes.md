@@ -1,8 +1,8 @@
-﻿# AI escreve testes — 7 gates obrigatórios
+# AI escreve testes — 7 validation obrigatórios
 
 > Reference de `sda-testing-best-practices`. Aplicado por `sda-qa-test-generator` em CADA caso de teste, e por `sda-qa-validator` ao revisar testes gerados.
 >
-> Agentes têm viés conhecido: mockar tudo para conseguir verde rápido, gerar testes sem invariante clara, omitir negative companion. Os gates abaixo bloqueiam esses vieses.
+> Agentes têm viés conhecido: mockar tudo para conseguir verde rápido, gerar testes sem invariante clara, omitir negative companion. Os validation abaixo bloqueiam esses vieses.
 
 ---
 
@@ -169,7 +169,7 @@ Se você não consegue marcar (a), (b) ou (c) honestamente, o teste é mock-driv
 
 ## Resumo executivo (para uso do sda-qa-test-generator)
 
-Cada item de `casos_teste[]` no JSON do `sda-qa-test-generator` ganha 6 campos derivados dos gates (schema canônico: `sda-qa-test-generator.md`):
+Cada item de `casos_teste[]` no JSON do `sda-qa-test-generator` ganha 6 campos derivados dos validation (schema canônico: `sda-qa-test-generator.md`):
 
 ```json
 {
@@ -222,7 +222,7 @@ Os campos são **obrigatórios**. Em caso de teste onde algum gate não se aplic
 
 ## Resumo executivo (para uso do sda-qa-validator)
 
-Ao revisar testes implementados, o `sda-qa-validator` aplica os 7 gates como **checklist de detecção**:
+Ao revisar testes implementados, o `sda-qa-validator` aplica os 7 validation como **checklist de detecção**:
 
 | Gate violado | Vira item em `problemas.*` com campo `smell` (nome canônico) |
 |---|---|
@@ -234,4 +234,4 @@ Ao revisar testes implementados, o `sda-qa-validator` aplica os 7 gates como **c
 | 6 (assertion em mock auto-set) | `mock_driven_confidence` (CRÍTICO) |
 | 7 (sem negative companion) | `happy_path_only` (ALTO) |
 
-Cada violação **simultaneamente** vai para `problemas.*` correspondente. Como todos os 7 gates listados aqui mapeiam para antipadrões CRÍTICOS ou ALTOS, qualquer violação **bloqueia** (`REJEITADO`) pela política débito-controlado do sda-qa-validator. Apenas violações estilísticas BAIXAS listadas em `antipadroes.md` viram observações em vez de bloqueio (médios também bloqueiam → entram no loop de correção).
+Cada violação **simultaneamente** vai para `problemas.*` correspondente. Como todos os 7 validation listados aqui mapeiam para antipadrões CRÍTICOS ou ALTOS, qualquer violação **bloqueia** (`REJEITADO`) pela política débito-controlado do sda-qa-validator. Apenas violações estilísticas BAIXAS listadas em `antipadroes.md` viram observações em vez de bloqueio (médios também bloqueiam → entram no loop de correção).

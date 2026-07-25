@@ -1,4 +1,4 @@
-﻿# Checklist de Challenge — `scope.md` (miniSpec)
+# Checklist de Challenge — `scope.md` (miniSpec)
 
 > Use este checklist na FASE 1 da skill `sda-challenge-spec` para construir a lista priorizada de questões. **Não escreva o checklist no chat com o usuário** — é um plano interno. Cada item vira potencialmente uma pergunta na FASE 2.
 

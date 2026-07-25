@@ -1,4 +1,4 @@
-﻿# CI e disciplina de flakiness
+# CI e disciplina de flakiness
 
 > Reference de `sda-testing-best-practices`. Aplicado em revisão de suítes existentes e ao avaliar resultado da execução do `sda-qa-validator`.
 

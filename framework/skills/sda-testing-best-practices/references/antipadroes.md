@@ -1,4 +1,4 @@
-﻿# Antipadrões — 29 sinais de teste mal escrito
+# Antipadrões — 29 sinais de teste mal escrito
 
 > Reference de `sda-testing-best-practices`. Use como checklist durante revisão (sda-qa-validator) ou geração (sda-qa-test-generator).
 >
@@ -231,9 +231,9 @@ Teste falhou; alguém **relaxou a assertion** para passar (ex.: `toBe(42)` virou
 Teste gerado por agente com 6+ assertions de happy-path e zero teste negativo, fronteira ou erro.
 
 - **Gate question**: Existe companheiro negativo (Gate 7)? Existe pelo menos um teste de fronteira/erro para essa invariante?
-- **Fix**: Aplique os 7 gates de `ai-escreve-testes.md`. Reject se Negative Companion ausente.
+- **Fix**: Aplique os 7 validation de `ai-escreve-testes.md`. Reject se Negative Companion ausente.
 
-> Os outros antipadrões AI-specific (auto-mock everything, no real execution, snapshot-as-evidence) estão **absorvidos** nos 7 gates de `ai-escreve-testes.md`.
+> Os outros antipadrões AI-specific (auto-mock everything, no real execution, snapshot-as-evidence) estão **absorvidos** nos 7 validation de `ai-escreve-testes.md`.
 
 ### AP-26 — `semantically_duplicated_test`
 **Família**: Process · **Severidade**: MÉDIO
@@ -270,13 +270,13 @@ Asserção que **nunca pode falhar**, logo não detecta regressão: ramo sempre-
 - **Gate question**: Existe ALGUM estado do SUT — incluindo o bug que o teste deveria pegar — em que esta asserção falha? Se não existe, ela é decorativa (Iron Law #1).
 - **Fix**: Asserte o ramo específico que importa (a condição real), removendo a disjunção sempre-verdadeira. Se duas condições são alternativas legítimas, separe em casos/asserções distintos.
 
-> Severidade ALTO (bloqueia) **alinhada entre os dois gates**: tanto `sda-qa-validator` (Camada 5) quanto `sda-staff-architecture-review` classificam asserção tautológica como `ALTO`/blocking — mascara regressão (Iron Law #1). Originou-se da divergência de rubrica no run `esqueci-a-senha` T3 (QA marcou MÉDIO via AP-05, Tech Review marcou ALTO para o mesmo achado).
+> Severidade ALTO (bloqueia) **alinhada entre os dois validation**: tanto `sda-qa-validator` (Camada 5) quanto `sda-staff-architecture-review` classificam asserção tautológica como `ALTO`/blocking — mascara regressão (Iron Law #1). Originou-se da divergência de rubrica no run `esqueci-a-senha` T3 (QA marcou MÉDIO via AP-05, Tech Review marcou ALTO para o mesmo achado).
 
 ---
 
 ## Mapeamento severidade → política débito-controlado
 
-Lembre-se: na política débito-controlado do sda-qa-validator, **críticos, altos e médios bloqueiam** (entram no loop de correção); **só baixos viram observação** (anotados na §2 do `_run/run-report.md` para cleanup futuro, sem reprovar). A severidade aqui define se o antipadrão **bloqueia** ou apenas **anota**.
+Lembre-se: na política débito-controlado do sda-qa-validator, **críticos, altos e médios bloqueiam** (entram no loop de correção); **só baixos viram observação** (anotados na §2 do `_run/report.md` para cleanup futuro, sem reprovar). A severidade aqui define se o antipadrão **bloqueia** ou apenas **anota**.
 
 | Severidade no testing_smells | Mapeia para `problemas.*` | Efeito no veredito |
 |---|---|---|

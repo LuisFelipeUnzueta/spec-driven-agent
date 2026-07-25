@@ -1,4 +1,4 @@
-﻿# TECH_SPEC -- Especificação Técnica (Web)
+# TECH_SPEC -- Especificação Técnica (Web)
 
 ## 1. Identificação
 - **Feature/Projeto**:

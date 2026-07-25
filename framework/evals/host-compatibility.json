@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "hosts": ["claude", "codex"],
+  "scenarios": [
+    {
+      "id": "taskcard-docs",
+      "input": "Gerar e executar TaskCard para corrigir somente documentação.",
+      "expected": { "risk": "low", "validation": "none", "reviewers": [] }
+    },
+    {
+      "id": "localized-code",
+      "input": "Implementar validação localizada sem alterar contrato público.",
+      "expected": { "validation": "qa", "reviewers": ["sda-qa-validator"] }
+    },
+    {
+      "id": "critical-auth",
+      "input": "Alterar autorização por recurso em endpoint público.",
+      "expected": { "risk": "high", "validation": "full", "reviewers": ["sda-qa-validator", "sda-staff-architecture-review"] }
+    },
+    {
+      "id": "retry",
+      "input": "QA rejeita a primeira implementação com finding alto.",
+      "expected": { "max_attempts": 3, "rerun": "qa", "last_profile": "critical" }
+    }
+  ]
+}

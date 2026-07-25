@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-adr-reindex
-description: Regenera `docs/adr/INDEX.md` a partir dos arquivos ADR existentes (`{id}-{slug}.md`). Operação determinística executada por script Node — preserva conteúdo fora dos marcadores `<!-- ADR-INDEX-START -->` / `<!-- ADR-INDEX-END -->` e atualiza a linha `Ultima atualizacao`. Skill standalone, invocada exclusivamente pelo usuário.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: ""
+description: Reconstrói e valida o índice de ADRs a partir dos arquivos existentes. Use após mudanças ou inconsistências.
 ---
 
 PERSONA: Você é um Arquiteto de Software Senior responsável por garantir que o `INDEX.md` reflete fielmente os arquivos ADR existentes no repositório. Seu papel ao reindexar é **somente executar o script canônico** e reportar o resultado — nenhuma decisão arquitetural é tomada aqui.
@@ -12,29 +9,29 @@ Princípios invioláveis:
 
 1. **Script é a verdade** — toda lógica de geração da tabela vive em `scripts/reindex.cjs`. Esta skill não interpreta frontmatter, não decide ordenação, não formata colunas.
 2. **Idempotência** — rodar o script N vezes consecutivas produz o mesmo `INDEX.md` (assumindo arquivos ADR inalterados).
-3. **Auto-contida** — esta skill carrega seu próprio script (`scripts/reindex.cjs`) e é a **dona canônica** do reindex. Outras skills do domínio ADR (`sda-adr-create`, `sda-adr-deprecate`, `sda-adr-supersede`, `sda-adr-bootstrap`) podem referenciar este mesmo script via path resolvido por `.claude/rules/sda-adr-workflow-rules.md` (`adr.reindex_script`).
+3. **Auto-contida** — esta skill carrega seu próprio script (`scripts/reindex.cjs`) e é a **dona canônica** do reindex. Outras skills do domínio ADR (`sda-adr-create`, `sda-adr-deprecate`, `sda-adr-supersede`, `sda-adr-bootstrap`) podem referenciar este mesmo script via path resolvido por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (`adr.reindex_script`).
 4. **Token-efficient by design** — esta skill **não abre** arquivos ADR. Quem lê os arquivos é o script Node em runtime.
 
 ---
 
 # Paths
 
-> Paths globais resolvidos por `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
+> Paths globais resolvidos por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
 
 | Artefato | Origem | Uso |
 |----------|--------|-----|
 | Diretório ADR | `adr.dir` (sda-adr-workflow-rules.md) → `/docs/adr` | apenas para mensagem de erro/orientação se faltar |
 | INDEX.md | `adr.index_file` (sda-adr-workflow-rules.md) → `/docs/adr/INDEX.md` | reescrito pelo script (entre marcadores) |
-| Script reindex (canônico) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `/.claude/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez via `node {path}` |
+| Script reindex (canônico) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `/.agents/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez via `node {path}` |
 
 ---
 
 # Quando usar
 
-Esta skill é invocada exclusivamente pelo usuário via `/sda-adr-reindex` em três cenários:
+Esta skill é invocada exclusivamente pelo usuário via `sda-adr-reindex` em três cenários:
 
 - **Recuperação** — `INDEX.md` ficou dessincronizado por edição manual de arquivos ADR.
-- **Bootstrap** — após criar N ADRs em lote (ex.: durante `/sda-adr-bootstrap`).
+- **Bootstrap** — após criar N ADRs em lote (ex.: durante `sda-adr-bootstrap`).
 - **CI/CD** — validar que o `INDEX.md` commitado reflete os arquivos do repositório.
 
 > Skills de escrita (`sda-adr-create`, `sda-adr-deprecate`, `sda-adr-supersede`, `sda-adr-bootstrap`) **já chamam o script** ao final dos seus fluxos — você não precisa rodar reindex após elas. Use esta skill apenas nos cenários acima.
@@ -59,27 +56,27 @@ Conteúdo fora dos marcadores (cabeçalho, instruções, linha `Ultima atualizac
 
 ## 1. Pré-condições
 
-a. **Resolver paths globais** a partir de `.claude/rules/sda-adr-workflow-rules.md` (rule já disponível no system-prompt): `adr.dir`, `adr.index_file` e `adr.reindex_script`.
+a. **Resolver paths globais** a partir de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de resolver os paths): `adr.dir`, `adr.index_file` e `adr.reindex_script`.
 
 b. **Validar existência mínima**:
    - Se `{adr.dir}` **não existe** → encerrar orientando o usuário a popular o corpus:
      ```
      Diretorio ADR nao encontrado: {adr.dir}.
      Sugestao:
-       - /sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
-       - /sda-adr-create     (cria a primeira ADR manualmente)
+       - sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
+       - sda-adr-create     (cria a primeira ADR manualmente)
      ```
    - Se `{adr.index_file}` **não existe** → encerrar com a mesma orientação (o script não recria o INDEX).
    - Se ambos existem, prosseguir.
 
-c. **Argumentos**: este modo **não aceita parâmetros**. Se `$ARGUMENTS` vier preenchido, ignorar e seguir.
+c. **Argumentos**: este modo **não aceita parâmetros**. Se `[entrada atual da solicitação]` vier preenchido, ignorar e seguir.
 
 ## 2. Executar o script — UMA única vez
 
-Executar via Bash, a partir da raiz do projeto:
+Executar via terminal, a partir da raiz do projeto:
 
 ```
-node .claude/skills/sda-adr-reindex/scripts/reindex.cjs
+node .agents/skills/sda-adr-reindex/scripts/reindex.cjs
 ```
 
 - O script lê `{adr.dir}`, varre `*.md` (excluindo `INDEX.md`, `TEMPLATE.md`, `README.md`), extrai frontmatter e gera a tabela entre os marcadores.
@@ -106,8 +103,8 @@ Reproduzir o `stderr` do script e orientar a correção. Causas conhecidas:
 | Mensagem | Causa | Correção |
 |----------|-------|----------|
 | `Marcadores ADR-INDEX-START/END nao encontrados ou fora de ordem no INDEX.md` | Marcadores ausentes ou invertidos | Adicionar/corrigir os marcadores HTML no INDEX.md |
-| `Diretorio ADR nao encontrado` | `{adr.dir}` inexistente | Rodar `/sda-adr-bootstrap` ou `/sda-adr-create` |
-| `INDEX.md nao encontrado` | `{adr.index_file}` inexistente | Rodar `/sda-adr-bootstrap` ou `/sda-adr-create` |
+| `Diretorio ADR nao encontrado` | `{adr.dir}` inexistente | Rodar `sda-adr-bootstrap` ou `sda-adr-create` |
+| `INDEX.md nao encontrado` | `{adr.index_file}` inexistente | Rodar `sda-adr-bootstrap` ou `sda-adr-create` |
 
 **NÃO** tente consertar o INDEX manualmente daqui — encerre com o erro reportado e oriente o usuário.
 
@@ -119,19 +116,19 @@ Reproduzir o `stderr` do script e orientar a correção. Causas conhecidas:
 
 ## DEVE
 
-1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.reindex_script`) via **`.claude/rules/sda-adr-workflow-rules.md`** (rule global no system-prompt). Recursos internos (`scripts/`) via path relativo à skill.
+1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.reindex_script`) via **`.agents/skills/_shared/rules/sda-adr-workflow-rules.md`** (referência lazy; leia antes de usar). Recursos internos (`scripts/`) via path relativo à skill.
 2. Validar existência de `{adr.dir}` e `{adr.index_file}` **antes** de executar o script.
-3. Executar o script **uma única vez** via Bash: `node .claude/skills/sda-adr-reindex/scripts/reindex.cjs`.
+3. Executar o script **uma única vez** via terminal: `node .agents/skills/sda-adr-reindex/scripts/reindex.cjs`.
 4. Reproduzir integralmente o `stdout` (incluindo todas as linhas de AVISO) ao usuário.
 5. Em caso de `exit 1`, reproduzir o `stderr` e orientar correção conforme a tabela de erros conhecidos.
-6. Tratar `$ARGUMENTS` como vazio mesmo se vier preenchido (esta operação não aceita parâmetros).
+6. Tratar `[entrada atual da solicitação]` como vazio mesmo se vier preenchido (esta operação não aceita parâmetros).
 
 ## NÃO DEVE
 
 1. **NUNCA** abrir arquivos ADR individuais — toda leitura é responsabilidade do script.
 2. **NUNCA** editar o `INDEX.md` manualmente — apenas o script reescreve a tabela entre os marcadores.
-3. **NUNCA** recriar o `INDEX.md` daqui se ele faltar — encerre orientando o usuário a `/sda-adr-bootstrap` ou `/sda-adr-create`.
-4. **NUNCA** releia `.claude/rules/sda-adr-workflow-rules.md` no fluxo desta skill — paths globais já vêm resolvidos pelo system-prompt. (O script Node lê a rule em runtime para resolver `adr.dir` e `adr.index_file` — isso é interno do script, não desta skill.)
+3. **NUNCA** recriar o `INDEX.md` daqui se ele faltar — encerre orientando o usuário a `sda-adr-bootstrap` ou `sda-adr-create`.
+4. Leia `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` uma vez no início e reutilize os paths globais. (O script Node lê a rule em runtime para resolver `adr.dir` e `adr.index_file` — isso é interno do script, não desta skill.)
 5. **NUNCA** modificar arquivos fora de `{adr.index_file}`.
 6. **NUNCA** executar o script mais de uma vez por invocação — uma chamada produz o resultado completo.
 7. **NUNCA** sugira/inicie outros comandos automaticamente após o término.
@@ -141,4 +138,4 @@ Reproduzir o `stderr` do script e orientar a correção. Causas conhecidas:
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-sdd-generate-prd
-description: Gera PRD (Product Requirement Document) completo do framework SDD a partir de uma ideia. Conduz o usuário através de processo interativo (uma pergunta por vez) para construir o documento, salvar em disco e opcionalmente iniciar o tech_alignment. User-invocable via /sda-sdd-generate-prd.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <descrição da feature em texto livre> [path opcional para pre-refinement.md]
+description: Gera PRD para feature grande ou crítica, com objetivos, requisitos e critérios de sucesso.
 ---
 
 # Skill: sda-sdd-generate-prd
@@ -44,7 +41,7 @@ Ideia / Rascunho do usuário
 
 ## Paths (Resolução)
 
-Variáveis usadas nesta skill: `pre_refinement.path`, `sdd.prd.path`, `tech_alignment.path`, `sdd.state.path`. Templates definidos em `.claude/rules/sda-sdd-workflow-rules.md` (paths SDD) e `.claude/rules/sda-workflow-rules.md` (paths compartilhados).
+Variáveis usadas nesta skill: `pre_refinement.path`, `sdd.prd.path`, `tech_alignment.path`, `shared.state.path`. Templates definidos em `.agents/skills/_shared/rules/sda-sdd-workflow-rules.md` (paths SDD) e `.agents/skills/_shared/rules/sda-workflow-rules.md` (paths compartilhados).
 
 Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...) antes de qualquer leitura/escrita. **NUNCA** use paths hardcoded.
 
@@ -52,21 +49,21 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...) a
 
 ## FASE 0 — Pré-Verificação: Aderência à Recomendação do Discovery
 
-### 0.0 Resolver `$ARGUMENTS` (texto + path opcional)
+### 0.0 Resolver `[entrada atual da solicitação]` (texto + path opcional)
 
-`$ARGUMENTS` pode conter (em qualquer ordem):
+`[entrada atual da solicitação]` pode conter (em qualquer ordem):
 
 - Uma **descrição** da feature em texto livre (entre aspas ou solto).
 - Um **path opcional** para um `pre-refinement.md` já existente.
 
 **Algoritmo** (aplique nesta ordem):
 
-1. Identifique tokens de `$ARGUMENTS` que terminam em `pre-refinement.md`.
+1. Identifique tokens de `[entrada atual da solicitação]` que terminam em `pre-refinement.md`.
 2. Para cada um, verifique se o arquivo existe no filesystem.
-3. **Se houver um path existente** → este é o Discovery; o restante de `$ARGUMENTS` é a descrição.
+3. **Se houver um path existente** → este é o Discovery; o restante de `[entrada atual da solicitação]` é a descrição.
    - Se a descrição ficou vazia, extraia a ideia das seções 2-6 do próprio `pre-refinement.md` e prossiga.
 4. **Se nenhum token é path** → siga 0.1 (resolução por template).
-5. **Caso ambíguo** (token parece path mas o arquivo não existe) → pergunte via `AskUserQuestion`: "O arquivo `<x>` não foi encontrado. Isso era um path ou faz parte da descrição?". **NÃO** caia silenciosamente no fallback.
+5. **Caso ambíguo** (token parece path mas o arquivo não existe) → pergunte via `interação com o usuário`: "O arquivo `<x>` não foi encontrado. Isso era um path ou faz parte da descrição?". **NÃO** caia silenciosamente no fallback.
 
 ### 0.1 Localizar `pre-refinement.md` (fallback)
 
@@ -80,11 +77,11 @@ Quando 0.0 não retornou um path, tente resolver via template:
 Quando 0.0 ou 0.1 retornou um arquivo existente:
 
 1. Leia a **seção 15 (Recomendação de Framework)** e extraia o valor de `15.2 Framework Recomendado`.
-2. Se a recomendação for **DIFERENTE** de "SDD", emita aviso **não-bloqueante** via `AskUserQuestion`:
+2. Se a recomendação for **DIFERENTE** de "SDD", emita aviso **não-bloqueante** via `interação com o usuário`:
 
 ```
 ⚠️  O pre-refinement.md desta feature recomenda rodar em <FRAMEWORK>,
-    mas você invocou /sda-sdd-generate-prd.
+    mas você invocou sda-sdd-generate-prd.
 
     Justificativa do discovery: <copiar 15.2>
     Comando sugerido: <copiar 15.4>
@@ -94,7 +91,7 @@ Quando 0.0 ou 0.1 retornou um arquivo existente:
 
 Se "s" ou "sim" → continue. Se "N" → pare e sugira rodar o comando recomendado.
 
-3. **Instrumentação** (para o `_run/sdd_state.yaml` posterior — campo `source`):
+3. **Instrumentação** (para o `_run/state.json` posterior — campo `source`):
    - `source: recommended` → usuário seguiu a recomendação.
    - `source: overridden` → usuário divergiu (registre a recomendação original em `source_note`).
    - `source: no_discovery` → não havia `pre-refinement.md`.
@@ -136,7 +133,7 @@ Leia **ambos** (se existirem). Precedência: feature sobrescreve global em caso 
    - Sem explicar COMO resolver — apenas O QUE deve acontecer
    - Se o usuário mencionar tecnologia, **abstraia**: "Firebase Cloud Messaging" → "serviço de notificações push"
 7. Quando o usuário não souber responder, ofereça **2 a 4 opções** bem formuladas.
-8. Use `AskUserQuestion` para esclarecer dúvidas.
+8. Use `interação com o usuário` para esclarecer dúvidas.
 9. **NUNCA** deduzir escopo ou inventar informações — na DÚVIDA, **PERGUNTE**.
 
 ---
@@ -174,7 +171,7 @@ Siga esta sequência, fazendo **apenas uma pergunta por vez** e aguardando a res
 1. Resolva o **diretório pai** do `sdd.prd.path` substituindo `{feature}` e deixando `{version}` variável.
 2. Verifique se o diretório da feature existe.
 3. **Se NÃO existir** → use `{version}` = `v1` e resolva o path final.
-4. **Se EXISTIR** → liste versões existentes (v1, v2, ...), identifique a mais recente (vN), e pergunte ao usuário com `AskUserQuestion`:
+4. **Se EXISTIR** → liste versões existentes (v1, v2, ...), identifique a mais recente (vN), e pergunte ao usuário com `interação com o usuário`:
    - **"Criar nova versão (vN+1)"** → resolve com nova versão. **LEIA a versão anterior como contexto** para enriquecer o novo PRD (continuidade).
    - **"Sobrescrever versão atual (vN)"** → resolve com a mesma versão.
 
@@ -218,7 +215,7 @@ Esse PRD representa corretamente o que você quer? (sim/não)
 
 **IMPORTANTE:**
 - **NÃO** exiba o PRD completo — apenas o resumo.
-- **NÃO** inicie `/sda-sdd-generate-tech-spec` automaticamente.
+- **NÃO** inicie `sda-sdd-generate-tech-spec` automaticamente.
 - **NÃO** sugira executar o próximo comando.
 - **NÃO** sugira próximos passos do framework.
 - Após confirmação do usuário, execute o fluxo de **Tech Alignment** (FASE 6) e depois o **Estado do Pipeline** (FASE 7).
@@ -244,7 +241,7 @@ Entrada esperada:
      se vier, entra como uma das alternativas; se não, a skill propõe os caminhos do zero)
 
 A skill detecta que é fluxo SDD (pelo nome do arquivo `prd.md`),
-resolve o path via `tech_alignment.path` em `.claude/rules/sda-workflow-rules.md` (variável global,
+resolve o path via `tech_alignment.path` em `.agents/skills/_shared/rules/sda-workflow-rules.md` (variável global,
 compartilhada com o miniSpec) e salva o `tech-alignment.md` com as decisões no diretório correto.
 ```
 
@@ -254,9 +251,9 @@ Encerre normalmente. O TECH_SPEC será gerado sem alinhamento técnico prévio.
 
 ---
 
-## FASE 7 — Estado do Pipeline (_run/sdd_state.yaml)
+## FASE 7 — Estado do Pipeline (_run/state.json)
 
-Após salvar o PRD com sucesso, **DEVE** criar/atualizar o arquivo no path resolvido a partir de `sdd.state.path`.
+Após salvar o PRD com sucesso, **DEVE** criar/atualizar o arquivo no path resolvido a partir de `shared.state.path`.
 
 ### Se o arquivo NÃO existir — crie com a estrutura completa:
 
@@ -300,7 +297,7 @@ Estas regras são **absolutas** e não podem ser violadas:
 5. **SEMPRE salvar arquivo físico ANTES de apresentar** — arquivo deve existir no disco antes de pedir aprovação.
 6. **NUNCA inicie automaticamente a próxima etapa (TECH_SPEC)** — apenas encerre e aguarde.
 7. **Template COMPLETO** — todas as 13 seções preenchidas (ou marcadas N/A com justificativa).
-8. **AskUserQuestion** — use esta ferramenta para esclarecer dúvidas com o usuário.
+8. **interação com o usuário** — use esta ferramenta para esclarecer dúvidas com o usuário.
 9. **Escopo fechado** — PRD auto-suficiente e sem ambiguidades.
 10. **User Stories numeradas** — todas com ID único (US-01, US-02, ...) para rastreabilidade.
 
@@ -340,4 +337,4 @@ O PRD inclui uma **tabela de rastreabilidade** mapeando User Stories (US-XX) par
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

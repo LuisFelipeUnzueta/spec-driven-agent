@@ -1,122 +1,97 @@
 # SpecDrivenAgent
 
-Framework de desenvolvimento assistido por IA para Claude Code e OpenAI Codex.
+Nucleo de workflows orientados por especificacao para Claude Code e OpenAI Codex.
 
-## O que e
+## Principios da v2
 
-SpecDrivenAgent e um framework que estrutura o fluxo de trabalho de desenvolvimento de software com assistencia de IA, oferecendo:
-
-- **3 workflows** baseados em complexidade: SDD, miniSpec, TaskCard
-- **2 gates** de validacao: QA funcional + Review arquitetural
-- **36 skills** para todas as fases do ciclo de vida
-- **Sistema de overrides** para customizacao por projeto
-- **Suporte nativo** a Claude Code e OpenAI Codex
+- uma unica fonte em `framework/skills`;
+- descoberta nativa em ambos os hosts;
+- `AGENTS.md` curto e compartilhado;
+- adapters isolam modelos, esforco e formato de agentes;
+- validacao proporcional ao risco;
+- no maximo tres tentativas por task;
+- nenhum staging ou commit automatico.
 
 ## Instalacao
 
-### Opcao 1: Git Submodule (recomendado)
-
-```bash
-cd seu-projeto
-git submodule add https://github.com/seu-usuario/SpecDrivenAgent.git .sda
-```
-
-### Opcao 2: Clone direto
-
-```bash
-git clone https://github.com/seu-usuario/SpecDrivenAgent.git
-```
-
-## Setup no Projeto
-
-### Usando o script de inicializacao (recomendado)
-
-O script auto-detecta o modo de instalacao (submodule ou clone) e configura tudo automaticamente.
+Como submodule:
 
 ```powershell
-# Submodule (.sda/) — detecta automaticamente:
+git submodule add <url-do-repositorio> .sda
 .\.sda\scripts\init-project.ps1 -ProjectPath .
+```
 
-# Clone direto — especifique o caminho:
+Como clone separado:
+
+```powershell
+git clone <url-do-repositorio> SpecDrivenAgent
 .\SpecDrivenAgent\scripts\init-project.ps1 -ProjectPath . -FrameworkPath .\SpecDrivenAgent
 ```
 
-### Manual
+O host padrao e `Both`. Para limitar a projecao:
 
-1. Copie `framework/` para `.claude/` (ou use `sync-claude.ps1`)
-2. Execute `generate-agents-md.ps1` para criar `AGENTS.md`
-3. Crie seu `CLAUDE.md`
-
-## Estrutura
-
+```powershell
+.\.sda\scripts\init-project.ps1 -ProjectPath . -Host Claude
+.\.sda\scripts\init-project.ps1 -ProjectPath . -Host Codex
 ```
-seu-projeto/
-├── .sda/                      # Git submodule (framework fonte)
-│   ├── framework/
-│   │   ├── agents/
-│   │   │   ├── sda-qa-validator.md          # Gate 1 — orquestrador
-│   │   │   ├── sda-qa-validator/            # Modulos de validacao
-│   │   │   ├── sda-staff-architecture-review.md
-│   │   │   └── sda-qa-test-generator.md
-│   │   ├── rules/
-│   │   └── skills/
-│   ├── scripts/
-│   └── templates/
-├── .claude/                  # Claude Code (gerado)
-│   ├── agents/
-│   ├── rules/
-│   └── skills/
-├── .agents/                  # Overrides do projeto
-│   ├── rules/
-│   └── skills/
-├── AGENTS.md                 # OpenAI Codex (gerado)
-├── CLAUDE.md                 # Claude Code (manual)
-├── VERSION                   # Versao semver do framework
-└── CHANGELOG.md              # Historico de alteracoes
-```
-
-## Workflows
-
-| Workflow | Quando usar | Comando inicial |
-|----------|-------------|-----------------|
-| **SDD** | Features grandes/criticas | `/sda-sdd-generate-prd` |
-| **miniSpec** | Features medias | `/sda-minispec-generate-intent` |
-| **TaskCard** | Tarefas pontuais | `/sda-taskcard-generate` |
-
-Execute `/sda-pre-refinement` se nao tiver certeza qual workflow usar.
-
-## Customizacao
-
-Adicione regras e skills especificas do projeto em `.agents/`:
-
-```bash
-# Regras do projeto
-.agents/rules/seu-projeto-nome-da-regra.md
-
-# Skills do projeto
-.agents/skills/seu-projeto-nome-da-skill/
-└── SKILL.md
-```
-
-O prefixo `sda-` e reservado para o framework. Use o nome do seu projeto como prefixo para overrides.
 
 ## Atualizacao
 
-```powershell
-# Submodule:
-cd .sda && git pull && cd ..
-.\.sda\scripts\sync-claude.ps1 -Force
+Depois de atualizar o submodule ou clone:
 
-# Clone direto:
-.\SpecDrivenAgent\scripts\update-framework.ps1 -FrameworkPath .\SpecDrivenAgent
+```powershell
+.\.sda\scripts\sync-project.ps1 -ProjectPath . -FrameworkPath .\.sda\framework -Host Both
 ```
 
-## Versao
+Use `-DryRun` para inspecionar as mudancas. O manifesto `.agents/.sda-manifest.json` permite limpar apenas arquivos antes gerados pelo framework. Conteudo externo aos blocos `<!-- sda:start -->` e `<!-- sda:end -->` em `AGENTS.md` e `CLAUDE.md` e preservado.
 
-Versao atual: **1.0.0**
+## Projecoes
 
-Consulte [CHANGELOG.md](CHANGELOG.md) para historico de alteracoes.
+| Fonte | Codex | Claude |
+|---|---|---|
+| `framework/skills` | `.agents/skills` | `.claude/skills` |
+| `framework/roles` | `.codex/agents/*.toml` | `.claude/agents/*.md` |
+| `.agents/rules` do projeto | lidas pelas skills | `.claude/rules` |
+| `templates/AGENTS.md.template` | `AGENTS.md` | importado por `CLAUDE.md` |
 
-## Licenca
+Skills locais sem prefixo `sda-` permanecem em `.agents/skills` e tambem sao projetadas para Claude. O prefixo `sda-` e reservado ao framework.
 
-Apache License 2.0
+## Invocacao
+
+| Host | Forma explicita |
+|---|---|
+| Claude Code | `/sda-taskcard-generate`, `/sda-minispec-run-tasks` |
+| Codex | `$sda-taskcard-generate`, `$sda-minispec-run-tasks` |
+
+Linguagem natural tambem pode ativar skills pelo campo `description`.
+
+## Contrato de task v2
+
+```yaml
+risk: low # low | medium | high
+validation: qa # none | qa | full
+```
+
+- `none`: documentacao ou metadado sem efeito executavel;
+- `qa`: codigo localizado de risco baixo ou medio;
+- `full`: autenticacao, seguranca, criptografia, migrations, secrets/config executavel, contratos publicos, pagamentos, mudancas cross-module ou `risk: high`.
+
+`model`, `reasoning_effort` e `gates` nao pertencem mais a tasks. Perfis de host ficam em `framework/adapters/profiles.json`.
+
+## Migracao da v1
+
+```powershell
+.\.sda\scripts\migrate-v2.ps1 -ProjectPath . -DryRun
+.\.sda\scripts\migrate-v2.ps1 -ProjectPath .
+```
+
+Veja [docs/MIGRATION-v2.md](docs/MIGRATION-v2.md).
+
+## Validacao do framework
+
+```powershell
+.\scripts\validate-framework.ps1
+Invoke-Pester .\tests
+```
+
+Versao atual: **2.0.0**. Licenca Apache-2.0.

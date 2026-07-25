@@ -1,34 +1,6 @@
-﻿---
+---
 name: sda-testing-stack-bootstrap
-description: |
-  Descobre a stack de teste do projeto host (linguagem, framework de teste por
-  camada, comando de teste, convenções de arquivo, fronteiras de execução real,
-  política de cobertura/flaky) e gera a rule `.claude/rules/testing-stack.md`
-  — fonte de verdade consumida pelos agentes sda-qa-validator e
-  sda-qa-test-generator. Deriva tudo que é detectável do código (manifests,
-  lockfiles, CI, testes existentes) e SÓ pergunta ao usuário o que NÃO é derivável
-  (ex.: framework E2E a padronizar quando nenhum existe, thresholds de gate, política
-  de quarentena). Raciocina em árvore (Chain of Tree): decompõe a rule em 3-5 eixos e
-  ramifica cada escolha em 3 alternativas com recomendação. Skill standalone, invocada
-  pelo usuário, agnóstica de linguagem.
-when_to_use: |
-  - Primeira vez que um projeto host vai usar os gates de QA do framework e ainda
-    não há rule de stack de teste (.claude/rules/testing-stack.md ausente).
-  - Quando sda-qa-validator ou sda-qa-test-generator retornarem
-    `stack_discovery.discovery_needed: true`.
-  - Quando a stack de teste do projeto mudou (novo framework, novo comando, nova
-    convenção) e a rule precisa ser regenerada/atualizada.
-  - Quando a rule já existe mas está **incompleta ou defasada** (campos vazios,
-    placeholders, valores divergentes do código) — modo ENRIQUECIMENTO reavalia e
-    preenche só os deltas, sem reescrever o que está coerente.
-do_not_invoke_for: |
-  - Gerar casos de teste (use sda-qa-test-generator).
-  - Validar implementação de testes (use sda-qa-validator).
-  - Curadoria genérica de regras de projeto (use sda-curate-project-rules).
-  - Escrever doutrina de testes (já existe: sda-testing-best-practices).
-user-invocable: true
-disable-model-invocation: true
-argument-hint: ""
+description: Descobre a stack de testes existente e registra somente decisões que não podem ser derivadas do código.
 ---
 
 # sda-testing-stack-bootstrap
@@ -53,7 +25,7 @@ argument-hint: ""
 
 ## Saída desta skill
 
-Um único artefato: a rule **`.claude/rules/testing-stack.md`** no projeto host (ou no diretório de rules que o host usa — ver Fase 0). É ela que torna os agentes de QA capazes de testar qualquer stack **sem** carregarem idiomas hardcoded.
+Um único artefato: a rule **`.agents/rules/testing-stack.md`** no projeto host (ou no diretório de rules que o host usa — ver Fase 0). É ela que torna os agentes de QA capazes de testar qualquer stack **sem** carregarem idiomas hardcoded.
 
 ---
 
@@ -69,7 +41,7 @@ Quebre a rule de teste a ser criada em **3 a 5 eixos de decisão** e apresente-o
 2. **Frameworks por camada** — unit / integração / e2e + libs de assert/mock.
 3. **Comando & convenções** — comando canônico (full/subset) + nomenclatura/localização de arquivos de teste.
 4. **Fronteira de execução real** — como a integração atravessa infra real e quais camadas DEVEM atravessar.
-5. **Política de qualidade (gates)** — cobertura, mutation, flaky/quarentena.
+5. **Política de qualidade (validation)** — cobertura, mutation, flaky/quarentena.
 
 ### Nível 2 — Detalhamento ramificado (3 alternativas por escolha)
 
@@ -105,7 +77,7 @@ Decisão: como a integração sobe infra real?
 
 ## Modo de operação — bootstrap vs. enriquecimento
 
-Logo no início, verifique se a rule `.claude/rules/testing-stack.md` (ou o equivalente no diretório de rules do host) **já existe**:
+Logo no início, verifique se a rule `.agents/rules/testing-stack.md` (ou o equivalente no diretório de rules do host) **já existe**:
 
 - **Ausente → modo BOOTSTRAP**: fluxo completo `Fase 0 → 1 → 2 → 3`.
 - **Presente → modo ENRIQUECIMENTO**: você **NÃO recomeça do zero**. Leia a rule existente, rode a Fase 0 só para coletar os sinais atuais do código, e siga para a **Fase E** (diff código × rule). A árvore Chain of Tree roda **apenas nos deltas** — nós já coerentes não viram pergunta nem re-decisão.
@@ -120,7 +92,7 @@ Faça uma varredura curta (≤90s). Descubra, **sem perguntar**, o máximo poss�
 
 | O que descobrir | Onde olhar (multi-stack — não exaustivo) | Vira campo na rule |
 |---|---|---|
-| **Onde moram as rules** | `.claude/rules/`, `.cursor/rules/`, `CLAUDE.md`, `AGENTS.md` — o que o host usa. Não invente diretório. | (destino do arquivo) |
+| **Onde moram as rules** | `.agents/rules/`, `.cursor/rules/`, `AGENTS.md`, `AGENTS.md` — o que o host usa. Não invente diretório. | (destino do arquivo) |
 | **Linguagem(ns) + gerenciador** | `package.json`, `go.mod`, `pyproject.toml`/`requirements.txt`/`setup.cfg`, `Cargo.toml`, `pubspec.yaml`, `Gemfile`, `pom.xml`/`build.gradle(.kts)`, `*.csproj`/`*.sln`, `composer.json`, `mix.exs` | `linguagens`, `gerenciador_pacotes` |
 | **Frente(s)** | Presença de UI vs HTTP server vs app mobile (deps + estrutura: `lib/` Flutter, `src/main/` JVM, `app/` etc.) | `frentes` |
 | **Framework de teste por camada** | Deps de teste no manifesto + imports nos testes existentes (ex.: jest/vitest, `go test`/testify, pytest, `flutter_test`/bloc_test, JUnit/Espresso, XCTest, RSpec, xUnit/NUnit) | `frameworks_teste.{unit,integracao,e2e}` |
@@ -128,7 +100,7 @@ Faça uma varredura curta (≤90s). Descubra, **sem perguntar**, o máximo poss�
 | **Padrão de arquivo de teste** | Nomes/locais reais: `*_test.go`, `*.spec.ts`/`*.test.ts`, `test_*.py`/`*_test.py`, `*_test.dart`, `*Test.java`/`*Spec.kt`, `*_spec.rb`, `*Tests.cs` | `convencao_arquivo_teste`, `localizacao_testes` |
 | **Libs de assert/mock** | Imports recorrentes nos testes (ex.: testify/gomock, unittest.mock/pytest-mock, mockito/mockk, jest mocks/MSW, Moq) | `libs_assert_mock` |
 | **Fronteira de execução real** | Como integração sobe infra: testcontainers, DB efêmero/in-memory, sqlite, httptest, supertest, fakes | `execucao_real` |
-| **CI test gates** | Workflows de CI: o que roda no PR, thresholds aplicados | `ci` (parcial) |
+| **CI test validation** | Workflows de CI: o que roda no PR, thresholds aplicados | `ci` (parcial) |
 
 > **Regra**: cada item acima que você conseguir resolver pelo código **NÃO** entra no questionário. Marque como `[derivado]` na sua nota mental.
 
@@ -147,7 +119,7 @@ Antes de qualquer pergunta, mostre ao usuário os **3 a 5 eixos** decompostos (N
 Percorra eixo por eixo, sempre na **forma canônica do nó** (A / B / C + recomendação, do protocolo acima):
 
 - **Nó `[derivado]`**: declare a Opção A (detectada, recomendada) + B/C alternativas e siga **sem perguntar** — salvo ambiguidade real, aí confirme.
-- **Nó `[a decidir]`**: pergunte via `AskUserQuestion` oferecendo as **3 alternativas** (recomendada em primeiro; a tool adiciona "Other" automaticamente). Agrupe nós relacionados numa só chamada (até 4 perguntas).
+- **Nó `[a decidir]`**: pergunte via `interação com o usuário` oferecendo as **3 alternativas** (recomendada em primeiro; a tool adiciona "Other" automaticamente). Agrupe nós relacionados numa só chamada (até 4 perguntas).
 
 **Regra de ouro da árvore**: nó `[derivado]` **nunca** vira pergunta. NUNCA pergunte o que o código já respondeu:
 - Linguagem, runner de teste, build tool — está no manifesto.
@@ -205,13 +177,13 @@ Percorra eixo por eixo, sempre na **forma canônica do nó** (A / B / C + recome
 1. **Folhas da árvore → seções da rule.** Colete as folhas escolhidas (uma por nó, Nível 2) e preencha o **template canônico** (abaixo). Mapa: eixo 1 → Identificação · 2 → Frameworks por camada · 3 → Comando + Convenções · 4 → Fronteira de execução real · 5 → Política de qualidade.
 
 2. **Decisão de artefato — nome + caminho + path match** (nó de árvore obrigatório, SEMPRE confirmado com o usuário antes de gravar):
-   - **Diretório + convenção de frontmatter**: use o que a Fase 0 descobriu no host — onde moram as rules (`.claude/rules/`, `.cursor/rules/`, `docs/rules/`…) e qual campo de matcher elas usam (`paths` | `globs` | `applies_to`…). **Não force a convenção do framework**; replique a do host.
+   - **Diretório + convenção de frontmatter**: use o que a Fase 0 descobriu no host — onde moram as rules (`.agents/rules/`, `.cursor/rules/`, `docs/rules/`…) e qual campo de matcher elas usam (`paths` | `globs` | `applies_to`…). **Não force a convenção do framework**; replique a do host.
    - **Nome do arquivo (PROPOSTO e EDITÁVEL)**: default `testing-stack.md`. Apresente como sugestão — o usuário pode renomear (ex.: `qa-stack.md`, `test-stack.md`). Confirme o nome final antes de gravar. **Nunca prefixe com `sda-`**: essa rule é um artefato DO HOST (gerada para o projeto, de posse do usuário), não um arquivo distribuído do framework. O prefixo `sda-` é a fronteira de distribuição — usá-lo faria o gerenciador tratar a rule como parte do framework, impedindo o usuário de deletá-la/editá-la livremente.
    - **Path match (DERIVADO do host + 3 alternativas)**: o matcher tem de garantir que a rule **carregue quando o fluxo de QA roda neste host**. Derive dos sinais da Fase 0 e ofereça a árvore:
      ```
      Decisão: quando esta rule deve carregar no contexto?
        ├─ A (recomendada): dirs de teste/código do host (ex.: conforme layout detectado — `src/**`, `test/**`, `tests/**`, `lib/**`, `internal/**`, `app/**`) + skills de QA do framework
-       ├─ B: só as skills de QA do framework (`.claude/skills/sda-*-run-tasks/**`, `*-generate-tech-spec/**`, …) — mínimo; carrega só durante a orquestração
+       ├─ B: só as skills de QA do framework (`.agents/skills/sda-*-run-tasks/**`, `*-generate-tech-spec/**`, …) — mínimo; carrega só durante a orquestração
        └─ C: matcher amplo do repositório (`**`) — sempre carrega; mais simples, maior custo de contexto
      → Escolha {A/B/C}; mostre o glob final ao usuário — ele pode editar livremente.
      ```
@@ -226,7 +198,7 @@ Percorra eixo por eixo, sempre na **forma canônica do nó** (A / B / C + recome
 ````markdown
 ---
 # Campo de matcher: use a convenção do HOST (`paths` | `globs` | `applies_to`).
-# Glob(s): os definidos na "Decisão de artefato" (Fase 2 passo 2) — derivados do
+# busca por arquivos(s): os definidos na "Decisão de artefato" (Fase 2 passo 2) — derivados do
 # layout deste host, NÃO copiados cegamente do framework. O bloco abaixo é a opção B
 # (só skills de QA do framework); a opção A acrescenta os dirs de teste/código do host.
 description: Stack de teste do projeto host — linguagem(ns), frameworks de teste por camada, comando de teste canônico, convenções de arquivo/nomenclatura, fronteiras de execução real e política de cobertura/flaky. Fonte de verdade consumida por sda-qa-validator (Gate 1) e sda-qa-test-generator. Gerada/atualizada por sda-testing-stack-bootstrap. Carregada quando o fluxo de QA roda neste host.
@@ -238,11 +210,11 @@ paths:
   # - "lib/**"
   # - "internal/**"
   # opção B (default): skills de QA do framework
-  - ".claude/skills/sda-*-run*/**"   # cobre os 3 orquestradores: sdd-run-tasks, minispec-run-tasks E taskcard-run
-  - ".claude/skills/sda-sdd-generate-tech-spec/**"
-  - ".claude/skills/sda-minispec-generate-tasks/**"
-  - ".claude/skills/sda-taskcard-generate/**"
-  - ".claude/skills/sda-testing-best-practices/**"
+  - ".agents/skills/sda-*-run*/**"   # cobre os 3 orquestradores: sdd-run-tasks, minispec-run-tasks E taskcard-run
+  - ".agents/skills/sda-sdd-generate-tech-spec/**"
+  - ".agents/skills/sda-minispec-generate-tasks/**"
+  - ".agents/skills/sda-taskcard-generate/**"
+  - ".agents/skills/sda-testing-best-practices/**"
 ---
 
 # Stack de Teste do Projeto
@@ -280,7 +252,7 @@ paths:
 - **Como integração sobe infra real**: `{ex.: testcontainers (Postgres) | sqlite in-memory | httptest | supertest}`
 - **Camada(s) que DEVEM atravessar fronteira real**: `{ex.: repository, route}`
 
-## Política de qualidade (gates)
+## Política de qualidade (validation)
 
 - **Cobertura**: `{% mínimo + se bloqueia merge | "não gate"}`
 - **Mutation score**: `{usa? bloqueia? | "não usa"}`
@@ -317,7 +289,7 @@ paths:
    - **Em ENRIQUECIMENTO**: o que foi enriquecido (`vazio`/`stale`/`novo sinal`) e o que foi preservado (hand-authored/`coerente`). Se nada mudou, diga "rule já coerente — nada a enriquecer".
    - **Auditoria**: confirme que a tabela "Decisões de stack (árvore)" foi gravada/atualizada na rule.
 2. Informe: *"A partir de agora, `sda-qa-validator` e `sda-qa-test-generator` descobrem a stack desta rule automaticamente. Reexecute o gate de QA se ele havia sinalizado `discovery_needed`."*
-3. **PR-companion na Referência**: se o projeto host for o próprio framework e tiver site de docs, lembre o usuário de rodar `/sda-docs-sync` (regra do CLAUDE.md). Em host externo, ignore.
+3. **PR-companion na Referência**: se o projeto host for o próprio framework e tiver site de docs, lembre o usuário de rodar `sda-docs-sync` (regra do AGENTS.md). Em host externo, ignore.
 
 ---
 

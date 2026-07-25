@@ -1,4 +1,4 @@
-﻿# Pré-Refinamento — Brainstorm de Produto
+# Pré-Refinamento — Brainstorm de Produto
 
 > Artefato **intermediário** (anterior ao PRD / INTENT / TaskCard), produto de um brainstorm em **Tree of Thought**: divergir os rumos possíveis, podar com o usuário e convergir.
 >
@@ -124,7 +124,7 @@ Direções **explicitamente** fora desta primeira versão (com motivo):
 
 > O que foi consultado no projeto para manter o brainstorm dentro do escopo e reaproveitar o existente.
 
-- **O que o projeto É** (CLAUDE.md / README): <propósito/domínio relevante>
+- **O que o projeto É** (AGENTS.md / README): <propósito/domínio relevante>
 - **PRDs / specs existentes consultados** (`/docs/specs/**/*.md` + `/docs/prds/**/*.md`):
   - `<feature/versão>` — <relação: cobre parte / adjacente / conflita / nada a ver>
 - **Capacidades reutilizáveis** (apenas para viabilidade):
@@ -218,8 +218,8 @@ _(LLM preenche — ex.: "TaskCard é sub-dimensionado: escopo atravessa múltipl
 ```bash
 <comando-exato>
 # Se houver decisão arquitetural transversal nova, registre-a ANTES:
-# /sda-adr-create "<titulo-da-decisao>"
-# ex.: /sda-sdd-generate-prd "sistema de trocas entre colecionadores"
+# sda-adr-create "<titulo-da-decisao>"
+# ex.: sda-sdd-generate-prd "sistema de trocas entre colecionadores"
 ```
 
 ### 15.5 Quando Reconsiderar a Recomendação

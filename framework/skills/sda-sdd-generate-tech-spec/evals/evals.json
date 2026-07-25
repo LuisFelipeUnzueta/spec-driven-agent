@@ -1,11 +1,11 @@
 {
-  "skill_name": "agent-spec-sdd-generate-tech-spec",
+  "skill_name": "sda-sdd-generate-tech-spec",
   "evals": [
     {
       "id": 0,
       "name": "fluxo-completo-aceitando-defaults",
       "prompt": "Gere o TECH_SPEC para a feature de carrinho-de-compras. O PRD aprovado está em docs/specs/features/carrinho-de-compras/v1/prd.md. Para agilizar, aceite todas as decisões técnicas padrão sem me perguntar — quero ver o documento final completo gerado em uma única passada. Salve o arquivo em docs/specs/features/carrinho-de-compras/v1/tech_spec.md.",
-      "expected_output": "A skill deve gerar um TECH_SPEC completo com TODAS as 16 seções, salvar o arquivo físico em docs/specs/features/carrinho-de-compras/v1/tech_spec.md ANTES de apresentar resumo ao usuário, mapear todas as 9 user stories (US-01..US-09) na seção 5.1, listar arquivos envolvidos na seção 15, delegar a Seção 14 ao subagente agent-spec-qa-test-generator, e NÃO iniciar automaticamente a geração de TASK PLAN.",
+      "expected_output": "A skill deve gerar um TECH_SPEC completo com TODAS as 16 seções, salvar o arquivo físico em docs/specs/features/carrinho-de-compras/v1/tech_spec.md ANTES de apresentar resumo ao usuário, mapear todas as 9 user stories (US-01..US-09) na seção 5.1, listar arquivos envolvidos na seção 15, delegar a Seção 14 ao subagente sda-qa-test-generator, e NÃO iniciar automaticamente a geração de TASK PLAN.",
       "files": [
         "docs/specs/features/carrinho-de-compras/v1/prd.md"
       ],
@@ -37,8 +37,8 @@
         {
           "name": "delegou-secao-14-qa",
           "type": "tool_usage",
-          "description": "A seção 14 (Estratégia de Testes) deve ser delegada ao subagente agent-spec-qa-test-generator",
-          "check": "A skill disparou um subagente (Task tool) com subagent_type agent-spec-qa-test-generator (ou similar) para gerar a seção 14"
+          "description": "A seção 14 (Estratégia de Testes) deve ser delegada ao subagente sda-qa-test-generator",
+          "check": "A skill disparou um subagente (Task tool) com subagent_type sda-qa-test-generator (ou similar) para gerar a seção 14"
         },
         {
           "name": "secao-15-arquivos-envolvidos",
@@ -49,14 +49,14 @@
         {
           "name": "atualizou-sdd-state",
           "type": "file_content",
-          "description": "Deve atualizar _run/sdd_state.yaml marcando tech_spec como completed",
-          "check": "O arquivo docs/specs/features/carrinho-de-compras/v1/_run/sdd_state.yaml contém current_step: tech_spec e steps.tech_spec.status: completed"
+          "description": "Deve atualizar _run/state.json marcando tech_spec como completed",
+          "check": "O arquivo docs/specs/features/carrinho-de-compras/v1/_run/state.json contém current_step: tech_spec e steps.tech_spec.status: completed"
         },
         {
           "name": "nao-iniciou-task-plan",
           "type": "output_content",
           "description": "NÃO deve sugerir ou iniciar a próxima etapa (TASK PLAN) automaticamente",
-          "check": "A resposta final do agente NÃO menciona executar /agent-spec-sdd-generate-task-plan, não inicia geração de tasks e apenas pergunta se o SPEC está aprovado"
+          "check": "A resposta final do agente NÃO menciona executar sda-sdd-generate-task-plan, não inicia geração de tasks e apenas pergunta se o SPEC está aprovado"
         }
       ]
     },
@@ -105,7 +105,7 @@
       "id": 2,
       "name": "rastreabilidade-ca-para-ct",
       "prompt": "Gere o TECH_SPEC completo para o carrinho-de-compras. PRD em docs/specs/features/carrinho-de-compras/v1/prd.md. Aceite todas as decisões técnicas padrão sem perguntar — quero o documento final salvo. Garanta que TODOS os critérios de aceite (CA-01 até CA-13) tenham casos de teste correspondentes na seção 14 com rastreabilidade completa.",
-      "expected_output": "A skill deve gerar o TECH_SPEC completo, delegar a seção 14 ao agent-spec-qa-test-generator, e produzir uma tabela de rastreabilidade CA→CT na seção 14 cobrindo TODOS os 13 critérios de aceite (CA-01 a CA-13). Cada CA deve ter ao menos 1 CT associado. A regra de deduplicação (cada CT em no máximo 1 task) deve ser respeitada.",
+      "expected_output": "A skill deve gerar o TECH_SPEC completo, delegar a seção 14 ao sda-qa-test-generator, e produzir uma tabela de rastreabilidade CA→CT na seção 14 cobrindo TODOS os 13 critérios de aceite (CA-01 a CA-13). Cada CA deve ter ao menos 1 CT associado. A regra de deduplicação (cada CT em no máximo 1 task) deve ser respeitada.",
       "files": [
         "docs/specs/features/carrinho-de-compras/v1/prd.md"
       ],
@@ -131,8 +131,8 @@
         {
           "name": "delegou-ao-qa-generator",
           "type": "tool_usage",
-          "description": "A seção 14 deve ter sido produzida via delegação ao subagente agent-spec-qa-test-generator",
-          "check": "A skill disparou Task tool com subagent_type agent-spec-qa-test-generator durante a execução"
+          "description": "A seção 14 deve ter sido produzida via delegação ao subagente sda-qa-test-generator",
+          "check": "A skill disparou Task tool com subagent_type sda-qa-test-generator durante a execução"
         }
       ]
     }

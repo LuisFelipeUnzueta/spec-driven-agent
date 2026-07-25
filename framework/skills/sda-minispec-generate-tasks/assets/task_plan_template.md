@@ -1,4 +1,4 @@
-﻿# TASK PLAN – MiniStack
+# TASK PLAN – MiniStack
 
 ## 1. Identificação
 - **Feature**:
@@ -32,7 +32,7 @@ O que será entregue tecnicamente ao final de todas as tasks.
 
 <!-- LLM-ONLY: A coluna "Pode Rodar em Paralelo?" é DERIVADA, nunca autorada por intuição, e esta é a sua
   ÚNICA fonte no documento. Calcule-a a partir do grafo de Dependências + Símbolos criados/consumidos de
-  cada TN.md, aplicando o "Invariante de Paralelismo" de .claude/rules/sda-workflow-rules.md (Regra
+  cada TN.md, aplicando o "Invariante de Paralelismo" de .agents/skills/_shared/rules/sda-workflow-rules.md (Regra
   10d). Default na incerteza: Não. A fonte única das dependências é a seção 1 de cada tasks/TN.md. -->
 
 | ID | Nome da Task | Arquivo | Fase | Dependências | Pode Rodar em Paralelo? (derivado) | Status |

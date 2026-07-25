@@ -1,17 +1,22 @@
-<#
+﻿<#
 .SYNOPSIS
-    Inicializa o SpecDrivenAgent em um projeto existente.
-.DESCRIPTION
-    Cria estrutura de override, sincroniza framework, gera AGENTS.md e cria CLAUDE.md basico.
-    Auto-detecta modo de instalacao (submodule ou clone).
+    Inicializa o SpecDrivenAgent v2 em um projeto.
 .PARAMETER ProjectPath
     Caminho do projeto-alvo.
 .PARAMETER FrameworkPath
-    Caminho do SpecDrivenAgent.
+    Raiz do repositório SpecDrivenAgent.
+.PARAMETER TargetHost
+    Host a projetar: Claude, Codex ou Both. Aceita o alias público -Host.
+.PARAMETER DryRun
+    Mostra as ações sem alterar arquivos.
 #>
 param(
     [string]$ProjectPath = ".",
-    [string]$FrameworkPath = ""
+    [string]$FrameworkPath = "",
+    [Alias("Host")]
+    [ValidateSet("Claude", "Codex", "Both")]
+    [string]$TargetHost = "Both",
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,66 +25,28 @@ if (-not $FrameworkPath) {
     $FrameworkPath = Join-Path $PSScriptRoot ".."
 }
 
-# Ler versao
-$versionFile = Join-Path $FrameworkPath "VERSION"
-$version = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { "dev" }
+if (-not (Test-Path -LiteralPath $ProjectPath -PathType Container)) {
+    throw "Projeto não encontrado: $ProjectPath"
+}
 
-# Detectar modo
-$resolved = Resolve-Path $FrameworkPath
-$isSubmodule = $resolved.Path -match '\.sda\\?$|\.sda$'
-$modo = if ($isSubmodule) { "submodule (.sda/)" } else { "clone direto" }
+if (-not (Test-Path -LiteralPath (Join-Path $FrameworkPath "framework") -PathType Container)) {
+    throw "Framework não encontrado: $FrameworkPath"
+}
 
-Write-Host "=== SpecDrivenAgent v$version - Inicializar Projeto ===" -ForegroundColor Cyan
-Write-Host "Modo detectado: $modo" -ForegroundColor Cyan
-Write-Host ""
+$syncScript = Join-Path $PSScriptRoot "sync-project.ps1"
+& $syncScript `
+    -ProjectPath $ProjectPath `
+    -FrameworkPath (Join-Path $FrameworkPath "framework") `
+    -TargetHost $TargetHost `
+    -DryRun:$DryRun
 
-# 1. Criar estrutura de override
-$dirs = @(
-    (Join-Path $ProjectPath ".agents\rules"),
-    (Join-Path $ProjectPath ".agents\skills")
-)
-foreach ($dir in $dirs) {
-    if (-not (Test-Path $dir)) {
-        New-Item -ItemType Directory -Path $dir -Force | Out-Null
-        Write-Host "Criado: $dir" -ForegroundColor Green
+if (-not $DryRun) {
+    $versionPath = Join-Path $FrameworkPath "VERSION"
+    $version = if (Test-Path -LiteralPath $versionPath) {
+        (Get-Content -Raw -LiteralPath $versionPath).Trim()
+    } else {
+        "dev"
     }
+
+    Write-Host "SpecDrivenAgent v$version inicializado para $TargetHost." -ForegroundColor Green
 }
-
-# 2. Sincronizar framework
-Write-Host ""
-Write-Host "Sincronizando framework..." -ForegroundColor Yellow
-$fwPath = if (Test-Path (Join-Path $FrameworkPath "framework")) { Join-Path $FrameworkPath "framework" } else { $FrameworkPath }
-& (Join-Path $PSScriptRoot "sync-claude.ps1") -ProjectPath $ProjectPath -FrameworkPath $fwPath
-
-# 3. Gerar AGENTS.md
-Write-Host ""
-Write-Host "Gerando AGENTS.md..." -ForegroundColor Yellow
-& (Join-Path $PSScriptRoot "generate-agents-md.ps1") -ProjectPath $ProjectPath -FrameworkPath (Join-Path $FrameworkPath "framework")
-
-# 4. Criar CLAUDE.md basico se nao existir
-$claudeMd = Join-Path $ProjectPath "CLAUDE.md"
-if (-not (Test-Path $claudeMd)) {
-    $claudeContent = @"
-# CLAUDE.md
-
-## Regras do Projeto
-Consulte `.claude/rules/` para regras de arquitetura e coding standards.
-
-## Skills Disponiveis
-Consulte `.claude/skills/` para skills do framework SpecDrivenAgent.
-
-## Fluxo de Trabalho
-1. Execute `/sda-guide` para ver todas as skills disponiveis
-2. Use `/sda-pre-refinement` para descobrir qual workflow usar
-3. Siga as rules em `.claude/rules/` durante implementacao
-"@
-    $claudeContent | Out-File -FilePath $claudeMd -Encoding UTF8
-    Write-Host "CLAUDE.md criado: $claudeMd" -ForegroundColor Green
-}
-
-Write-Host ""
-Write-Host "Inicializacao concluida! (SpecDrivenAgent v$version)" -ForegroundColor Green
-Write-Host "Proximos passos:"
-Write-Host "  1. Revise os arquivos em .claude/"
-Write-Host "  2. Adicione overrides em .agents/rules/ e .agents/skills/"
-Write-Host "  3. Execute /sda-guide para ver as skills disponiveis"

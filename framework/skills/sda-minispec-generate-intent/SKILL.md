@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-minispec-generate-intent
-description: Gera INTENT do framework miniSpec a partir de uma descrição de feature. Conduz o usuário através de processo interativo (uma pergunta por vez) para construir o documento, salvar em disco e registrar o estado do pipeline. User-invocable via /sda-minispec-generate-intent.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <descrição da feature em texto livre> [path opcional para pre-refinement.md]
+description: Define resultado esperado, motivação e limites de uma mudança média antes do detalhamento técnico.
 ---
 
 # Skill: sda-minispec-generate-intent
@@ -45,7 +42,7 @@ A INTENT responde **exclusivamente** a duas perguntas:
 
 ## Paths (Resolução)
 
-Variáveis usadas nesta skill: `pre_refinement.path`, `minispec.intent.path`, `minispec.state.path`. Templates definidos em `.claude/rules/sda-minispec-workflow-rules.md` (paths miniSpec) e `.claude/rules/sda-workflow-rules.md` (paths compartilhados).
+Variáveis usadas nesta skill: `pre_refinement.path`, `minispec.intent.path`, `shared.state.path`. Templates definidos em `.agents/skills/_shared/rules/sda-minispec-workflow-rules.md` (paths miniSpec) e `.agents/skills/_shared/rules/sda-workflow-rules.md` (paths compartilhados).
 
 Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...) antes de qualquer leitura/escrita. **NUNCA** use paths hardcoded.
 
@@ -53,21 +50,21 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...) a
 
 ## FASE 0 — Pré-Verificação: Aderência à Recomendação do Discovery
 
-### 0.0 Resolver `$ARGUMENTS` (texto + path opcional)
+### 0.0 Resolver `[entrada atual da solicitação]` (texto + path opcional)
 
-`$ARGUMENTS` pode conter (em qualquer ordem):
+`[entrada atual da solicitação]` pode conter (em qualquer ordem):
 
 - Uma **descrição** da feature em texto livre (entre aspas ou solto).
 - Um **path opcional** para um `pre-refinement.md` já existente.
 
 **Algoritmo** (aplique nesta ordem):
 
-1. Identifique tokens de `$ARGUMENTS` que terminam em `pre-refinement.md`.
+1. Identifique tokens de `[entrada atual da solicitação]` que terminam em `pre-refinement.md`.
 2. Para cada um, verifique se o arquivo existe no filesystem.
-3. **Se houver um path existente** → este é o Discovery; o restante de `$ARGUMENTS` é a descrição.
+3. **Se houver um path existente** → este é o Discovery; o restante de `[entrada atual da solicitação]` é a descrição.
    - Se a descrição ficou vazia, extraia a ideia das seções 2-6 do próprio `pre-refinement.md` e prossiga.
 4. **Se nenhum token é path** → siga 0.1 (resolução por template).
-5. **Caso ambíguo** (token parece path mas o arquivo não existe) → pergunte via `AskUserQuestion`: "O arquivo `<x>` não foi encontrado. Isso era um path ou faz parte da descrição?". **NÃO** caia silenciosamente no fallback.
+5. **Caso ambíguo** (token parece path mas o arquivo não existe) → pergunte via `interação com o usuário`: "O arquivo `<x>` não foi encontrado. Isso era um path ou faz parte da descrição?". **NÃO** caia silenciosamente no fallback.
 
 ### 0.1 Localizar `pre-refinement.md` (fallback)
 
@@ -81,11 +78,11 @@ Quando 0.0 não retornou um path, tente resolver via template:
 Quando 0.0 ou 0.1 retornou um arquivo existente:
 
 1. Leia a **seção 15 (Recomendação de Framework)** e extraia o valor de `15.2 Framework Recomendado`.
-2. Se a recomendação for **DIFERENTE** de "miniSpec", emita aviso **não-bloqueante** via `AskUserQuestion`:
+2. Se a recomendação for **DIFERENTE** de "miniSpec", emita aviso **não-bloqueante** via `interação com o usuário`:
 
 ```
 ⚠️  O pre-refinement.md desta feature recomenda rodar em <FRAMEWORK>,
-    mas você invocou /sda-minispec-generate-intent.
+    mas você invocou sda-minispec-generate-intent.
 
     Justificativa do discovery: <copiar 15.2>
     Comando sugerido: <copiar 15.4>
@@ -95,7 +92,7 @@ Quando 0.0 ou 0.1 retornou um arquivo existente:
 
 Se "s" ou "sim" → continue. Se "N" → pare e sugira rodar o comando recomendado.
 
-3. **Instrumentação** (para o `_run/minispec_state.yaml` posterior — campo `source`):
+3. **Instrumentação** (para o `_run/state.json` posterior — campo `source`):
    - `source: recommended` → usuário seguiu a recomendação.
    - `source: overridden` → usuário divergiu (registre a recomendação original em `source_note`).
    - `source: no_discovery` → não havia `pre-refinement.md`.
@@ -112,7 +109,7 @@ Leia **ambos** os arquivos (se existirem), nesta ordem de precedência:
 Comportamento:
 
 - **Se algum existir** → use a terminologia canônica (global + feature combinados) ao escrever a INTENT. Se o usuário introduzir um alias de termo canônico, **sinalize**: "Você mencionou '{termo}'. O glossário define este conceito como '{canônico}' — confirma que são o mesmo?". Use o termo canônico na INTENT final.
-- **Se NENHUM existir** → siga o fluxo normal. Se durante a INTENT novos termos de domínio significativos aparecerem (≥ 2 conceitos de negócio relacionados), **sinalize ao final**: "Identifiquei N termos de domínio nesta feature. Recomendo rodar `/sda-challenge-spec` no `scope.md` (após a FASE 2) para canonizá-los — termos cross-feature vão para `/docs/specs/domain-glossary.md`, termos específicos para o glossário-feature."
+- **Se NENHUM existir** → siga o fluxo normal. Se durante a INTENT novos termos de domínio significativos aparecerem (≥ 2 conceitos de negócio relacionados), **sinalize ao final**: "Identifiquei N termos de domínio nesta feature. Recomendo rodar `sda-challenge-spec` no `scope.md` (após a FASE 2) para canonizá-los — termos cross-feature vão para `/docs/specs/domain-glossary.md`, termos específicos para o glossário-feature."
 
 ---
 
@@ -136,7 +133,7 @@ Comportamento:
    - Sem explicar COMO resolver — apenas O QUE deve acontecer
    - Se o usuário mencionar tecnologia, **abstraia**: "Firebase Cloud Messaging" → "serviço de notificações push"
 7. Quando o usuário não souber responder, ofereça **2 a 4 opções** bem formuladas.
-8. Use `AskUserQuestion` para esclarecer dúvidas.
+8. Use `interação com o usuário` para esclarecer dúvidas.
 9. **NUNCA** deduzir escopo ou inventar informações — na DÚVIDA, **PERGUNTE**.
 
 ---
@@ -168,7 +165,7 @@ Siga esta sequência, fazendo **apenas uma pergunta por vez** e aguardando a res
 2. Resolva o **diretório pai** do `minispec.intent.path` substituindo `{feature}` e deixando `{version}` variável.
 3. Verifique se o diretório da feature existe.
 4. **Se NÃO existir** → use `{version}` = `v1` e resolva o path final.
-5. **Se EXISTIR** → liste versões existentes (v1, v2, ...), identifique a mais recente (vN), e pergunte ao usuário com `AskUserQuestion`:
+5. **Se EXISTIR** → liste versões existentes (v1, v2, ...), identifique a mais recente (vN), e pergunte ao usuário com `interação com o usuário`:
    - **Sufixo `-debits`**: versões de limpeza (`v2-debits`, criadas por `sda-debt-resolution`) **não contam** como versão funcional ao calcular vN/vN+1 — ignore o sufixo no cálculo (ex.: com `v1`, `v2`, `v2-debits`, a mais recente é `v2` e a próxima é `v3`). Liste-as separadamente na pergunta, apenas como contexto.
    - **"Criar nova versão (vN+1)"** → resolve com nova versão. **LEIA a versão anterior como contexto** para enriquecer a nova INTENT (continuidade).
    - **"Sobrescrever versão atual (vN)"** → resolve com a mesma versão.
@@ -206,16 +203,16 @@ Essa Intent representa corretamente o que você quer resolver? (sim/não)
 **IMPORTANTE:**
 
 - **NÃO** exiba a INTENT completa no terminal — o usuário lerá o arquivo diretamente.
-- **NÃO** inicie `/sda-minispec-generate-scope` automaticamente.
+- **NÃO** inicie `sda-minispec-generate-scope` automaticamente.
 - **NÃO** sugira executar o próximo comando.
 - **NÃO** sugira próximos passos do framework.
 - Após confirmação do usuário, execute o **Estado do Pipeline** (FASE 6) e encerre.
 
 ---
 
-## FASE 6 — Estado do Pipeline (_run/minispec_state.yaml)
+## FASE 6 — Estado do Pipeline (_run/state.json)
 
-Após salvar a INTENT com sucesso, **DEVE** criar/atualizar o arquivo no path resolvido a partir de `minispec.state.path` (mesmo diretório da INTENT).
+Após salvar a INTENT com sucesso, **DEVE** criar/atualizar o arquivo no path resolvido a partir de `shared.state.path` (mesmo diretório da INTENT).
 
 ### Se o arquivo NÃO existir — crie com a estrutura completa:
 
@@ -260,7 +257,7 @@ Estas regras são **absolutas** e não podem ser violadas:
 6. **NUNCA inicie automaticamente a próxima etapa** — apenas encerre e aguarde.
 7. **Template COMPLETO** — todas as seções preenchidas (ou marcadas N/A com justificativa).
 8. **Escopo fechado** — INTENT auto-suficiente e sem ambiguidades.
-9. **AskUserQuestion** — use esta ferramenta para esclarecer dúvidas com o usuário.
+9. **interação com o usuário** — use esta ferramenta para esclarecer dúvidas com o usuário.
 10. **Foco no O QUE e POR QUE** — **NUNCA** mencione código, arquitetura ou solução técnica.
 
 ---
@@ -274,7 +271,7 @@ Estas regras são **absolutas** e não podem ser violadas:
 - [ ] Todas as seções do template preenchidas (ou N/A justificado)
 - [ ] Nenhuma informação foi inventada ou deduzida
 - [ ] Arquivo físico salvo no path resolvido a partir de `minispec.intent.path`
-- [ ] `_run/minispec_state.yaml` criado/atualizado no path resolvido a partir de `minispec.state.path`
+- [ ] `_run/state.json` criado/atualizado no path resolvido a partir de `shared.state.path`
 - [ ] Pronto para definição de TECH ALIGNMENT / SCOPE
 
 ---
@@ -333,4 +330,4 @@ Estas regras são **absolutas** e não podem ser violadas:
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

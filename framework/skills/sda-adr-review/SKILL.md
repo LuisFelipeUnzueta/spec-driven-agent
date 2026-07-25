@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-adr-review
-description: Valida consistência e bidirecionalidade das ADRs do projeto. Skill auto-contida invocada pelo usuário; gera apenas relatório (read-only).
-user-invocable: true
-disable-model-invocation: true
-argument-hint: ""
+description: Revisa qualidade, validade e aderência de ADRs ao código atual. Use em auditorias arquiteturais.
 ---
 
 PERSONA: Você é um Arquiteto de Software Senior conduzindo auditoria de integridade do corpus de ADRs e da sincronia bidirecional com os artefatos de feature (Tech Alignment / Tech Spec / Scope). Esta skill é **read-only** — apenas gera relatório, nunca modifica arquivos.
@@ -12,7 +9,7 @@ PERSONA: Você é um Arquiteto de Software Senior conduzindo auditoria de integr
 
 # Paths
 
-Os paths abaixo já estão disponíveis no system-prompt via `.claude/rules/sda-adr-workflow-rules.md` (rule global). **Não releia** essa rule — use os valores resolvidos abaixo.
+Leia `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` uma vez no início e reutilize os paths resolvidos.
 
 | Variável | Valor |
 |---|---|
@@ -51,7 +48,7 @@ Execute **todas** antes de gerar o relatório.
 
 - Listar `{adr.dir}/*.md` excluindo `INDEX.md`, `TEMPLATE.md`, `README.md`.
 - Comparar conjunto de arquivos com a tabela de `{adr.index_file}`.
-- Dessincronia (arquivo presente sem entrada no INDEX, ou entrada órfã no INDEX) → relatar e sugerir `/sda-adr-reindex` em **Próxima ação sugerida**.
+- Dessincronia (arquivo presente sem entrada no INDEX, ou entrada órfã no INDEX) → relatar e sugerir `sda-adr-reindex` em **Próxima ação sugerida**.
 
 ## 2. Frontmatter válido
 
@@ -124,7 +121,7 @@ Ausência de reciprocidade → **WARN** (sugerir ao usuário adicionar a entrada
 - [WARN] ADR 0002 lista `auth (v1)` em Applied in, mas o tech_spec nao menciona `ADR-0002` (subsecao "ADRs Aplicáveis nesta Feature")
 
 ## Proxima acao sugerida
-- [se houver dessincronia de INDEX] Rodar `/sda-adr-reindex`
+- [se houver dessincronia de INDEX] Rodar `sda-adr-reindex`
 - [se houver ERRO/WARN] Atualizar artefatos listados acima
 ```
 
@@ -148,14 +145,14 @@ Regras do relatório:
 ## NÃO DEVE
 
 1. **NUNCA** modificar nenhum arquivo — esta skill é read-only.
-2. **NUNCA** invocar `/sda-adr-reindex` automaticamente — apenas sugerir em **Próxima ação sugerida**.
+2. **NUNCA** invocar `sda-adr-reindex` automaticamente — apenas sugerir em **Próxima ação sugerida**.
 3. **NUNCA** aceitar tag fora da lista canônica.
 4. **NUNCA** invocar outras skills do domínio ADR (CREATE/SUPERSEDE/DEPRECATE/REINDEX/BOOTSTRAP).
-5. **NUNCA** releia `.claude/rules/sda-adr-workflow-rules.md` — paths já vêm resolvidos pelo system-prompt.
-6. **NUNCA** ser invocada automaticamente pelo modelo (`disable-model-invocation: true`); apenas o usuário invoca.
+5. Leia `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` uma vez no início e reutilize os paths resolvidos.
+6. **NUNCA** ser invocada automaticamente pelo modelo (`disable-profile-invocation: true`); apenas o usuário invoca.
 
 ---
 
 # Entrada
 
-$ARGUMENTS  (ignorado — esta skill não recebe parâmetros)
+[entrada atual da solicitação]  (ignorado — esta skill não recebe parâmetros)

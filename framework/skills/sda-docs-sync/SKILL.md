@@ -1,27 +1,16 @@
-﻿---
+---
 name: sda-docs-sync
-description: >-
-  Faz um pente fino na documentação do site (docs/site/docs) comparando com o
-  estado real do código em .claude/skills/, .claude/agents/ e .claude/rules/.
-  Reporta divergências (skill/agent/rule sem doc, doc com flag inexistente,
-  capítulos da espinha narrativa pendentes de migração, links internos quebrados, ausência
-  de callouts ou diagramas em capítulos da espinha narrativa) e propõe atualizações com
-  diff revisável — nunca aplica sozinha. Use sempre que terminar uma alteração
-  em .claude/skills, .claude/agents ou .claude/rules; antes de cada release;
-  ou periodicamente para evitar acúmulo de débito documental. Acione também
-  quando o usuário disser "auditar docs", "pente fino na documentação",
-  "checar se a doc reflete o código", "/sda-docs-sync", "sincronizar docs" ou
-  pedir uma revisão geral do site.
+description: Verifica documentação afetada pelo diff e aplica somente atualizações necessárias e comprováveis.
 ---
 
-# /sda-docs-sync — auditoria contínua da documentação
+# sda-docs-sync — auditoria contínua da documentação
 
 Skill de **pente fino + atualização** da documentação. Roda em duas fases:
 
 1. **Auditoria** — varre artefatos do framework e produz um relatório de divergências.
 2. **Aplicação** — para cada divergência aprovada pelo usuário, gera o diff e aplica.
 
-A skill **NUNCA aplica sozinha**. Toda alteração passa por confirmação explícita do usuário (via `AskUserQuestion`).
+A skill **NUNCA aplica sozinha**. Toda alteração passa por confirmação explícita do usuário (via `interação com o usuário`).
 
 ---
 
@@ -29,10 +18,10 @@ A skill **NUNCA aplica sozinha**. Toda alteração passa por confirmação expl�
 
 | Fonte de verdade | Tipo | O que documenta |
 |---|---|---|
-| `.claude/skills/<slug>/SKILL.md` | Skill | Capacidade/comando disponível ao Claude |
-| `.claude/agents/<slug>.md` | Agent | Subagente especializado (gates, executores, geradores) |
-| `.claude/rules/*.md` | Rule | Regras carregadas no system-prompt |
-| `docs/site/docs/sda-completo.md` | Espelho | **Fonte canônica da espinha narrativa** para esta auditoria (versão consolidada para fatiamento). O PDF original (`book_agent_spec/dist/sda.pdf`) não é versionado neste repo — não dependa dele |
+| `.agents/skills/<slug>/SKILL.md` | Skill | Capacidade/comando disponível ao host |
+| `.agents/roles/<slug>.md` | Agent | Subagente especializado (validation, executores, geradores) |
+| `.agents/rules/*.md` | Rule | Regras locais lidas sob demanda pelas skills |
+| `docs/site/docssda-completo.md` | Espelho | **Fonte canônica da espinha narrativa** para esta auditoria (versão consolidada para fatiamento). O PDF original (`book_agent_spec/dist/sda.pdf`) não é versionado neste repo — não dependa dele |
 
 **Saída da auditoria mapeia para:**
 
@@ -50,7 +39,7 @@ A skill **NUNCA aplica sozinha**. Toda alteração passa por confirmação expl�
 
 ### FASE 0 — Calibração
 
-Pergunte ao usuário **o escopo da auditoria** via `AskUserQuestion`:
+Pergunte ao usuário **o escopo da auditoria** via `interação com o usuário`:
 
 | Opção | O que faz |
 |---|---|
@@ -67,13 +56,13 @@ Levante o inventário factual de cada fonte. **Não interprete** ainda.
 
 ```bash
 # Skills locais (excluir symlinks de outros repos)
-find .claude/skills -maxdepth 2 -name SKILL.md -not -path '*/node_modules/*' | sort
+find .agents/skills -maxdepth 2 -name SKILL.md -not -path '*/node_modules/*' | sort
 
 # Agents
-find .claude/agents -maxdepth 1 -name '*.md' | sort
+find .agents/agents -maxdepth 1 -name '*.md' | sort
 
 # Rules
-ls -1 .claude/rules/*.md
+ls -1 .agents/rules/*.md
 
 # Páginas de doc
 find docs/site/docs -name '*.md' -not -path '*/.vitepress/*' | sort
@@ -106,7 +95,7 @@ Produza item:
 ```yaml
 - tipo: skill_sem_doc
   severidade: alta
-  artefato: .claude/skills/sda-foo-bar/SKILL.md
+  artefato: .agents/skills/sda-foo-bar/SKILL.md
   esperado: docs/site/docs/skills/<grupo>/foo-bar.md
   acao_sugerida: criar página da skill seguindo o gabarito da Referência
 ```
@@ -123,7 +112,7 @@ Cuidado: use **heurísticas simples** (presença/ausência de tokens), não embe
 
 #### Dimensão 3 — Capítulos da espinha narrativa pendentes
 
-**Derive o inventário do espelho** `docs/site/docs/sda-completo.md` (fonte canônica): extraia os headings de capítulo/apêndice (`grep "^# \|^## "` no espelho) e compare com o estado em `docs/site/docs/` usando a convenção de paths:
+**Derive o inventário do espelho** `docs/site/docssda-completo.md` (fonte canônica): extraia os headings de capítulo/apêndice (`grep "^# \|^## "` no espelho) e compare com o estado em `docs/site/docs/` usando a convenção de paths:
 
 | Elemento do espelho | Path esperado no site |
 |---|---|
@@ -182,7 +171,7 @@ Pente fino da documentação — relatório
 [Tabela detalhada por dimensão]
 ```
 
-Em seguida, **`AskUserQuestion` em 4 ondas** (mesmo padrão de `/sda-debt-resolution`):
+Em seguida, **`interação com o usuário` em 4 ondas** (mesmo padrão de `sda-debt-resolution`):
 
 | Onda | Pergunta | Quando |
 |---|---|---|
@@ -202,7 +191,7 @@ Para cada item aprovado:
    - Capítulo da espinha narrativa → use o gabarito do guia de estilo (`docs/site/docs/contributing/docs-style-guide.md`).
 2. **Mostre o diff** (`git diff --no-index` contra `/dev/null` para arquivo novo, ou contra a versão atual).
 3. **Aguarde confirmação** antes de gravar.
-4. **Use `Write` ou `Edit`** para aplicar.
+4. **Use `escrita` ou `Edit`** para aplicar.
 
 ::: danger 🚫 Guardrails invioláveis
 - **NUNCA** sobrescrever conteúdo conceitual existente sem confirmar.
@@ -247,7 +236,7 @@ Se build falhar, **reverta as últimas mudanças** e reporte o erro ao usuário.
 | Cenário | Por quê |
 |---|---|
 | Documentação ainda em rascunho local (sem commit) | A skill audita o working tree — use após estabilizar |
-| `.claude/` em sincronização ativa (várias mudanças em curso) | Espere terminar para evitar relatório inconsistente |
+| `.agents/` em sincronização ativa (várias mudanças em curso) | Espere terminar para evitar relatório inconsistente |
 | Você quer migrar UMA Parte específica da espinha narrativa | Use diretamente o gabarito em `/contributing/docs-style-guide` — a skill é para auditoria, não para escrita criativa |
 | `docs/site/node_modules` ausente | Rode `npm install` antes — a skill depende de `npm run build` |
 
@@ -266,5 +255,5 @@ A skill produz:
 ## 📚 Referências internas
 
 - Guia de estilo: `docs/site/docs/contributing/docs-style-guide.md`
-- Diretrizes em CLAUDE.md: seção "Diretrizes de documentação"
+- Diretrizes em AGENTS.md: seção "Diretrizes de documentação"
 - Inventário de migração: tabela "Inventário de migração" no guia de estilo

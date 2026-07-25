@@ -1,4 +1,4 @@
-﻿# Delegação QA — Seção 6 das Tasks (Testes)
+# Delegação QA — Seção 6 das Tasks (Testes)
 
 > Este arquivo é consultado pela skill `sda-sdd-generate-task-plan` no momento de preencher a **seção 6 (Testes)** de cada task.
 
@@ -10,7 +10,7 @@ A seção 6 de cada task **NÃO** deve ser preenchida pelo engenheiro de tarefas
 
 ## Pré-verificação: a Estratégia de Testes do tech_spec já cobre os CTs? (skip QA quando completa)
 
-**Antes** de invocar qualquer `sda-qa-test-generator`, verifique se a fase de tech_spec já gerou os CTs. **Fonte preferencial: o JSON lossless** persistido pelo `sda-sdd-generate-tech-spec` em `shared.test_cases.path` (`.claude/rules/sda-workflow-rules.md`). **Fallback (features geradas antes do artefato)**: a tabela markdown da seção **Estratégia de Testes** do tech_spec (§19 backend / §17 web / §18 mobile, conforme a `variant`).
+**Antes** de invocar qualquer `sda-qa-test-generator`, verifique se a fase de tech_spec já gerou os CTs. **Fonte preferencial: o JSON lossless** persistido pelo `sda-sdd-generate-tech-spec` em `shared.test_cases.path` (`.agents/skills/_shared/rules/sda-workflow-rules.md`). **Fallback (features geradas antes do artefato)**: a tabela markdown da seção **Estratégia de Testes** do tech_spec (§19 backend / §17 web / §18 mobile, conforme a `variant`).
 
 ```
 SE shared.test_cases.path existe E casos_teste[] não-vazio E cada caso tem criterios_aceitacao_validados não-vazio:
@@ -34,7 +34,7 @@ SENÃO:
 2. Para cada task em `task_plan`, extraia os componentes/arquivos da seção 5 (A Criar + A Modificar).
 3. Faça match componente↔task via grep/regex dos paths (no JSON, use `existing_suite` + `camada` do caso):
    - Se CT menciona `internal/pings/handler/*` e a task T5 tem `internal/pings/handler/ping_handler.go` em 5.1 → CT-XX pertence a T5.
-4. Para CTs sem match claro, agrupe e apresente ao usuário via `AskUserQuestion`:
+4. Para CTs sem match claro, agrupe e apresente ao usuário via `interação com o usuário`:
    - "Identifiquei 3 CTs não distribuídos automaticamente: CT-15 (integração), CT-18 (E2E), CT-22 (smoke). Deseja: (a) atribuir manualmente, (b) invocar sda-qa-test-generator para esses específicos, (c) criar uma task 'T-extra-tests'?"
 5. Mostre a distribuição proposta ao usuário para aprovação:
    ```
@@ -65,7 +65,7 @@ Para **cada task**, após preencher as seções 1-5 e 7-8, **ANTES de salvar o a
 
 ## Consolidação por camada (reduzir N subagentes para 4)
 
-**Problema**: N tasks → N subagentes paga ~3k de system prompt + ~6k de MCP por invocação. Em 8 tasks isso é ~72k de overhead fixo repetido.
+**Problema**: delegações por task repetem contexto. Processe casos independentes em lote quando isso não reduzir a precisão.
 
 **Estratégia**: agrupe as tasks por **camada arquitetural** e dispare **1 subagente por grupo** que retorna CTs para TODAS as tasks do grupo em 1 JSON:
 
@@ -94,7 +94,7 @@ Para **cada task**, após preencher as seções 1-5 e 7-8, **ANTES de salvar o a
 
 **Antes de disparar qualquer subagente QA**, extraia 1× um `qa_context.md` denso:
 
-1. **Resolva o path** via `sdd.qa_context.path` (`.claude/rules/sda-sdd-workflow-rules.md`). O prefixo `.` sinaliza artefato intermediário — adicione ao `.gitignore` se ainda não estiver.
+1. **Resolva o path** via `sdd.qa_context.path` (`.agents/skills/_shared/rules/sda-sdd-workflow-rules.md`). O prefixo `.` sinaliza artefato intermediário — adicione ao `.gitignore` se ainda não estiver.
 2. **Leia o `tech_spec.md`** uma única vez.
 3. **Extraia em formato condensado** (idealmente <2k tokens):
    - **Mapa CA→CT**: tabela com `CA-01 → CT-01, CT-02, CT-05 / CA-02 → CT-03, CT-04 / ...` a partir da rastreabilidade do tech_spec.
@@ -119,7 +119,7 @@ Monte a lista de `arquivos` que o subagente deve ler para CADA task. Inclua:
 - **`qa_context.md`** (OBRIGATÓRIO): caminho resolvido via `sdd.qa_context.path`. **Este substitui a passagem do `tech_spec.md` completo** na maioria dos casos.
 - **PRD aprovado**: caminho resolvido via `sdd.prd.path` — passado como **referência opcional** para o QA consultar sob demanda.
 - **TECH_SPEC completo**: NÃO incluir por padrão. Se o `qa_context.md` não tiver sido gerado (ex.: tech_spec pequeno) OU se a task tocar área pouco coberta pelo contexto condensado, incluir aqui via `sdd.tech_spec.path`.
-- **Regras do projeto**: `CLAUDE.md`, `.claude/rules/*.md` (já são carregadas automaticamente no contexto do subagente — NÃO re-liste aqui).
+- **Regras do projeto**: `AGENTS.md`, `.agents/rules/*.md` (já são carregadas automaticamente no contexto do subagente — NÃO re-liste aqui).
 - **Migrações**: arquivos de migração relacionados à task (ex: `internal/db/migrations/*.sql`).
 - **Queries**: arquivos de query relacionados à task (ex: `internal/db/queries/*.sql`).
 - **Testes existentes**: arquivos de teste relacionados aos arquivos impactados pela task, na convenção da stack (ex.: `*_test.go`, `*.spec.ts`/`*.test.ts`, `test_*.py`, `*_test.dart`, `*Test.java`).
@@ -153,10 +153,10 @@ Você foi invocado com os seguintes parâmetros:
 1. **arquivos**: [lista de caminhos dos arquivos preparados no Passo 1]
 2. **instrucoes**: [conteúdo preparado no Passo 2]
 
-OBRIGATÓRIO: Antes de gerar casos de teste, leia (Read) a doutrina de testes: `.claude/skills/sda-testing-best-practices/SKILL.md` e `.claude/skills/sda-testing-best-practices/references/ai-escreve-testes.md`. Aplique os 7 gates (Invariant First, Owning Layer, Real Execution, Failure→Fix Production, No Snapshot Without Contract, No Self-Set Mock, Negative Companion). Cada caso de teste DEVE conter `invariant`, `owning_layer`, `existing_suite`, `real_execution_boundary`, `negative_companion` e, quando aplicável, `precondicao_privilegiada`.
+OBRIGATÓRIO: Antes de gerar casos de teste, leia (leitura) a doutrina de testes: `.agents/skills/sda-testing-best-practices/SKILL.md` e `.agents/skills/sda-testing-best-practices/references/ai-escreve-testes.md`. Aplique os 7 validation (Invariant First, Owning Layer, Real Execution, Failure→Fix Production, No Snapshot Without Contract, No Self-Set Mock, Negative Companion). Cada caso de teste DEVE conter `invariant`, `owning_layer`, `existing_suite`, `real_execution_boundary`, `negative_companion` e, quando aplicável, `precondicao_privilegiada`.
 ```
 
-> **Modelo**: não passe `model` no `Agent({...})` — confie no default configurado para o subagente.
+> **Modelo**: não passe `profile` no `Delegue({...})` — confie no default configurado para o subagente.
 
 ---
 
@@ -186,9 +186,9 @@ Além dos testes tipo `SEGURANCA` e `PERFORMANCE`, inclua em 6.4 todos os `casos
 
 ### Formato de saída por subseção
 
-O formato DEVE seguir o **formato tabular** idêntico ao da seção de **Estratégia de Testes** do TECH_SPEC (seção 17 Web | 18 Mobile | 19 Backend, conforme a `variant` registrada em `_run/sdd_state.yaml`). Isso garante consistência entre os dois documentos e facilita a validação visual.
+O formato DEVE seguir o **formato tabular** idêntico ao da seção de **Estratégia de Testes** do TECH_SPEC (seção 17 Web | 18 Mobile | 19 Backend, conforme a `variant` registrada em `_run/state.json`). Isso garante consistência entre os dois documentos e facilita a validação visual.
 
-Infira o nome do arquivo de teste a partir do componente testado, **na convenção da stack do projeto** (descoberta via `.claude/rules/testing-stack.md`, CLAUDE.md ou pelos testes existentes). Exemplos multi-stack para a mesma camada "Service":
+Infira o nome do arquivo de teste a partir do componente testado, **na convenção da stack do projeto** (descoberta via `.agents/rules/testing-stack.md`, AGENTS.md ou pelos testes existentes). Exemplos multi-stack para a mesma camada "Service":
 - Go → `service_test.go` · Python → `test_service.py` · TS → `service.spec.ts` · Dart → `service_test.dart` · JVM → `ServiceTest.kt`
 
 Infira o nome da função/caso de teste a partir do título do CT, **na convenção da stack** (ex.: `TestMetodo_Cenario` em Go, `test_metodo_cenario` em Python, `describe/it("...")` em JS-TS, `metodo_cenario_test` em Dart). Não imponha a convenção de uma linguagem específica.

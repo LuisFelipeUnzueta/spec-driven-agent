@@ -1,15 +1,15 @@
 {
-  "skill_name": "agent-spec-generate-design",
+  "skill_name": "sda-generate-design",
   "evals": [
     {
       "id": 1,
       "name": "web-sem-figma-propoe-do-design-system",
       "prompt": "/docs/specs/features/dashboard-vendas/v1/prd.md",
-      "expected_output": "Apenas o PRD foi passado (sem referências de design). A skill detecta SDD, confirma a frente via AskUserQuestion, ancora no design system real do projeto (tokens, componentes, padrões de loading/erro existentes) e PROPÕE o design tela a tela — layout, estados visuais concretos — sem exigir Figma. Salva design.md no path resolvido.",
+      "expected_output": "Apenas o PRD foi passado (sem referências de design). A skill detecta SDD, confirma a frente via interação com o usuário, ancora no design system real do projeto (tokens, componentes, padrões de loading/erro existentes) e PROPÕE o design tela a tela — layout, estados visuais concretos — sem exigir Figma. Salva design.md no path resolvido.",
       "files": [],
       "expectations": [
         "A skill detecta o framework SDD pelo nome prd.md",
-        "A skill pergunta a frente via AskUserQuestion (web/mobile/backend) antes de qualquer geração",
+        "A skill pergunta a frente via interação com o usuário (web/mobile/backend) antes de qualquer geração",
         "A skill funciona SEM Figma/mockups — propõe a partir do PRD + design system existente, sem bloquear",
         "A skill varre o design system real do codebase (tema, tokens, componentes compartilhados) antes de propor",
         "Cada tela do PRD aparece no Mapa Visual com layout descrito e os 4 estados (loading/sucesso/erro/vazio) concretos",
@@ -25,8 +25,8 @@
       "expected_output": "Feature backend. Ao confirmar a frente como Backend, a skill encerra com orientação clara (estados de API ficam na tech spec backend / contrato de handoff) e NÃO cria nenhum arquivo.",
       "files": [],
       "expectations": [
-        "A skill pergunta a frente via AskUserQuestion mesmo que o nome da feature sugira backend",
-        "Ao confirmar Backend, a skill encerra com orientação (tech spec backend + /agent-spec-backend-contract-handoff)",
+        "A skill pergunta a frente via interação com o usuário mesmo que o nome da feature sugira backend",
+        "Ao confirmar Backend, a skill encerra com orientação (tech spec backend + sda-backend-contract-handoff)",
         "Nenhum design.md, design-system.md ou diretório é criado",
         "A skill não tenta adaptar o template web/mobile para backend"
       ]
@@ -57,7 +57,7 @@
         "A promoção ao design-system.md só acontece após confirmação explícita do usuário",
         "O update do design-system.md é cirúrgico (entradas novas), nunca reescrita do arquivo",
         "Telas, layouts e estados ficam no design.md da feature (não vazam para o global)",
-        "Se a decisão for transversal com trade-off real, é sinalizada como candidata a ADR tag ui via /agent-spec-adr-create (não criada)"
+        "Se a decisão for transversal com trade-off real, é sinalizada como candidata a ADR tag ui via sda-adr-create (não criada)"
       ]
     },
     {

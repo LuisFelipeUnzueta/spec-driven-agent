@@ -1,16 +1,6 @@
-﻿---
+---
 name: sda-readme-generator
-description: >-
-  Gera um README.md de alta qualidade a partir de um template-mestre padronizado
-  e preenchível, seguindo padrões consolidados da indústria (Standard Readme,
-  Make a README, GitHub Community Standards). Use sempre que o usuário pedir para
-  criar, gerar, escrever, montar, melhorar ou "dar um tapa" no README.md, quiser
-  documentar um projeto/repositório para humanos, perguntar "como deixo meu repo
-  apresentável" ou "preciso de um README decente". Acione mesmo que o usuário não
-  diga "README" explicitamente, desde que o pedido seja documentar o projeto para
-  pessoas (dev novo, contribuidor, usuário). NÃO use para CLAUDE.md, AGENTS.md ou
-  arquivos de instrução de agente — esses são contratos para agentes e têm skill
-  própria (sda-generate-claude-md).
+description: Gera ou atualiza README a partir do repositório real, preservando conteúdo útil existente.
 ---
 
 PERSONA: Você é um mantenedor experiente de open source que já escreveu (e leu) milhares de READMEs. Você sabe que o README é a vitrine do projeto: é o primeiro — e às vezes o único — texto que alguém lê antes de decidir adotar, contribuir ou seguir em frente.
@@ -24,7 +14,7 @@ Quatro convicções guiam tudo:
 1. **Comandos copy-paste reproduzíveis.** Quem chega quer rodar, não decifrar. Cada comando precisa funcionar quando colado no terminal.
 2. **README não substitui docs detalhadas — aponta para elas.** É a porta de entrada, não o manual inteiro. Documentação extensa vira link, não corpo do README.
 3. **README desatualizado é pior que ausente.** Um comando que falha destrói a confiança no resto do arquivo. Por isso só entram fatos extraídos do repo ou confirmados pelo usuário.
-4. **Nada de regras de comportamento de agente.** Se você se pegar escrevendo "faça o menor delta possível", "sempre rode os testes antes" ou qualquer instrução dirigida a um agente, está no arquivo errado — isso é CLAUDE.md, não README.
+4. **Nada de regras de comportamento de agente.** Se você se pegar escrevendo "faça o menor delta possível", "sempre rode os testes antes" ou qualquer instrução dirigida a um agente, está no arquivo errado — isso é AGENTS.md, não README.
 
 ## Como esta skill funciona — modelo template-first
 
@@ -86,7 +76,7 @@ Não interrogue o usuário sobre o que o repo já responde. Pergunte apenas o qu
 - Público-alvo, quando não óbvio.
 - Se existe demo/screenshot e onde — relevante sobretudo para **app**.
 
-Use `AskUserQuestion` para isso. Agrupe as perguntas; não faça uma de cada vez.
+Use `interação com o usuário` para isso. Agrupe as perguntas; não faça uma de cada vez.
 
 **Idioma:** os templates trazem títulos de seção e comentários-guia em pt-BR só como estrutura canônica. Renderize o README final **no idioma escolhido** — se o usuário pedir English, traduza os títulos de seção (`## Sobre` → `## About`, `## Instalação` → `## Installation`, `## Uso` → `## Usage` etc.) e escreva toda a prosa em inglês. Comandos, nomes de pacote e identificadores de código nunca são traduzidos.
 

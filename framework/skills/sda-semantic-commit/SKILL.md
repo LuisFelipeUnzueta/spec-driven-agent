@@ -1,17 +1,6 @@
-﻿---
+---
 name: sda-semantic-commit
-description: >-
-  Gera mensagens de commit em Português Brasileiro seguindo a especificação
-  Conventional Commits, escolhendo o tipo correto (feat, fix, refactor, chore,
-  docs, test, perf, etc.), definindo escopo e redigindo a linha de assunto no
-  imperativo pt-BR dentro de 72 caracteres. Use sempre que o usuário quiser
-  commitar mudanças, pedir uma mensagem de commit, mostrar um diff e querer
-  registrar a alteração no git, ou perguntar como commitar algo que acabou de
-  fazer — mesmo que não mencione explicitamente "semântico", "conventional
-  commits" ou os tipos feat/fix/refactor. Acione também quando o usuário
-  disser "commita isso", "como commito isso?", "gera o commit", "qual seria
-  o commit?" ou simplesmente descrever o que mudou no código sem pedir nada
-  formalmente.
+description: Organiza alterações em commits semânticos pequenos. Use somente quando o usuário solicitar commit.
 ---
 
 # Semantic Commit pt-BR
@@ -139,4 +128,4 @@ Se precisar de um exemplo para um tipo específico (breaking change com corpo, r
 - Não faça `git add` automático — opere apenas sobre o que já está staged.
 - Não use `--no-verify` nem `--amend` sem pedido explícito do usuário.
 - Não faça push.
-- **NUNCA** inclua `Co-Authored-By: Claude` (ou qualquer rodapé indicando autoria por IA) na mensagem de commit. Muitas empresas não aceitam atribuição de IA em commits — o commit deve sair como autoria exclusiva do usuário. Vale para linha de assunto, corpo e rodapé.
+- **NUNCA** inclua `Co-Authored-By: AI Assistant` (ou qualquer rodapé indicando autoria por IA) na mensagem de commit. Muitas empresas não aceitam atribuição de IA em commits — o commit deve sair como autoria exclusiva do usuário. Vale para linha de assunto, corpo e rodapé.

@@ -1,4 +1,4 @@
-﻿# Checklist — Revisão Final do Handoff
+# Checklist — Revisão Final do Handoff
 
 > Usado pela skill na FASE 8 (auto-revisão) antes de salvar. Cada item é verificado mecanicamente. Se algo falha, **corrige antes de gravar**. Se não puder corrigir (falta evidência), converte em `[DÚVIDA]` na seção `Open Questions`.
 

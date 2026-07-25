@@ -1,4 +1,4 @@
-﻿# Scripts — sda-backend-contract-handoff
+# Scripts — sda-backend-contract-handoff
 
 > Os scripts deste diretório são **exemplos**, escritos em pseudocódigo agnóstico de linguagem. Eles **não fazem parte obrigatória da skill** — o agente pode gerar handoffs sem eles. Servem como ponto de partida para automatizar tarefas repetitivas quando o projeto justifica.
 
@@ -33,7 +33,7 @@
 
 ## Convenções
 
-- **Sem dependência de linguagem.** Pseudocódigo. Quem adotar traduz para Bash, Python, Node, Go, etc. — o que o time já usa.
+- **Sem dependência de linguagem.** Pseudocódigo. Quem adotar traduz para terminal, Python, Node, Go, etc. — o que o time já usa.
 - **Idempotência.** Rodar 2× produz o mesmo resultado.
 - **Determinismo.** Mesma entrada, mesma saída. Sem timestamps ou IDs aleatórios.
 - **Output legível por máquina E humano.** JSON ou markdown.
@@ -46,7 +46,7 @@
 1. Leia o pseudocódigo do script.
 2. Identifique as primitivas usadas (`glob`, `grep`, `parse-openapi`, `read-file`).
 3. Mapeie para a stack do projeto:
-   - Bash: `find`, `rg`, `jq`, `yq`.
+   - terminal: `find`, `rg`, `jq`, `yq`.
    - Python: `pathlib`, `re`, `pyyaml`, `openapi-spec-validator`.
    - Node: `fast-glob`, `ts-morph`, `graphql`, `openapi-typescript`.
    - Go: `filepath.Walk`, `go/parser`, `kin-openapi`.

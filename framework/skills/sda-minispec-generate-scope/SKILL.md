@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-minispec-generate-scope
-description: Gera SCOPE do framework miniSpec a partir de uma INTENT aprovada. Atua como Arquiteto de Software Sênior, transforma a INTENT em definições técnicas concretas (COMO), salva o arquivo físico e atualiza o estado do pipeline. User-invocable via /sda-minispec-generate-scope.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <caminho do intent.md (ex: /docs/specs/features/cardapio-digital/v1/intent.md)>
+description: Transforma um intent aprovado em escopo técnico localizado, restrições e critérios verificáveis.
 ---
 
 # Skill: sda-minispec-generate-scope
@@ -42,7 +39,7 @@ O SCOPE responde **exclusivamente** a uma pergunta: **COMO a feature será imple
 
 ## Paths (Resolução)
 
-Variáveis usadas nesta skill: `minispec.intent.path`, `tech_alignment.path`, `minispec.scope.path`, `minispec.state.path`. Templates definidos em `.claude/rules/sda-minispec-workflow-rules.md` (paths miniSpec) e `.claude/rules/sda-workflow-rules.md` (paths compartilhados).
+Variáveis usadas nesta skill: `minispec.intent.path`, `tech_alignment.path`, `minispec.scope.path`, `shared.state.path`. Templates definidos em `.agents/skills/_shared/rules/sda-minispec-workflow-rules.md` (paths miniSpec) e `.agents/skills/_shared/rules/sda-workflow-rules.md` (paths compartilhados).
 
 Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...) antes de qualquer leitura/escrita. **NUNCA** use paths hardcoded.
 
@@ -62,7 +59,7 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
 - **NUNCA** deduzir escopo ou inventar informações — na DÚVIDA, **PERGUNTE** ao usuário
 - **SEMPRE** salvar o arquivo físico antes de pedir aprovação
 - **NUNCA** iniciar automaticamente a próxima etapa
-- Use a ferramenta `AskUserQuestion` para esclarecer dúvidas
+- Use a ferramenta `interação com o usuário` para esclarecer dúvidas
 
 ---
 
@@ -70,7 +67,7 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
 
 **PRIMEIRA AÇÃO da skill, antes de qualquer leitura ou pesquisa.** A variante determina qual template carregar (FASE 3), o set de decisões técnicas a coletar e como o cabeçalho do SCOPE será preenchido.
 
-**Regra dura**: a pergunta é **OBRIGATÓRIA** e **SEMPRE** disparada via `AskUserQuestion`. Não pule mesmo que o `tech-alignment.md` exista e indique a variante — tech-alignment apenas **pré-preenche a sugestão**, não substitui a confirmação explícita do usuário.
+**Regra dura**: a pergunta é **OBRIGATÓRIA** e **SEMPRE** disparada via `interação com o usuário`. Não pule mesmo que o `tech-alignment.md` exista e indique a variante — tech-alignment apenas **pré-preenche a sugestão**, não substitui a confirmação explícita do usuário.
 
 **Procedimento**:
 
@@ -79,7 +76,7 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
    - Se o arquivo existir, busque referência inequívoca a uma frente (`web`, `mobile`, `backend`, `front-end`, `back-end`, `iOS`, `Android`, `Flutter`, `React Native`, etc.).
    - Se detectar com confiança alta, reserve essa variante como **opção destacada** ("Recomendado") na pergunta — **não** assuma silenciosamente.
 
-2. **Pergunta obrigatória** (sempre via `AskUserQuestion`):
+2. **Pergunta obrigatória** (sempre via `interação com o usuário`):
    > "Qual é a frente deste SCOPE? Essa decisão escolhe o template (web | mobile | backend)."
    > Opções: `Web` | `Mobile` | `Backend`
    >
@@ -87,7 +84,7 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
 
 3. **Persistência** — a variante escolhida (`web`, `mobile` ou `backend`) deve ser usada:
    - Na FASE 3 para carregar o template correto e preencher o cabeçalho do SCOPE.
-   - Na FASE 5 para gravar `variant` no `_run/minispec_state.yaml` (raiz e `steps.scope.variant`).
+   - Na FASE 5 para gravar `variant` no `_run/state.json` (raiz e `steps.scope.variant`).
    - No campo `Variante` do cabeçalho do SCOPE.
 
 > **Por que SEMPRE perguntar**: tech-alignment é opcional, frequentemente ausente ou impreciso. Inferência silenciosa já levou a templates errados carregados em features mistas (ex.: backend que também expõe BFF). Pergunta explícita custa 1 turn e elimina ambiguidade.
@@ -105,7 +102,7 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
 3. **Se EXISTIR** → use como **ponto de partida** para as decisões técnicas:
    - Contém decisões já tomadas, tecnologias sugeridas e padrões preferidos pelo dev.
    - Você pode **complementar, ajustar ou questionar** qualquer item — não é uma ordem, é um direcionamento.
-   - Se houver conflito com o codebase, **levante antes de prosseguir** (use `AskUserQuestion`).
+   - Se houver conflito com o codebase, **levante antes de prosseguir** (use `interação com o usuário`).
 4. **Se NÃO EXISTIR** → siga o fluxo normal (propor solução do zero) e marque `tech_alignment: skipped` no estado posterior (FASE 5). Se EXISTIR e for usado, a FASE 5 marca `tech_alignment: completed`.
 
 ### 0.1.5 Verificar Design (opcional — só variantes web/mobile)
@@ -117,12 +114,12 @@ O SCOPE transforma a INTENT em **definições técnicas concretas**. Responde **
 3. **Se o `design.md` da feature EXISTIR** → ele é a fonte de verdade do COMO VISUAL:
    - Preencha o campo **"Design de referência"** na seção **3.3 Páginas / Componentes** (web) / **3.3 Telas / Componentes** (mobile) do SCOPE com o path.
    - Na tabela de Páginas/Telas (§3.3), a coluna Descrição referencia o design.md (ex.: "ver design.md §4.1") em vez de redescrever layout/estados.
-   - Se houver conflito entre o design.md e o codebase, **levante antes de prosseguir** (`AskUserQuestion`).
+   - Se houver conflito entre o design.md e o codebase, **levante antes de prosseguir** (`interação com o usuário`).
 4. **Se NÃO EXISTIR** → siga o fluxo normal — ausência **não é erro** (é o default de features sem fluxo de design). Preencha "Design de referência" com `—`.
 
 ### 0.2 Regras e contexto pré-carregados
 
-O `CLAUDE.md` e `.claude/rules/` **já estão no contexto** — **NÃO** releia. Consulte também as ADRs ativas via `docs/adr/INDEX.md` (se existir) para reaproveitar padrões transversais.
+Use o `AGENTS.md` já carregado e leia em `.agents/rules/` somente as regras relevantes. Consulte também as ADRs ativas via `docs/adr/INDEX.md` (se existir) para reaproveitar padrões transversais.
 
 ### 0.2.0 Inventário de ADRs Aplicáveis (OBRIGATÓRIO se `docs/adr/` existe)
 
@@ -139,7 +136,7 @@ Procedimento:
      - **N/A** — a feature não toca a área coberta pela ADR.
 3. **Conformidade LITERAL (obrigatória para cada ADR `APLICÁVEL`/`PARCIAL`)** — não basta declarar que "obedece". Para cada ADR aplicável que **restringe um artefato concreto** (path/diretório canônico, biblioteca/lib, padrão estrutural, identificador, naming), **abra a seção `Decision` integral da ADR** (`adr.dir` + `adr.file_pattern`) e **confronte literalmente** cada decisão concreta do scope contra o texto da ADR:
    - Bate exatamente → adicione um **bullet em §3 do SCOPE** citando o trecho da ADR que a decisão satisfaz.
-   - **Diverge** (ex.: ADR manda `pkg/logger` e o scope propõe `internal/platform/logger`; ou ADR manda lib X e o scope usa Y) → **CONFLITO spec×ADR**. **PARE** e resolva via `AskUserQuestion` antes de finalizar o scope, apresentando o trecho literal da ADR vs a decisão do scope e duas saídas: **(a) conformar o scope à ADR**; **(b) superseder/atualizar a ADR primeiro** (`/sda-adr-supersede` ou `/sda-adr-create`). **NUNCA** escolha um lado em silêncio nem registre o conflito apenas como observação.
+   - **Diverge** (ex.: ADR manda `pkg/logger` e o scope propõe `internal/platform/logger`; ou ADR manda lib X e o scope usa Y) → **CONFLITO spec×ADR**. **PARE** e resolva via `interação com o usuário` antes de finalizar o scope, apresentando o trecho literal da ADR vs a decisão do scope e duas saídas: **(a) conformar o scope à ADR**; **(b) superseder/atualizar a ADR primeiro** (`sda-adr-supersede` ou `sda-adr-create`). **NUNCA** escolha um lado em silêncio nem registre o conflito apenas como observação.
    - **PROIBIDO** citar uma ADR como "obedecida" afirmando um path/símbolo que a ADR **não contém** (a citação de conformidade deve referenciar o texto real da `Decision`).
 4. **Consistência ADR×ADR**: se duas ADRs aplicáveis se contradizem nas decisões concretas, trate como conflito a sinalizar ao usuário (mesma mecânica de PARE) — não escolha qual prevalece sozinho.
 
@@ -157,7 +154,7 @@ Resolva os dois paths definidos em `sda-workflow-rules.md`:
 Leia **ambos** (se existirem). Precedência: feature sobrescreve global em caso de conflito (raro; sinalize ao usuário quando ocorrer).
 
 - **Se algum EXISTIR** → use a terminologia canônica combinada (global + feature) nas definições técnicas do SCOPE (entidades, endpoints, telas, componentes). Se uma decisão técnica usar termo que conflita com o glossário, **sinalize ao usuário** e adote o canônico.
-- **Se NENHUM EXISTIR** → siga normalmente. Se durante o SCOPE surgirem novos termos técnicos de domínio relevantes, sinalize ao final que é recomendado rodar `/sda-challenge-spec scope.md` para canonizá-los (termos cross-feature vão para o global; termos específicos vão para o glossário-feature).
+- **Se NENHUM EXISTIR** → siga normalmente. Se durante o SCOPE surgirem novos termos técnicos de domínio relevantes, sinalize ao final que é recomendado rodar `sda-challenge-spec scope.md` para canonizá-los (termos cross-feature vão para o global; termos específicos vão para o glossário-feature).
 
 ### 0.3 Exploração do projeto
 
@@ -212,7 +209,7 @@ Defina com clareza:
 
 ## FASE 2 — Detecção de Candidatos a ADR (Hook)
 
-A skill `sda-minispec-generate-scope` atua como **hook de detecção de candidatos a ADR** do fluxo miniSpec. Ao definir as decisões técnicas, aplique os **5 critérios canônicos** definidos em `.claude/rules/sda-adr-workflow-rules.md` (seção "ADR — Critérios Canônicos de Criação"):
+A skill `sda-minispec-generate-scope` atua como **hook de detecção de candidatos a ADR** do fluxo miniSpec. Ao definir as decisões técnicas, aplique os **5 critérios canônicos** definidos em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (seção "ADR — Critérios Canônicos de Criação"):
 
 1. Para cada decisão técnica candidata, valide mentalmente os 5 critérios (TODOS devem ser verdadeiros):
    - **C1 — Transversal**: aplicável a outras features ou ao projeto.
@@ -226,7 +223,7 @@ A skill `sda-minispec-generate-scope` atua como **hook de detecção de candidat
    - **2-4/5 passam** → registre como **"Candidato a ADR parcial"** + lista dos critérios que falharam (ajuda o usuário a decidir se promove ou refina a decisão).
    - **0-1/5 passam** → registre apenas como decisão técnica nas seções apropriadas — **não** mencione candidatura a ADR.
 
-3. **NÃO** crie a ADR automaticamente — apenas sinalize. O usuário invocará `/sda-adr-create` se desejar (essa skill revalida os 5 critérios via `AskUserQuestion`).
+3. **NÃO** crie a ADR automaticamente — apenas sinalize. O usuário invocará `sda-adr-create` se desejar (essa skill revalida os 5 critérios via `interação com o usuário`).
 
 ---
 
@@ -267,7 +264,7 @@ Esse escopo está fechado e aprovado? (sim/não)
 **IMPORTANTE:**
 
 - **NÃO** exiba o SCOPE completo no terminal — o usuário lerá o arquivo diretamente.
-- **NÃO** inicie `/sda-minispec-generate-tasks` automaticamente.
+- **NÃO** inicie `sda-minispec-generate-tasks` automaticamente.
 - **NÃO** sugira executar o próximo comando.
 - **NÃO** sugira próximos passos do framework.
 - **Se "sim"** → execute a FASE 5 (Estado do Pipeline) e encerre.
@@ -275,17 +272,17 @@ Esse escopo está fechado e aprovado? (sim/não)
 
 ---
 
-## FASE 5 — Estado do Pipeline (_run/minispec_state.yaml — APÓS aprovação do usuário)
+## FASE 5 — Estado do Pipeline (_run/state.json — APÓS aprovação do usuário)
 
 > **Ordem inviolável**: este passo só roda **depois** do "sim" da FASE 4. Atualizar o estado antes da aprovação faz o state mentir quando o usuário reprova o scope.
 
-Atualize o arquivo no path resolvido a partir de `minispec.state.path` (mesmo diretório do SCOPE).
+Atualize o arquivo no path resolvido a partir de `shared.state.path` (mesmo diretório do SCOPE).
 
-### Se o `_run/minispec_state.yaml` NÃO existir
+### Se o `_run/state.json` NÃO existir
 
 **NÃO** crie o arquivo. A criação é responsabilidade da skill `sda-minispec-generate-intent`. Apenas registre a omissão e prossiga.
 
-### Se o `_run/minispec_state.yaml` JÁ existir — atualize apenas estes campos:
+### Se o `_run/state.json` JÁ existir — atualize apenas estes campos:
 
 ```yaml
 current_step: scope
@@ -297,7 +294,7 @@ steps:
     summary: "<componentes novos>, <N endpoints>, tabelas: <lista tabelas>"
 ```
 
-> Se o `_run/minispec_state.yaml` existir mas **não tiver** o campo `variant` no nível raiz (state legado), adicione ao atualizar.
+> Se o `_run/state.json` existir mas **não tiver** o campo `variant` no nível raiz (state legado), adicione ao atualizar.
 
 ### Bloco `tech_alignment` (sempre atualize junto)
 
@@ -317,7 +314,7 @@ steps:
     status: skipped
 ```
 
-> **Por que aqui**: a skill compartilhada `sda-generate-tech-alignment` não atualiza o `_run/minispec_state.yaml` — sem este ramo, o step ficaria `pending` para sempre mesmo quando o tech-alignment foi feito e usado.
+> **Por que aqui**: a skill compartilhada `sda-generate-tech-alignment` não atualiza o `_run/state.json` — sem este ramo, o step ficaria `pending` para sempre mesmo quando o tech-alignment foi feito e usado.
 
 ### Bloco `design` (sempre atualize junto, se o step existir no state)
 
@@ -346,11 +343,11 @@ steps:
 Estas regras são **absolutas** e não podem ser violadas:
 
 1. **Aprovação obrigatória** — nunca avance sem confirmação do usuário.
-2. **Sem invenção** — se faltar informação, **PERGUNTE** ao usuário via `AskUserQuestion`.
+2. **Sem invenção** — se faltar informação, **PERGUNTE** ao usuário via `interação com o usuário`.
 3. **Escopo fechado** — o documento deve ser auto-suficiente, sem ambiguidades.
 4. **Template completo** — todas as seções devem ser preenchidas (ou marcadas N/A com justificativa).
 5. **Arquivo físico** — **SEMPRE** salvar antes de apresentar ao usuário.
-6. **AskUserQuestion** — use esta ferramenta para esclarecer dúvidas com o usuário.
+6. **interação com o usuário** — use esta ferramenta para esclarecer dúvidas com o usuário.
 7. **Pesquisa obrigatória** — **SEMPRE** pesquise o projeto antes de definir o SCOPE (FASE 0).
 8. **Baseado na INTENT** — **NUNCA** adicione funcionalidades não mencionadas na INTENT.
 9. **Tech Alignment como direcionamento** — se existir, use como ponto de partida; em caso de conflito com codebase, levante antes de prosseguir.
@@ -364,7 +361,7 @@ Estas regras são **absolutas** e não podem ser violadas:
 
 - [ ] **Variante decidida (web/mobile/backend) em FASE 0.0 e registrada no cabeçalho do SCOPE**
 - [ ] **Template correto carregado para a variante** (web/mobile/backend)
-- [ ] **`variant` gravado em `_run/minispec_state.yaml`** (raiz e em `steps.scope`)
+- [ ] **`variant` gravado em `_run/state.json`** (raiz e em `steps.scope`)
 - [ ] SCOPE descreve **COMO** a feature será implementada (zero ambiguidade)
 - [ ] Itens DENTRO e FORA do escopo listados explicitamente
 - [ ] Definições técnicas concretas conforme a variante:
@@ -379,7 +376,7 @@ Estas regras são **absolutas** e não podem ser violadas:
 - [ ] Nenhuma informação foi inventada ou deduzida
 - [ ] Comentários `<!-- LLM-ONLY: ... -->` removidos do arquivo final
 - [ ] Arquivo físico salvo no path resolvido a partir de `minispec.scope.path`
-- [ ] `_run/minispec_state.yaml` atualizado (se existir) no path resolvido a partir de `minispec.state.path`
+- [ ] `_run/state.json` atualizado (se existir) no path resolvido a partir de `shared.state.path`
 - [ ] Pronto para definição de TASKS
 
 ---
@@ -464,6 +461,6 @@ Legenda: `[N]` Novo  `[M]` Modificado  `[R]` Referência
 
 ## Entrada
 
-`$ARGUMENTS` deve conter o caminho do `intent.md` aprovado (ex: `/docs/specs/features/{feature}/v1/intent.md`).
+`[entrada atual da solicitação]` deve conter o caminho do `intent.md` aprovado (ex: `/docs/specs/features/{feature}/v1/intent.md`).
 
-$ARGUMENTS
+[entrada atual da solicitação]

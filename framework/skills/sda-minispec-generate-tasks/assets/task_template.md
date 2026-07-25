@@ -1,11 +1,10 @@
-﻿# TASK – Detalhamento da Task
+# TASK – Detalhamento da Task
 
 ## 1. Identificação
 - **ID**:
 - **Nome da Task**:
-- **model**: sonnet            <!-- sonnet (default) | opus (área crítica/alta complexidade). Ver sda-minispec-generate-tasks/SKILL.md → "FASE 3 — Heurística de modelo, risk e gates". NUNCA haiku. -->
 - **risk**: low                 <!-- low | medium | high -->
-- **gates**: [qa, tech_review]  <!-- [qa, tech_review] (default) | [qa] | none (task trivial) -->
+- **validation**: full  <!-- full (default) | qa | none (task trivial) -->
 - **Status**: A Fazer | Em Progresso | Bloqueado | Concluído  <!-- enum canônico. Em Progresso: setado pelo orquestrador na pré-execução. Bloqueado: 3 tentativas esgotadas OU dependência bloqueada. -->
 - **Fase**:
 - **Dependências**:

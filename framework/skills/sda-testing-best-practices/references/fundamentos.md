@@ -1,4 +1,4 @@
-﻿# Fundamentos — placement, invariantes, pyramid vs trophy
+# Fundamentos — placement, invariantes, pyramid vs trophy
 
 > Reference de `sda-testing-best-practices`. Leia antes de decidir ONDE um teste deve viver.
 

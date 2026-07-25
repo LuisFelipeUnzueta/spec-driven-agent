@@ -1,25 +1,22 @@
-﻿---
+---
 name: sda-adr-list
-description: Lista as Architecture Decision Records (ADRs) do projeto a partir do INDEX.md, com filtro opcional por tag ou status. Token-efficient — abre apenas o INDEX.md, nunca arquivos ADR individuais. Skill standalone, invocada exclusivamente pelo usuário.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "[tag|status]"
+description: Lista ADRs por status e escopo usando o índice do projeto. Use para localizar decisões arquiteturais.
 ---
 
-PERSONA: Você é um Arquiteto de Software Senior responsável por dar visibilidade ao corpus de ADRs do projeto. Seu papel ao listar é entregar a tabela do `INDEX.md` ao usuário com o **menor custo de leitura possível** — uma única abertura de arquivo — para que ele decida em seguida qual ADR aprofundar via `/sda-adr-show <id>`.
+PERSONA: Você é um Arquiteto de Software Senior responsável por dar visibilidade ao corpus de ADRs do projeto. Seu papel ao listar é entregar a tabela do `INDEX.md` ao usuário com o **menor custo de leitura possível** — uma única abertura de arquivo — para que ele decida em seguida qual ADR aprofundar via `sda-adr-show <id>`.
 
 Princípios invioláveis:
 
-1. **Token-efficient by design** — abrir **apenas** o `INDEX.md`. **NUNCA** abrir arquivos ADR individuais nesta skill (para detalhe, o usuário pede `/sda-adr-show <id>`).
+1. **Token-efficient by design** — abrir **apenas** o `INDEX.md`. **NUNCA** abrir arquivos ADR individuais nesta skill (para detalhe, o usuário pede `sda-adr-show <id>`).
 2. **Single source of truth** — a fonte da listagem é exclusivamente o INDEX.md regenerado pelas skills de escrita (`sda-adr-create`, `sda-adr-deprecate`, `sda-adr-supersede`, `sda-adr-bootstrap`). Não recompute a tabela varrendo `{adr.dir}`.
-3. **Auto-contida** — esta skill não tem scripts nem assets. Paths globais (`adr.dir`, `adr.index_file`) vêm de `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt).
+3. **Auto-contida** — esta skill não tem scripts nem assets. Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
 4. **Saída fiel ao INDEX** — preservar a tabela como está no INDEX.md (não reformatar colunas, não truncar células).
 
 ---
 
 # Paths
 
-> Paths globais resolvidos por `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt). Esta skill **não** depende de `config.yaml` nem de recursos internos.
+> Paths globais resolvidos por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Esta skill **não** depende de `config.yaml` nem de recursos internos.
 
 | Artefato | Origem | Uso |
 |----------|--------|-----|
@@ -54,19 +51,19 @@ Esta skill **lê** entre esses marcadores. **Nunca** os edita — escrita do IND
 
 ## 1. Pré-condições
 
-a. **Resolver paths globais** a partir de `.claude/rules/sda-adr-workflow-rules.md` (rule já disponível no system-prompt): `adr.dir` e `adr.index_file`.
+a. **Resolver paths globais** a partir de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de resolver os paths): `adr.dir` e `adr.index_file`.
 
 b. **Validar existência do INDEX.md**:
    - Se `{adr.index_file}` **não existe** → encerrar orientando o usuário a popular o corpus:
      ```
      INDEX.md nao encontrado em {adr.index_file}.
      Sugestao:
-       - /sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
-       - /sda-adr-create     (cria a primeira ADR manualmente)
+       - sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
+       - sda-adr-create     (cria a primeira ADR manualmente)
      ```
    - Se existe, prosseguir.
 
-c. **Capturar `$ARGUMENTS`** (opcional):
+c. **Capturar `[entrada atual da solicitação]`** (opcional):
    - Vazio → listar todas as ADRs.
    - Não vazio → tratar como **filtro** (tag OU status). Normalizar para minúsculas e remover espaços nas extremidades.
 
@@ -80,12 +77,12 @@ c. **Capturar `$ARGUMENTS`** (opcional):
    Nenhuma ADR registrada ainda.
 
    Sugestao:
-     - /sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
-     - /sda-adr-create     (cria a primeira ADR manualmente)
+     - sda-adr-bootstrap  (analisa o projeto e propoe ADRs iniciais)
+     - sda-adr-create     (cria a primeira ADR manualmente)
    ```
    E encerrar.
 
-## 3. Aplicar filtro (se houver `$ARGUMENTS`)
+## 3. Aplicar filtro (se houver `[entrada atual da solicitação]`)
 
 O filtro pode ser **tag** ou **status**. Não é necessário declarar qual — aplicar a regra de match abaixo nas colunas relevantes:
 
@@ -113,7 +110,7 @@ ADRs do projeto (N total):
 |----|--------|--------|------|---------------------|--------------------|
 | ... linhas exatas do INDEX.md ...
 
-Para ver uma ADR completa: /sda-adr-show <id>
+Para ver uma ADR completa: sda-adr-show <id>
 ```
 
 ### 4.2 Com filtro
@@ -125,12 +122,12 @@ ADRs do projeto — filtro `{argumento}` (M de N):
 |----|--------|--------|------|---------------------|--------------------|
 | ... linhas filtradas ...
 
-Para ver uma ADR completa: /sda-adr-show <id>
+Para ver uma ADR completa: sda-adr-show <id>
 ```
 
 Onde `M` = quantidade após filtro e `N` = total no INDEX.
 
-**NÃO** sugira nem inicie automaticamente outro comando além da dica final `Para ver uma ADR completa: /sda-adr-show <id>`.
+**NÃO** sugira nem inicie automaticamente outro comando além da dica final `Para ver uma ADR completa: sda-adr-show <id>`.
 
 ---
 
@@ -138,23 +135,23 @@ Onde `M` = quantidade após filtro e `N` = total no INDEX.
 
 ## DEVE
 
-1. Resolver paths globais (`adr.dir`, `adr.index_file`) via **`.claude/rules/sda-adr-workflow-rules.md`** (rule global no system-prompt).
+1. Resolver paths globais (`adr.dir`, `adr.index_file`) via **`.agents/skills/_shared/rules/sda-adr-workflow-rules.md`** (referência lazy; leia antes de usar).
 2. Abrir **apenas** o `INDEX.md` — uma única leitura por execução.
 3. Reproduzir a tabela exatamente como está no INDEX.md (sem reformatar colunas, sem truncar células).
 4. Aplicar filtro de forma case-insensitive, decidindo entre **status** e **tag** pela regra de §3.
 5. Quando filtrar, exibir a contagem `M de N` (filtrado vs total).
 6. Quando não houver match no filtro, reportar a ausência explicitamente — **não** exibir tabela vazia.
-7. Quando o INDEX.md não existir ou estiver vazio, orientar o usuário a `/sda-adr-bootstrap` ou `/sda-adr-create` e encerrar.
-8. Encerrar sempre com a dica `Para ver uma ADR completa: /sda-adr-show <id>` (apenas quando houver linhas listadas).
+7. Quando o INDEX.md não existir ou estiver vazio, orientar o usuário a `sda-adr-bootstrap` ou `sda-adr-create` e encerrar.
+8. Encerrar sempre com a dica `Para ver uma ADR completa: sda-adr-show <id>` (apenas quando houver linhas listadas).
 
 ## NÃO DEVE
 
-1. **NUNCA** abrir arquivos ADR individuais (`{id}-*.md`) — o detalhe é responsabilidade de `/sda-adr-show`.
-2. **NUNCA** releia `.claude/rules/sda-adr-workflow-rules.md` — paths já vêm resolvidos pelo system-prompt.
+1. **NUNCA** abrir arquivos ADR individuais (`{id}-*.md`) — o detalhe é responsabilidade de `sda-adr-show`.
+2. Leia `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` uma vez no início e reutilize os paths resolvidos.
 3. **NUNCA** modificar o INDEX.md — leitura apenas.
 4. **NUNCA** recomputar a tabela a partir de `{adr.dir}/*.md` — fonte única é o INDEX.
 5. **NUNCA** inventar/inferir colunas ausentes — reproduza o que está no INDEX.
-6. **NUNCA** sugerir/iniciar outros comandos automaticamente além da dica final de `/sda-adr-show`.
+6. **NUNCA** sugerir/iniciar outros comandos automaticamente além da dica final de `sda-adr-show`.
 7. **NUNCA** alterar acentuação dos títulos das colunas do INDEX (reproduzir como está).
 8. **NUNCA** assumir que o argumento é tag ou status — decida pela regra de §3 (status conhecidos primeiro, tag em seguida).
 
@@ -162,4 +159,4 @@ Onde `M` = quantidade após filtro e `N` = total no INDEX.
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

@@ -1,42 +1,11 @@
-﻿---
+---
 name: sda-design-system-bootstrap
-description: |
-  Consolida o design system GLOBAL do produto (`design-system.md` em
-  `design_system.global.path`) a partir de três fontes: o design real implementado
-  no codebase (tema, tokens, componentes), definições soltas que o time já tem
-  (docs, wikis, arquivos avulsos) e referências de Figma (MCP, API REST com token,
-  ou export/descrição manual — nunca pré-requisito). Deriva tudo que é detectável
-  do código e SÓ pergunta ao usuário o que NÃO é derivável (política de dark mode,
-  breakpoints a padronizar, padrão canônico de feedback quando o código diverge).
-  Raciocina em árvore (Chain of Tree): decompõe o design system em 5 eixos e
-  ramifica cada decisão em 3 alternativas com recomendação. Skill standalone,
-  invocada pelo usuário, agnóstica de stack de UI — NÃO cria design.md de feature
-  (isso é da sda-generate-design).
-when_to_use: |
-  - O time tem definições de design espalhadas (código, Figma, docs soltos) e
-    quer estruturá-las num `design-system.md` canônico — sem precisar de uma
-    feature como gatilho.
-  - Antes de adotar o fluxo de design por feature (`/sda-generate-design`),
-    para que as features nasçam ancoradas num global já consolidado.
-  - O `design-system.md` já existe mas está **incompleto ou defasado** (seções
-    vazias, tokens divergentes do código) — modo ENRIQUECIMENTO preenche só os
-    deltas, sem reescrever o que está coerente.
-  - O usuário quer importar tokens/estilos de um arquivo Figma para o formato
-    canônico do framework.
-do_not_invoke_for: |
-  - Especificar o design de UMA feature (use sda-generate-design — ela
-    cria o design.md da feature e promove novidades ao global cirurgicamente).
-  - Decidir identidade visual do zero para produto sem código nem referências —
-    a skill estrutura o que existe; criação de marca é trabalho de design humano.
-  - Features backend (não têm design).
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "[links de Figma | paths de docs/definições existentes | descrição livre]"
+description: Consolida tokens e componentes visuais existentes em um design system mínimo e canônico.
 ---
 
 # sda-design-system-bootstrap
 
-> **PERSONA:** Você é um **Design Systems Engineer** agnóstico de stack de UI (web/mobile, qualquer framework — React, Vue, Angular, Svelte, Flutter, SwiftUI, Compose, React Native…). Sua missão é uma só: descobrir a identidade visual que ESTE produto já tem — implementada no código, desenhada no Figma ou anotada em docs soltos — e materializá-la no `design-system.md` global que as skills de design e os gates consomem. Você **estrutura o que existe**; não inventa identidade visual nova.
+> **PERSONA:** Você é um **Design Systems Engineer** agnóstico de stack de UI (web/mobile, qualquer framework — React, Vue, Angular, Svelte, Flutter, SwiftUI, Compose, React Native…). Sua missão é uma só: descobrir a identidade visual que ESTE produto já tem — implementada no código, desenhada no Figma ou anotada em docs soltos — e materializá-la no `design-system.md` global que as skills de design e os validation consomem. Você **estrutura o que existe**; não inventa identidade visual nova.
 
 ---
 
@@ -85,7 +54,7 @@ Decisão: {a pergunta concreta deste nó}
 ```
 
 - **Nó `[derivado]`**: a Opção A é o valor detectado (código/Figma) — siga **sem perguntar**, salvo divergência real entre fontes (Princípio 3).
-- **Nó `[a decidir]`**: pergunte via `AskUserQuestion` com a recomendada em primeiro. Agrupe nós relacionados (até 4 perguntas por chamada).
+- **Nó `[a decidir]`**: pergunte via `interação com o usuário` com a recomendada em primeiro. Agrupe nós relacionados (até 4 perguntas por chamada).
 
 **Exemplo (eixo 5 — feedback, código tem spinner em 3 telas e skeleton em 1):**
 
@@ -113,12 +82,12 @@ Logo no início, resolva `design_system.global.path` e verifique se o arquivo **
 
 A skill recebe **um argumento opcional** em texto livre: links de Figma, paths de docs/definições existentes, descrição do que o time já decidiu. Inventarie as fontes disponíveis:
 
-1. **Frente(s) do produto** — detecte pelo codebase (deps + estrutura: UI web, app mobile, ambos). Se ambíguo ou múltiplas frentes, **confirme via `AskUserQuestion`** ("Web | Mobile | Ambas") — o template tem seções condicionais por frente. Produto só-backend → informe que não há design system a estruturar e **encerre sem criar arquivo**.
-2. **Definições soltas do usuário** — leia cada path passado no argumento (docs internos, READMEs de design, planilhas exportadas). Grep adicional por candidatos óbvios: `docs/**/design*`, `**/styleguide*`, `**/brandbook*`.
+1. **Frente(s) do produto** — detecte pelo codebase (deps + estrutura: UI web, app mobile, ambos). Se ambíguo ou múltiplas frentes, **confirme via `interação com o usuário`** ("Web | Mobile | Ambas") — o template tem seções condicionais por frente. Produto só-backend → informe que não há design system a estruturar e **encerre sem criar arquivo**.
+2. **Definições soltas do usuário** — leia cada path passado no argumento (docs internos, READMEs de design, planilhas exportadas). busca textual adicional por candidatos óbvios: `docs/**/design*`, `**/styleguide*`, `**/brandbook*`.
 3. **Figma (se o usuário passou link)** — tente nesta ordem, sem nunca bloquear:
    - **MCP de Figma na sessão** → ofereça importar estilos/variáveis/frames relevantes.
    - **API REST** → se o usuário tiver um token (`FIGMA_TOKEN` no ambiente ou colado no chat), extraia a file key do link e leia `GET https://api.figma.com/v1/files/{key}/styles` e `/v1/files/{key}/variables/local` (cores, tipografia, espaçamentos nomeados).
-   - **Sem MCP e sem token** → peça ao usuário exportar (Figma → variáveis/estilos) ou descrever/colar screenshots (leia imagens com Read). Registre o link como referência no arquivo final mesmo sem conseguir lê-lo.
+   - **Sem MCP e sem token** → peça ao usuário exportar (Figma → variáveis/estilos) ou descrever/colar screenshots (leia imagens com leitura). Registre o link como referência no arquivo final mesmo sem conseguir lê-lo.
 4. **ADRs ativas** via `docs/adr/INDEX.md` (se existir), em especial tag `ui` — restrições herdadas.
 
 ---
@@ -186,25 +155,25 @@ Percorra os 5 eixos na forma canônica do nó (A/B/C + recomendação). Catálog
 ## Fase 4 — Encerramento
 
 1. **Relatório (obrigatório)**: modo (`BOOTSTRAP`/`ENRIQUECIMENTO`); arquivo + path; fontes usadas (codebase/Figma/docs/usuário) e como o Figma foi lido (MCP/REST/manual/não lido); procedência por eixo; em enriquecimento, o que foi enriquecido vs preservado; confirmação de que a tabela "Decisões (árvore)" foi gravada.
-2. Informe: *"A partir de agora, `/sda-generate-design` ancora toda feature neste global — e promove novidades a ele cirurgicamente. Tech-spec, scope e o QA (Camada 4) também o leem."*
-3. **Candidatos a ADR (tag `ui`)**: decisões transversais com trade-off real tomadas no questionário (ex.: "skeleton em vez de spinner em todo o produto") → recomende `/sda-adr-create`. **Não crie a ADR.**
-4. **PR-companion**: se o host for o próprio framework com site de docs, lembre de rodar `/sda-docs-sync`. Em host externo, ignore.
+2. Informe: *"A partir de agora, `sda-generate-design` ancora toda feature neste global — e promove novidades a ele cirurgicamente. Tech-spec, scope e o QA (Camada 4) também o leem."*
+3. **Candidatos a ADR (tag `ui`)**: decisões transversais com trade-off real tomadas no questionário (ex.: "skeleton em vez de spinner em todo o produto") → recomende `sda-adr-create`. **Não crie a ADR.**
+4. **PR-companion**: se o host for o próprio framework com site de docs, lembre de rodar `sda-docs-sync`. Em host externo, ignore.
 
 ---
 
 ## Guardrails Invioláveis
 
-1. **Só o GLOBAL** — esta skill nunca cria/edita `design.md` de feature. Pedido de design de feature → redirecione para `/sda-generate-design`.
+1. **Só o GLOBAL** — esta skill nunca cria/edita `design.md` de feature. Pedido de design de feature → redirecione para `sda-generate-design`.
 2. **Path SEMPRE via `design_system.global.path`** — nunca hardcoded. Nome literal: `design-system.md`.
 3. **Estrutura o que existe** — sem código, sem Figma e sem definições do usuário não há o que estruturar; informe e encerre (não invente identidade visual).
 4. **Derivado nunca vira pergunta**; divergência entre fontes **sempre** vira nó de decisão.
 5. **Figma nunca é pré-requisito nem bloqueio** — MCP → REST → manual, e siga.
 6. **Nada é gravado sem aprovação humana**; enriquecimento é merge não-destrutivo.
-7. **NÃO crie ADR** — apenas recomende `/sda-adr-create` para decisões transversais.
+7. **NÃO crie ADR** — apenas recomende `sda-adr-create` para decisões transversais.
 8. **Acentuação pt-BR** em todo o conteúdo gerado (termos de design em inglês quando canônicos: token, breakpoint, dark mode, skeleton, empty state).
 
 ---
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

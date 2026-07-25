@@ -1,5 +1,5 @@
 {
-  "skill_name": "agent-spec-pre-refinement",
+  "skill_name": "sda-pre-refinement",
   "evals": [
     {
       "id": 1,
@@ -31,7 +31,7 @@
         "A recomendação é TaskCard (não SDD nem miniSpec)",
         "A justificativa cita pelo menos 2 dimensões decisivas (amplitude, personas ou novidade)",
         "A seção 15.3 (Alternativas) explica por que NÃO miniSpec",
-        "O comando de próximo passo é /agent-spec-taskcard-generate com a ideia entre aspas",
+        "O comando de próximo passo é sda-taskcard-generate com a ideia entre aspas",
         "Toda inferência da skill está marcada com [HIPÓTESE]"
       ]
     },
@@ -51,7 +51,7 @@
         "A recomendação é SDD (não TaskCard nem miniSpec)",
         "A justificativa cita pelo menos 2 dimensões decisivas entre: amplitude 4+ rumos, múltiplas personas, greenfield, decisão arquitetural nova",
         "A seção 15.3 (Alternativas) explica por que NÃO miniSpec E por que NÃO TaskCard",
-        "O comando de próximo passo é /agent-spec-sdd-generate-prd com a ideia entre aspas",
+        "O comando de próximo passo é sda-sdd-generate-prd com a ideia entre aspas",
         "A skill identifica múltiplos rumos/US implícitos (cadastro, catálogo, trocas, moderação, integração)"
       ]
     },
@@ -62,7 +62,7 @@
       "expected_output": "Skill deve consultar PRDs/specs existentes (/docs/specs/**/*.md) e o codebase no Ancoramento, reaproveitar o que já existe, e marcar como [fora do escopo do projeto] qualquer rumo que extrapole o cardápio digital (ex.: virar um BI genérico).",
       "files": [],
       "expectations": [
-        "A skill faz o Ancoramento no Projeto consultando CLAUDE.md/README e varrendo /docs/specs/**/*.md por features existentes",
+        "A skill faz o Ancoramento no Projeto consultando AGENTS.md/README e varrendo /docs/specs/**/*.md por features existentes",
         "A seção 10 do arquivo (ou a resposta, se ainda em Fase 1) cita PRDs/specs ou capacidades concretas consultadas",
         "Se algum rumo extrapolar o escopo do projeto, ele é marcado como [fora do escopo do projeto] e NÃO entra no escopo inicial",
         "A skill sinaliza ao usuário se a ideia duplica ou conflita com uma feature já especificada",

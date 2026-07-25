@@ -1,0 +1,28 @@
+{
+  "verdict": "approved|approved_with_notes|rejected",
+  "tests": {
+    "command": "",
+    "scope": "targeted|full|not_run",
+    "passed": 0,
+    "failed": 0,
+    "details": []
+  },
+  "criteria": [
+    {
+      "id": "",
+      "status": "passed|failed|partial",
+      "evidence": ""
+    }
+  ],
+  "findings": [
+    {
+      "severity": "critical|high|medium|low",
+      "category": "",
+      "path": "",
+      "line": 0,
+      "message": "",
+      "impact": "",
+      "fix": ""
+    }
+  ]
+}

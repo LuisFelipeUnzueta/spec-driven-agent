@@ -1,4 +1,4 @@
-﻿# TASK PLAN – Plano de Execução das Tasks
+# TASK PLAN – Plano de Execução das Tasks
 
 ## 1. Identificação
 - **Feature/Projeto**:
@@ -36,7 +36,7 @@ Breve resumo do objetivo geral da feature e o que será entregue ao final das ta
 
 ## 4. Lista de Tasks (visão macro)
 
-<!-- LLM-ONLY: A coluna "Pode Rodar em Paralelo?" é DERIVADA, nunca autorada por intuição. Calcule-a a partir do grafo de Dependências + Símbolos criados/consumidos de cada TN.md, aplicando o "Invariante de Paralelismo" de .claude/rules/sda-workflow-rules.md (Regra 10d). Default na incerteza: Não. A fonte única das dependências é a seção 1 de cada tasks/TN.md. -->
+<!-- LLM-ONLY: A coluna "Pode Rodar em Paralelo?" é DERIVADA, nunca autorada por intuição. Calcule-a a partir do grafo de Dependências + Símbolos criados/consumidos de cada TN.md, aplicando o "Invariante de Paralelismo" de .agents/skills/_shared/rules/sda-workflow-rules.md (Regra 10d). Default na incerteza: Não. A fonte única das dependências é a seção 1 de cada tasks/TN.md. -->
 
 | ID  | Nome da Task | Arquivo           | Fase | Dependências | Pode Rodar em Paralelo? (derivado) | Status  |
 | --- | ------------ | ----------------- | ---- | ------------ | ---------------------------------- | ------- |

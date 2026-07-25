@@ -1,12 +1,9 @@
-# CLAUDE.md
+<!-- sda:start -->
+@AGENTS.md
 
-## Regras do Projeto
-Consulte `.claude/rules/` para regras de arquitetura e coding standards.
+## Claude Code
 
-## Skills Disponiveis
-Consulte `.claude/skills/` para skills do framework SpecDrivenAgent.
-
-## Fluxo de Trabalho
-1. Execute `/sda-guide` para ver todas as skills disponiveis
-2. Use `/sda-pre-refinement` para descobrir qual workflow usar
-3. Siga as rules em `.claude/rules/` durante implementacao
+- Skills do projeto são projetadas para `.claude/skills/`.
+- Agentes especializados são projetados para `.claude/agents/`.
+- Regras específicas do projeto são espelhadas de `.agents/rules/` para `.claude/rules/`.
+<!-- sda:end -->

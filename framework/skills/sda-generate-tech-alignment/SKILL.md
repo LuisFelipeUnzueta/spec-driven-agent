@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-generate-tech-alignment
-description: Arquiteto de Soluções. A partir de um documento de definição (PRD do SDD ou Intent do miniSpec), PROPÕE soluções técnicas para a feature. Em uma Fase 1, gera livremente — a partir do PRD/Intent + ancoragem no stack/ADRs — os pontos onde há solução técnica a propor (bullets), sem template e sem cota. Em uma Fase 2, expande cada ponto com a solução recomendada e alternativas viáveis ancoradas no projeto, com trade-offs. REGISTRA as decisões (escolhida + rejeitadas + justificativa + trade-off) em um tech-alignment.md de forma livre. Trava dupla: NÃO reabre decisões de produto/negócio (o QUE/PORQUÊ já vêm do PRD/Intent) e NÃO desce a detalhe de implementação (endpoints/schemas/tabelas — isso é do TECH_SPEC/SCOPE). Pergunta SÓ para confirmar ou tirar dúvida técnica sobre o que já existe. Sinaliza decisões transversais como candidatas a ADR. Resolve tech_alignment.path e salva o arquivo. User-invocable.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <caminho do prd.md OU intent.md> [descrição técnica opcional em texto livre do que você já imagina]
+description: Registra alternativas, trade-offs e direção técnica antes da especificação detalhada.
 ---
 
 # Skill: sda-generate-tech-alignment
@@ -74,7 +71,7 @@ Propor alternativas **não** é desculpa para complexidade. A solução recomend
 - **Nada mirabolante.** Rejeite a opção sofisticada quando a simples entrega o mesmo resultado. Camada de abstração antecipada, generalização para casos hipotéticos, configurabilidade "que pode ser útil um dia" — tudo isso é over-engineering e fica de fora.
 - **A recomendada é a mais simples ancorada.** Quando mostrar 2-3 alternativas, a recomendação default é a mais simples que cabe no projeto. Alternativas mais elaboradas só entram se a feature **realmente cobra** o trade-off — e isso fica explícito na justificativa.
 
-> Espelha a doutrina da Disciplina do Executor (`.claude/skills/sda-minispec-run-tasks/references/executor-discipline.md` — canônico, com symlinks nos demais `*-run-tasks`; Regra 2 — sem complexidade especulativa / Regra 3 — mudanças a serviço da task): a decisão tomada aqui é o que o executor vai implementar — se ela já nasce inflada ou fora do escopo, o over-engineering se propaga para baixo.
+> Espelha a doutrina da Disciplina do Executor (`.agents/skills/sda-minispec-run-tasks/references/executor-discipline.md` — canônico, com symlinks nos demais `*-run-tasks`; Regra 2 — sem complexidade especulativa / Regra 3 — mudanças a serviço da task): a decisão tomada aqui é o que o executor vai implementar — se ela já nasce inflada ou fora do escopo, o over-engineering se propaga para baixo.
 
 ---
 
@@ -105,7 +102,7 @@ A skill recebe **um argumento obrigatório** e **um opcional**:
 
 ### 1.2 Se não conseguir detectar
 
-Pare e pergunte via `AskUserQuestion`:
+Pare e pergunte via `interação com o usuário`:
 > "Não identifiquei o framework pelo nome do arquivo (`<nome>`). Esperava `prd.md` (SDD) ou `intent.md` (miniSpec). Qual é?"
 
 ### 1.3 Resolver o path de saída
@@ -126,7 +123,7 @@ Antes de propor, você DEVE entender o terreno — uma solução só é "viável
 2. **Ler material de discovery** existente — também como **decisões de produto fechadas**:
    - `/docs/specs/features/{feature}/{version}/pre-refinement.md` (rumos de produto já decididos).
    - Handoffs de versões anteriores: `/docs/specs/features/{feature}/**/handoff*.md` (ex.: `handoff-frontend.md` gerado pelo `sda-backend-contract-handoff` em `{feature}/{version}/`).
-3. **Absorver stack e padrões**: `CLAUDE.md` + `.claude/rules/` (já no contexto) — linguagem, camadas, libs, convenções.
+3. **Absorver stack e padrões**: `AGENTS.md` + `.agents/rules/` (já no contexto) — linguagem, camadas, libs, convenções.
 4. **Consultar ADRs ativas** via `docs/adr/INDEX.md` (se existir) — decisões transversais já canonizadas. Soluções **NÃO podem conflitar** com ADR ativa sem sinalizar.
 5. **Mapear capacidades reutilizáveis** no codebase (dependências, módulos internos, infra já provisionada) — **prioridade**: o que já existe e pode ser reusado vence tecnologia/abstração nova. Esta varredura é o que sustenta o princípio de simplicidade: você só recomenda algo novo depois de confirmar que o existente não atende.
 
@@ -146,7 +143,7 @@ Características de um bom ponto:
 - **Ortogonal**: pontos cobrem dimensões distintas (persistência, sincronismo, auth, contrato de integração, consistência, etc.).
 - **Real**: a feature realmente força a decisão. Se não força nenhuma → diga isso (não invente).
 
-Apresente os pontos **já com sua leitura** — para cada um, a direção que você recomenda em 1 linha — e faça **um único checkpoint** com `AskUserQuestion`:
+Apresente os pontos **já com sua leitura** — para cada um, a direção que você recomenda em 1 linha — e faça **um único checkpoint** com `interação com o usuário`:
 
 ```markdown
 Li o PRD/Intent e ancorei no projeto. Os pontos técnicos onde proponho solução:
@@ -192,7 +189,7 @@ Regras da Fase 3.2:
 - **Viabilidade ancorada** — toda solução cita o que reusa / o que é novo / se conflita com ADR.
 - **Decisão direta quando óbvia** — se o projeto/padrão já determina o caminho, registre como decisão direta (sem alternativas), não force um leque artificial.
 - **Respeite o que já foi decidido** — produto/negócio fechado no PRD/Intent/pre-refinement **não reabre**. Se uma escolha técnica depende de produto não resolvido, registre como dependência em "Pontos em aberto".
-- **≤ 2-3 rodadas** de `AskUserQuestion`, e só para dúvida técnica/confirmação — agrupe pontos relacionados; não itere ad-infinitum.
+- **≤ 2-3 rodadas** de `interação com o usuário`, e só para dúvida técnica/confirmação — agrupe pontos relacionados; não itere ad-infinitum.
 - **Continue em alto nível** — soluções arquiteturais, não implementação.
 
 ### 3.3 Fronteira com ADR (durante a convergência)
@@ -200,9 +197,9 @@ Regras da Fase 3.2:
 Ao registrar cada decisão, classifique seu alcance:
 
 - **Feature-scoped** (default) → fica registrada no tech-alignment.
-- **Transversal / evergreen** (vira padrão do projeto, afeta ≥ 2 features, ou contradiz/estende um padrão existente) → **sinalize ao usuário** e **recomende** registrar via `/sda-adr-create "<titulo-da-decisao>"`. **NÃO crie a ADR** — a skill `sda-adr-create` revalida os critérios com o usuário. No tech-alignment, registre a decisão como "candidata a ADR" e, quando a ADR existir, **referencie-a** em vez de duplicar a justificativa.
+- **Transversal / evergreen** (vira padrão do projeto, afeta ≥ 2 features, ou contradiz/estende um padrão existente) → **sinalize ao usuário** e **recomende** registrar via `sda-adr-create "<titulo-da-decisao>"`. **NÃO crie a ADR** — a skill `sda-adr-create` revalida os critérios com o usuário. No tech-alignment, registre a decisão como "candidata a ADR" e, quando a ADR existir, **referencie-a** em vez de duplicar a justificativa.
 
-> Espelha o padrão de `sda-challenge-spec`: skills nunca criam ADR direto; orientam o usuário a rodar `/sda-adr-create`.
+> Espelha o padrão de `sda-challenge-spec`: skills nunca criam ADR direto; orientam o usuário a rodar `sda-adr-create`.
 
 ---
 
@@ -215,7 +212,7 @@ O documento **DEVE conter, no mínimo**, para o TECH_SPEC/SCOPE conseguir herdar
 1. **Cabeçalho de metadados** (1 bloco curto): feature, versão, framework (SDD/miniSpec), variante (web/mobile/backend, se discernível), documento de definição (path), discovery lido, ADRs consultadas, data, status.
 2. **Contexto técnico** (1-3 parágrafos curtos): reescrita técnica afiada do problema — vocabulário de arquiteto, invariantes explícitas. Sem narrativa de refinamento, sem implementação.
 3. **Soluções técnicas decididas**: para cada ponto, a **solução recomendada/escolhida**, as **alternativas avaliadas** (quando houver), o **motivo** e o **trade-off aceito**. Decisões cravadas pelo usuário ou determinadas pelo projeto → registre como "decisão direta" (sem leque). Forma livre.
-4. **Candidatas a ADR** (se houver): decisões transversais, com o comando `/sda-adr-create` sugerido.
+4. **Candidatas a ADR** (se houver): decisões transversais, com o comando `sda-adr-create` sugerido.
 5. **Restrições e invariantes técnicas**: o que qualquer implementação deve respeitar (vindas do PRD/Intent, stack, ADRs ou das decisões acima) — inclui os padrões herdados quando a feature não força decisão aberta.
 6. **Pontos em aberto**: decisões técnicas deixadas `a critério do arquiteto do TECH_SPEC/SCOPE` **e** dependências de produto não resolvidas (sinalizadas, não decididas).
 
@@ -243,7 +240,7 @@ Regras de consolidação:
 4. **Salvar** como **`tech-alignment.md`** (com hífen) no path resolvido.
 5. **Confirmar** a criação.
 
-> **NUNCA** use path hardcoded. A estrutura é definida em `.claude/rules/sda-workflow-rules.md`.
+> **NUNCA** use path hardcoded. A estrutura é definida em `.agents/skills/_shared/rules/sda-workflow-rules.md`.
 
 ---
 
@@ -268,7 +265,7 @@ Pontos em aberto: <N técnicos a critério do arquiteto + M dependências de pro
 
 ────────────────────────────────────────
 Decisões transversais detectadas? Registre antes de seguir:
-  /sda-adr-create "<titulo>"   (a skill revalida os critérios)
+  sda-adr-create "<titulo>"   (a skill revalida os critérios)
 ────────────────────────────────────────
 
 Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
@@ -277,7 +274,7 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 **IMPORTANTE:**
 - **NÃO** exiba o tech-alignment completo no terminal.
 - **NÃO** inicie automaticamente a próxima etapa (TECH_SPEC para SDD, SCOPE para miniSpec).
-- **NÃO** sugira o próximo comando do framework — apenas o `/sda-adr-create` quando houver candidata a ADR.
+- **NÃO** sugira o próximo comando do framework — apenas o `sda-adr-create` quando houver candidata a ADR.
 - Após confirmação, encerre.
 
 ---
@@ -285,7 +282,7 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 ## Guardrails Invioláveis
 
 1. **Detecção correta do framework** — `prd.md` → SDD; `intent.md` → miniSpec; outro → pare e pergunte.
-2. **Path SEMPRE resolvido via `tech_alignment.path`** em `.claude/rules/sda-workflow-rules.md`. NUNCA hardcoded.
+2. **Path SEMPRE resolvido via `tech_alignment.path`** em `.agents/skills/_shared/rules/sda-workflow-rules.md`. NUNCA hardcoded.
 3. **Nome do arquivo `tech-alignment.md`** — com hífen, nunca underscore.
 4. **PROPONHA SOLUÇÕES** — para cada ponto técnico real, lidere com a recomendação e mostre as alternativas viáveis ancoradas. Não crave a primeira solução, não largue só alternativas sem opinião, não devolva o problema como questionário.
 5. **GERE OS PONTOS LIVREMENTE** a partir do PRD/Intent + ancoragem — sem template, sem cota. Tantos pontos quanto a feature forçar; **zero é resposta válida** (diga e registre restrições herdadas).
@@ -296,7 +293,7 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 10. **REGISTRE as decisões** — escolhida + rejeitadas + justificativa + trade-off aceito. A decisão deve ser defensável pela proposta registrada.
 11. **NÃO INVENTE pontos** — se o projeto cobre a área ou a escolha é óbvia/única, é restrição, não ponto. Forçar cota gera pergunta de negócio disfarçada.
 12. **Conflito com ADR/stack = ponto de discussão técnica** — nunca descarte nem aceite cegamente; vire alternativa com trade-off.
-13. **NÃO crie ADR diretamente** — recomende `/sda-adr-create` para decisões transversais; a skill ADR revalida critérios.
+13. **NÃO crie ADR diretamente** — recomende `sda-adr-create` para decisões transversais; a skill ADR revalida critérios.
 14. **SEM narrativas do refinamento** ("o usuário deve poder", "no momento em que") — declaração técnica direta.
 15. **ALTO NÍVEL** — decida a forma da solução, não os detalhes. Qualidade das soluções > compressão.
 16. **AGNÓSTICA de stack** — não use termos de uma frente (modal, endpoint REST, tabela, controller) a menos que o projeto/input justifique.
@@ -322,7 +319,7 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 - [ ] Framework detectado pelo nome do arquivo de entrada (PRD ou Intent)
 - [ ] Path resolvido via `tech_alignment.path`
 - [ ] Documento de definição lido (QUE/PORQUÊ tratados como fechados) + discovery varrido (`pre-refinement.md`, `**/handoff*.md`)
-- [ ] Stack/padrões absorvidos (CLAUDE.md + rules) + **ADRs ativas consultadas** (`docs/adr/INDEX.md`)
+- [ ] Stack/padrões absorvidos (AGENTS.md + rules) + **ADRs ativas consultadas** (`docs/adr/INDEX.md`)
 - [ ] **Pontos gerados livremente** do PRD/Intent + ancoragem (sem template, sem cota), cada um técnico-arquitetural
 - [ ] Checkpoint da Fase 3.1 foi **propositivo** (direção recomendada por ponto), não um questionário
 - [ ] **Cada ponto** com solução recomendada + alternativas viáveis (exemplo + prós/contras + viabilidade) OU marcado como decisão direta
@@ -330,7 +327,7 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 - [ ] **Nenhuma decisão de produto/negócio** tomada pela skill; dependências de produto em "Pontos em aberto"
 - [ ] **Decisões registradas**: escolhida + rejeitadas + justificativa + trade-off aceito
 - [ ] Conflitos com ADR/stack tratados como ponto de discussão técnica, não descartados
-- [ ] **Decisões transversais** marcadas como candidatas a ADR com `/sda-adr-create` sugerido (não criadas direto)
+- [ ] **Decisões transversais** marcadas como candidatas a ADR com `sda-adr-create` sugerido (não criadas direto)
 - [ ] **Variante** preenchida no cabeçalho se discernível
 - [ ] Sem detalhes de implementação (endpoints, schemas, arquivos, tabelas, campos, middlewares)
 - [ ] Sem narrativas do refinamento
@@ -341,4 +338,4 @@ Essas soluções técnicas representam as decisões corretas? (sim / ajustar)
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

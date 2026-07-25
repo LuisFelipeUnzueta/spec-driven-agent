@@ -1,8 +1,8 @@
-﻿# SCOPE — Cleanup de Débitos Técnicos · {{feature}} · {{version}}
+# SCOPE — Cleanup de Débitos Técnicos · {{feature}} · {{version}}
 
 > **Variante**: {{variant}} (herdada de {{parent_version}})
 > **Versão**: {{version}}
-> **Padrão**: 1 task por débito, `gates: [qa]` (cleanup é categoria `code_review_only`)
+> **Padrão**: 1 task por débito, `validation: qa` (cleanup é categoria `code_review_only`)
 
 ---
 
@@ -51,13 +51,12 @@ _Nenhum débito ignorado — todos os coletados foram selecionados para cleanup.
 ### 3.2 Frontmatter padrão de cada task
 
 ```markdown
-- model: sonnet
 - risk: low
-- gates: [qa]      # cleanup é categoria code_review_only — Tech Review traz pouco valor
+- validation: qa      # cleanup é categoria code_review_only — Tech Review traz pouco valor
 - source: sda-debt-resolution
 ```
 
-> **Exceção**: se um débito específico toca path em qualquer categoria de Critical Paths da rule `sda-workflow-rules.md` (a rule é a fonte única — não enumere subconjuntos aqui), a task correspondente força `gates: [qa, tech_review]`.
+> **Exceção**: se um débito específico toca path em qualquer categoria de Critical Paths da rule `sda-workflow-rules.md` (a rule é a fonte única — não enumere subconjuntos aqui), a task correspondente força `validation: full`.
 
 ### 3.3 Estratégia de testes
 
@@ -68,7 +67,7 @@ _Nenhum débito ignorado — todos os coletados foram selecionados para cleanup.
 
 ### 3.4 Paralelização
 
-Tasks de débito são **independentes por construção** (cada uma toca seu próprio cenário). No `task_plan.md`, o flag `Pode Rodar em Paralelo?` é **derivado** (Regra 10d) — não autore `Sim` por padrão. O orquestrador `/sda-minispec-run-tasks` **re-verifica** os guards (independência no DAG, disjunção de símbolo, paths disjuntos, sem arquivo de alta contenção compartilhado, lote ≤ MAX_PARALLEL=4) — se houver colisão de paths/símbolo/arquivo de registro entre 2 tasks de débito, faz fallback automático para sequencial.
+Tasks de débito são **independentes por construção** (cada uma toca seu próprio cenário). No `task_plan.md`, o flag `Pode Rodar em Paralelo?` é **derivado** (Regra 10d) — não autore `Sim` por padrão. O orquestrador `sda-minispec-run-tasks` **re-verifica** os guards (independência no DAG, disjunção de símbolo, paths disjuntos, sem arquivo de alta contenção compartilhado, lote ≤ MAX_PARALLEL=4) — se houver colisão de paths/símbolo/arquivo de registro entre 2 tasks de débito, faz fallback automático para sequencial.
 
 ---
 
@@ -77,13 +76,13 @@ Tasks de débito são **independentes por construção** (cada uma toca seu pró
 - [ ] {{count_selecionados}} tasks `Concluído` no `task_plan.md` desta versão.
 - [ ] Suíte de testes da feature inteira passa após cada task (Gate 1 valida).
 - [ ] Nenhum diff em arquivos fora dos listados em §3.1.
-- [ ] §2 do `_run/run-report.md` da `{{parent_version}}` marca os débitos em cleanup; `_run/workflow-report.md` registra a execução (via FASE 4.6 da skill `/sda-debt-resolution`).
+- [ ] §2 do `_run/report.md` da `{{parent_version}}` marca os débitos em cleanup; `_run/state.json` registra a execução (via FASE 4.6 da skill `sda-debt-resolution`).
 
 ---
 
 ## 5. Observações
 
-- **Origem**: gerada pela skill `/sda-debt-resolution` em {{data}}.
+- **Origem**: gerada pela skill `sda-debt-resolution` em {{data}}.
 - **Agente especialista usado**: `{{agent_name}}`.
 - **Decisão do usuário**: {{count_selecionados}} de {{count_coletado}} débitos coletados foram aprovados para cleanup nesta rodada.
-- **Não é candidato a ADR**: cleanup técnico não dispara ADR. Se durante execução algum débito revelar padrão arquitetural a registrar, sinalize ao usuário criar `/sda-adr-create` separadamente — NÃO inclua nesta versão.
+- **Não é candidato a ADR**: cleanup técnico não dispara ADR. Se durante execução algum débito revelar padrão arquitetural a registrar, sinalize ao usuário criar `sda-adr-create` separadamente — NÃO inclua nesta versão.

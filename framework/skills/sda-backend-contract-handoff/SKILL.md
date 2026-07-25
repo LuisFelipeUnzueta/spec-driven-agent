@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-backend-contract-handoff
-description: Gera um handoff operacional do backend para o frontend a partir de código-fonte, contratos formais (OpenAPI/GraphQL/protobuf) e/ou especificações (PRD, tech_spec, scope, TaskCard, ADR). Produz um markdown curto, auditável e executável que descreve endpoints, payloads, erros, autenticação, permissões, estados de UI, fixtures e critérios de aceite — sem assumir linguagem ou framework. Use SEMPRE que um agente de frontend (humano ou IA) precisar implementar integração com um backend e você quiser evitar releitura completa do backend, drift de contrato ou documentação informal.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <tech_spec.md | scope.md | task-{nn}-{slug}.md (TaskCard)> [+ caminho do backend e/ou contrato formal opcional]
+description: Gera handoff verificável de contratos backend para consumidores frontend. Use após estabilizar endpoints e schemas.
 ---
 
 # Skill: sda-backend-contract-handoff
@@ -25,8 +22,8 @@ Estilo: Direto. Operacional. Sem prosa. Toda afirmação é rastreável até có
 ## Quando NÃO Usar
 
 - Documentação pública de API para terceiros (use OpenAPI/portal de docs — esta skill é operacional, não institucional).
-- Discovery de domínio ou design da API (use `/sda-sdd-generate-prd`, `/sda-sdd-generate-tech-spec`, `/sda-minispec-generate-intent`, `/sda-minispec-generate-scope` — esta skill consome decisões, não as toma).
-- Refatoração de backend (use `/sda-challenge-spec` ou Tech Review — esta skill descreve o estado atual, não o questiona).
+- Discovery de domínio ou design da API (use `sda-sdd-generate-prd`, `sda-sdd-generate-tech-spec`, `sda-minispec-generate-intent`, `sda-minispec-generate-scope` — esta skill consome decisões, não as toma).
+- Refatoração de backend (use `sda-challenge-spec` ou Tech Review — esta skill descreve o estado atual, não o questiona).
 - Frontend com regra de negócio rica que precisa de PRD próprio (o handoff é integração, não substituto de spec de produto).
 
 ---

@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-sdd-generate-tech-spec
-description: Gera Tech Spec (Especificação Técnica) completo do framework SDD a partir de um PRD aprovado, em uma de 3 variantes (Web | Mobile | Backend). Conduz processo interativo (uma pergunta por vez) para coletar decisões técnicas, delega geração da Estratégia de Testes ao subagente sda-qa-test-generator, salva o arquivo e atualiza o estado do pipeline. User-invocable via /sda-sdd-generate-tech-spec.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <caminho do prd.md ex: docs/specs/features/feature-user/v1/prd.md>
+description: Transforma um PRD aprovado em Tech Spec aderente ao código, ADRs e estratégia de testes.
 ---
 
 # Skill: sda-sdd-generate-tech-spec
@@ -29,11 +26,11 @@ O Tech Spec responde: **COMO a solução será implementada tecnicamente?**
 
 ## Paths (Resolução)
 
-Variáveis usadas nesta skill: `sdd.prd.path`, `tech_alignment.path`, `design.feature.path`, `design_system.global.path`, `sdd.tech_spec.path`, `sdd.state.path`, `adr.index_file`. Templates definidos em `.claude/rules/sda-sdd-workflow-rules.md` (paths SDD), `.claude/rules/sda-workflow-rules.md` (paths compartilhados) e `.claude/rules/sda-adr-workflow-rules.md` (paths ADR).
+Variáveis usadas nesta skill: `sdd.prd.path`, `tech_alignment.path`, `design.feature.path`, `design_system.global.path`, `sdd.tech_spec.path`, `shared.state.path`, `adr.index_file`. Templates definidos em `.agents/skills/_shared/rules/sda-sdd-workflow-rules.md` (paths SDD), `.agents/skills/_shared/rules/sda-workflow-rules.md` (paths compartilhados) e `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (paths ADR).
 
 Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...), extraídos do path do **prd.md** recebido como argumento, antes de qualquer leitura/escrita. **NUNCA** use paths hardcoded.
 
-> **Validação do argumento**: se o path recebido NÃO casar com o template `sdd.prd.path` (não dá para extrair `{feature}`/`{version}`), NÃO deduza — pergunte via `AskUserQuestion`: (a) confirme o nome da feature e a versão manualmente; (b) ou aponte o `prd.md` no layout canônico. Prossiga apenas com `{feature}`/`{version}` confirmados.
+> **Validação do argumento**: se o path recebido NÃO casar com o template `sdd.prd.path` (não dá para extrair `{feature}`/`{version}`), NÃO deduza — pergunte via `interação com o usuário`: (a) confirme o nome da feature e a versão manualmente; (b) ou aponte o `prd.md` no layout canônico. Prossiga apenas com `{feature}`/`{version}` confirmados.
 
 > **Atenção**: `sdd.prd.path` e `sdd.tech_spec.path` podem apontar para diretórios-base diferentes em outras configurações. Resolva cada path independentemente — não assuma que o `tech_spec.md` será salvo no mesmo diretório do `prd.md`.
 
@@ -43,7 +40,7 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...), 
 
 **PRIMEIRA AÇÃO da skill, antes de qualquer leitura/pesquisa.** A variante determina qual template carregar (FASE 5), quais perguntas técnicas aplicar (FASE 3.2) e o parâmetro `frente` passado ao `sda-qa-test-generator` (FASE 4).
 
-**Regra dura**: a pergunta é **OBRIGATÓRIA** e **SEMPRE** disparada via `AskUserQuestion`. Não pule mesmo que o `tech-alignment.md` exista e mencione a variante — tech-alignment apenas **pré-preenche a sugestão**, não substitui a confirmação explícita do usuário.
+**Regra dura**: a pergunta é **OBRIGATÓRIA** e **SEMPRE** disparada via `interação com o usuário`. Não pule mesmo que o `tech-alignment.md` exista e mencione a variante — tech-alignment apenas **pré-preenche a sugestão**, não substitui a confirmação explícita do usuário.
 
 **Procedimento**:
 
@@ -52,7 +49,7 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...), 
    - Se o arquivo existir, busque referência inequívoca a uma frente (`web`, `mobile`, `backend`, `front-end`, `back-end`, `iOS`, `Android`, `Flutter`, `React Native`, etc.).
    - Se detectar com confiança alta, reserve essa variante como **opção destacada** ("Recomendado pelo tech-alignment") na pergunta — **não** assuma silenciosamente.
 
-2. **Pergunta obrigatória** (sempre via `AskUserQuestion`):
+2. **Pergunta obrigatória** (sempre via `interação com o usuário`):
    > "Qual é a frente desta TECH SPEC? Essa decisão escolhe o template e o set de perguntas técnicas."
    > Opções: `Web` | `Mobile` | `Backend`
    >
@@ -62,7 +59,7 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...), 
    - Na FASE 3.2 para escolher o set de perguntas técnicas.
    - Na FASE 4 (delegação ao `sda-qa-test-generator`) como parâmetro `frente`.
    - Na FASE 5 para carregar o template correto.
-   - Na FASE 7 para gravar `variant` no `_run/sdd_state.yaml` (raiz e `steps.tech_spec.variant`).
+   - Na FASE 7 para gravar `variant` no `_run/state.json` (raiz e `steps.tech_spec.variant`).
    - No campo `Variante` da seção 1 (Identificação) do Tech Spec.
 
 > **Por que SEMPRE perguntar**: tech-alignment é opcional e nem sempre existe. Inferência silenciosa já levou a templates errados em features mistas. A pergunta explícita custa 1 turn e elimina ambiguidade — ver mesma regra em `sda-minispec-generate-scope` (FASE 0.0).
@@ -87,11 +84,11 @@ Substitua `{feature}` (kebab-case sem acentos) e `{version}` (`v1`, `v2`, ...), 
   - `design.feature.path` → `/docs/specs/features/{feature}/{version}/design.md`
 - **Se o `design.md` da feature EXISTIR** → ele é a **fonte de verdade do COMO VISUAL**. As seções de Fluxos de Interface e Comportamento Visual e Estados da UI (4 e 5 nos templates web/mobile) devem **referenciar** o design.md (resumo + ponteiro para as seções dele) em vez de redefinir layout/estados do zero. Rotas, deep links e decisões técnicas de navegação continuam sendo suas (são técnica, não design).
 - **Se houver conflito** entre o design.md e o codebase/decisões técnicas (ex.: design pede componente que conflita com a biblioteca adotada), **levante o conflito e pergunte** — mesma mecânica do tech-alignment.
-- **Se NÃO existir** → siga o fluxo normal: as seções 4–5 são preenchidas integralmente pela tech spec, como sempre. Ausência de design.md **não é erro nem exige aviso** — é o default de features sem fluxo de design. Se a feature tem interface relevante e o usuário parece se beneficiar do fluxo, você PODE mencionar uma única vez que `/sda-generate-design` existe — sem insistir e sem bloquear.
+- **Se NÃO existir** → siga o fluxo normal: as seções 4–5 são preenchidas integralmente pela tech spec, como sempre. Ausência de design.md **não é erro nem exige aviso** — é o default de features sem fluxo de design. Se a feature tem interface relevante e o usuário parece se beneficiar do fluxo, você PODE mencionar uma única vez que `sda-generate-design` existe — sem insistir e sem bloquear.
 
 ### 1.2 Regras e contexto do projeto (pré-carregados)
-O `CLAUDE.md` e `.claude/rules/` já estão no contexto — **NÃO releia**.
-Para reaproveitar padrões transversais, leia o índice de ADRs em `adr.index_file` (ver tabela de paths) — leitura única e enxuta. **NÃO** abra arquivos ADR individuais; se precisar aprofundar uma ADR específica, peça ao usuário rodar `/sda-adr-show <id>`.
+Use o `AGENTS.md` já carregado e leia em `.agents/rules/` somente as regras relevantes.
+Para reaproveitar padrões transversais, leia o índice de ADRs em `adr.index_file` (ver tabela de paths) — leitura única e enxuta. **NÃO** abra arquivos ADR individuais; se precisar aprofundar uma ADR específica, peça ao usuário rodar `sda-adr-show <id>`.
 
 ### 1.2.1 Glossário de Domínio (Global + Feature)
 Resolva os dois paths definidos em `sda-workflow-rules.md`:
@@ -102,7 +99,7 @@ Resolva os dois paths definidos em `sda-workflow-rules.md`:
 Leia **ambos** (se existirem). Precedência: feature sobrescreve global em caso de conflito (raro; sinalize ao usuário quando ocorrer).
 
 - **Se algum EXISTIR** → use a terminologia canônica combinada (global + feature) nas definições técnicas (entidades, modelos, endpoints, nomes de tabelas/colunas). Se uma decisão técnica usar termo que conflita com o glossário, **sinalize ao usuário** e adote o canônico.
-- **Se NENHUM EXISTIR** → siga normalmente. Se durante a tech spec surgirem novos termos técnicos de domínio relevantes (entidades de negócio, agregados, value objects), sinalize ao final do Tech Spec que é recomendado rodar `/sda-challenge-spec tech_spec.md` para canonizá-los (termos cross-feature vão para o global; termos específicos vão para o glossário-feature).
+- **Se NENHUM EXISTIR** → siga normalmente. Se durante a tech spec surgirem novos termos técnicos de domínio relevantes (entidades de negócio, agregados, value objects), sinalize ao final do Tech Spec que é recomendado rodar `sda-challenge-spec tech_spec.md` para canonizá-los (termos cross-feature vão para o global; termos específicos vão para o glossário-feature).
 
 ### 1.3 Explorar as camadas do projeto
 Identifique a arquitetura real do projeto:
@@ -134,7 +131,7 @@ Identifique a arquitetura real do projeto:
 ### Regras de Prioridade
 
 ```
-1. Regras do projeto (.claude/rules/, CLAUDE.md)     → INVIOLÁVEL
+1. Regras do projeto (.agents/rules/, AGENTS.md)     → INVIOLÁVEL
 2. Tech Alignment do usuário                          → RESPEITAR (prioridade alta)
 3. Descoberta autônoma do codebase                    → COMPLEMENTAR
 4. Proposta do arquiteto (você)                       → QUANDO NÃO HÁ CONFLITO
@@ -152,7 +149,7 @@ Identifique a arquitetura real do projeto:
 
 > "O tech_alignment define SQLite para cache. Porém, identifiquei que o projeto já utiliza Redis para caching no módulo X. Deseja manter SQLite para este caso específico ou prefere seguir o padrão existente com Redis?"
 
-> O `tech-alignment.md` é gerado/atualizado pela skill **`sda-generate-tech-alignment`** (user-invocable, genérica para SDD e miniSpec). Se ele não existir e o usuário quiser registrar alinhamento técnico, **oriente-o** a rodar `/sda-generate-tech-alignment <prd.md> "<descrição técnica>"` — esta skill (sda-sdd-generate-tech-spec) **não invoca** outras skills.
+> O `tech-alignment.md` é gerado/atualizado pela skill **`sda-generate-tech-alignment`** (user-invocable, genérica para SDD e miniSpec). Se ele não existir e o usuário quiser registrar alinhamento técnico, **oriente-o** a rodar `sda-generate-tech-alignment <prd.md> "<descrição técnica>"` — esta skill (sda-sdd-generate-tech-spec) **não invoca** outras skills.
 
 ---
 
@@ -171,7 +168,7 @@ Coletar as decisões técnicas necessárias para preencher o Tech Spec. Cada per
 - Oferecer **2-4 opções técnicas** quando houver diferentes caminhos possíveis.
 - Se o usuário fornecer informações extras, reutilize para seções futuras.
 - **NÃO peça "concorda?" ou "valida?" entre perguntas** — use a resposta e siga adiante.
-- Use a ferramenta **`AskUserQuestion`** (Claude Code) para coletar decisões.
+- Use a ferramenta **`interação com o usuário`** (host) para coletar decisões.
 
 ### Sequência de Perguntas
 
@@ -256,7 +253,7 @@ Procedimento:
      - **N/A** — o tech_spec não toca a área coberta pela ADR.
 3. **Conformidade LITERAL (obrigatória para cada ADR `APLICÁVEL`/`PARCIAL`)** — não basta declarar que "obedece". Para cada ADR aplicável que **restringe um artefato concreto** (path/diretório canônico, biblioteca/lib, padrão estrutural, identificador, naming), **abra a seção `Decision` integral da ADR** (`adr.dir` + `adr.file_pattern`) e **confronte literalmente** cada decisão concreta do tech_spec contra o texto da ADR:
    - Bate exatamente (mesmo path, mesma lib, mesmo padrão) → adicione um **sub-bullet na seção de Definições Técnicas correspondente** citando o trecho da ADR que a decisão satisfaz. Exemplo: "ADR-0010 — tags `form:`/`json:` em §3.3 usam identificadores em inglês conforme a `Decision` da ADR."
-   - **Diverge** (ex.: ADR manda `pkg/logger` e a spec propõe `internal/platform/logger`; ou ADR manda lib X e a spec usa Y) → isto é um **CONFLITO spec×ADR**. **PARE** e resolva via `AskUserQuestion` antes de finalizar o tech_spec, apresentando o trecho literal da ADR vs a decisão da spec e duas saídas: **(a) conformar o tech_spec à ADR**; **(b) superseder/atualizar a ADR primeiro** (`/sda-adr-supersede` ou `/sda-adr-create`) — só então a spec pode divergir, agora legitimamente. **NUNCA** escolha um lado em silêncio nem registre o conflito apenas como observação.
+   - **Diverge** (ex.: ADR manda `pkg/logger` e a spec propõe `internal/platform/logger`; ou ADR manda lib X e a spec usa Y) → isto é um **CONFLITO spec×ADR**. **PARE** e resolva via `interação com o usuário` antes de finalizar o tech_spec, apresentando o trecho literal da ADR vs a decisão da spec e duas saídas: **(a) conformar o tech_spec à ADR**; **(b) superseder/atualizar a ADR primeiro** (`sda-adr-supersede` ou `sda-adr-create`) — só então a spec pode divergir, agora legitimamente. **NUNCA** escolha um lado em silêncio nem registre o conflito apenas como observação.
    - **PROIBIDO** citar uma ADR como "APLICÁVEL — obedecida" afirmando um path/símbolo que a ADR **não contém** (foi exatamente a falha do caso `arquitetura-projeto`: a spec citou ADR-0003 alegando `internal/platform/logger`, path que a ADR — que dizia `pkg/logger` — nunca teve). A citação de conformidade deve referenciar o texto real da `Decision`.
 4. **Consistência ADR×ADR**: se duas ADRs aplicáveis se contradizem nas decisões concretas (ex.: uma estrutura implica `internal/platform/`, outra fixa `pkg/`), trate como conflito a ser sinalizado ao usuário (mesma mecânica de PARE acima) — não escolha qual prevalece sozinho.
 
@@ -270,7 +267,7 @@ Quando o diretório de ADRs (via `adr.dir`) não existe ou está vazio: marque o
 
 ## FASE 4B — Detecção de Candidatos a ADR (Hook)
 
-A skill `sda-sdd-generate-tech-spec` é um **hook** de detecção de ADRs. Após decidir as definições técnicas (componentes, modelos, endpoints, banco), aplique os **5 critérios canônicos** definidos em `.claude/rules/sda-adr-workflow-rules.md` (seção "ADR — Critérios Canônicos de Criação"):
+A skill `sda-sdd-generate-tech-spec` é um **hook** de detecção de ADRs. Após decidir as definições técnicas (componentes, modelos, endpoints, banco), aplique os **5 critérios canônicos** definidos em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (seção "ADR — Critérios Canônicos de Criação"):
 
 1. Para cada decisão técnica candidata, valide os 5 critérios (TODOS devem ser verdadeiros):
    - **C1 — Transversal**: aplicável a outras features ou ao projeto.
@@ -284,7 +281,7 @@ A skill `sda-sdd-generate-tech-spec` é um **hook** de detecção de ADRs. Após
    - **2-4/5 passam** → registre como **"Candidato a ADR parcial"** + lista dos critérios que falharam.
    - **0-1/5 passam** → registre apenas como decisão técnica nas seções apropriadas — **não** mencione candidatura a ADR.
 
-3. **NÃO** crie a ADR automaticamente — apenas sinalize. O usuário invocará `/sda-adr-create` se desejar (a skill revalida os 5 critérios).
+3. **NÃO** crie a ADR automaticamente — apenas sinalize. O usuário invocará `sda-adr-create` se desejar (a skill revalida os 5 critérios).
 
 > **Por que aqui**: as decisões técnicas do Tech Spec são o material primário de onde nascem ADRs (escolhas de banco, padrão arquitetural, integração entre módulos, política de segurança). Pular esta detecção significa perder o momento em que a decisão ainda está fresca e o "porquê" é óbvio para quem a tomou.
 
@@ -351,9 +348,9 @@ Essa especificação técnica está aprovada? (sim/não)
 
 ---
 
-## FASE 7 — Estado do Pipeline (_run/sdd_state.yaml)
+## FASE 7 — Estado do Pipeline (_run/state.json)
 
-Após salvar o `tech_spec.md` com sucesso, atualize o arquivo no path resolvido a partir de `sdd.state.path`:
+Após salvar o `tech_spec.md` com sucesso, atualize o arquivo no path resolvido a partir de `shared.state.path`:
 
 ```yaml
 # atualizar apenas estes campos:
@@ -382,8 +379,8 @@ steps:
     status: completed | skipped   # omitir em variante backend
 ```
 
-> Se o `_run/sdd_state.yaml` NÃO existir, **não crie** — o `sda-sdd-generate-prd` é responsável por criar.
-> Se o `_run/sdd_state.yaml` existir mas **não tiver** o campo `variant` no nível raiz (state legado), adicione ao atualizar.
+> Se o `_run/state.json` NÃO existir, **não crie** — o `sda-sdd-generate-prd` é responsável por criar.
+> Se o `_run/state.json` existir mas **não tiver** o campo `variant` no nível raiz (state legado), adicione ao atualizar.
 
 ---
 
@@ -396,7 +393,7 @@ steps:
 3. **Pesquisar o projeto** antes de propor qualquer solução (regras, camadas, código existente).
 4. **SEMPRE salvar o arquivo físico** ANTES de apresentar ao usuário.
 5. **Decidir a variante** (web/mobile/backend) em FASE 0 e preencher **integralmente** o template correspondente — todas as seções da variante escolhida.
-6. Usar **`AskUserQuestion`** no Claude Code para coletar decisões técnicas.
+6. Usar **`interação com o usuário`** no host para coletar decisões técnicas.
 7. **Mapear TODAS as User Stories** do PRD para definições técnicas na seção correspondente do template (15 Web, 16 Mobile, 5.3+17 Backend).
 8. **Listar TODOS os arquivos** envolvidos na seção correspondente (20 Web, 21 Mobile, 22 Backend).
 9. **Delegar a Estratégia de Testes ao `sda-qa-test-generator`** seguindo [qa-delegation.md](references/qa-delegation.md). Numeração da seção varia por variante (17 Web | 18 Mobile | 19 Backend) e o parâmetro `frente` deve ser passado no prompt.
@@ -424,7 +421,7 @@ steps:
 
 - [ ] **Variante decidida (web/mobile/backend) em FASE 0 e registrada no campo `Variante` da seção 1 do Tech Spec**
 - [ ] **Template correto carregado para a variante** (web/mobile/backend)
-- [ ] **`variant` gravado em `_run/sdd_state.yaml`** (raiz e em `steps.tech_spec`)
+- [ ] **`variant` gravado em `_run/state.json`** (raiz e em `steps.tech_spec`)
 - [ ] **Frente passada ao `sda-qa-test-generator`** na delegação (FASE 4 / `qa-delegation.md`)
 - [ ] **Design verificado (web/mobile)**: `design.md` existente → seções 4–5 referenciam + campo `Design Relacionado` preenchido + `steps.design: completed`; inexistente → seções 4–5 preenchidas integralmente + `steps.design: skipped`
 - [ ] Tech Spec cobre todo o PRD (todas as US-XX mapeadas)
@@ -447,4 +444,4 @@ steps:
 
 ## Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

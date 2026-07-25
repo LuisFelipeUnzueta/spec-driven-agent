@@ -1,28 +1,6 @@
-﻿---
+---
 name: sda-rule-create
-description: |
-  Facilitador de autoria de rules de projeto a partir de um TEMA arquitetural
-  (ex.: acesso a banco, injeção de dependência, gerenciador de estado, tratamento
-  de erro HTTP). Tira o usuário da página em branco: decompõe o tema em eixos
-  (Chain of Tree), oferece 3 alternativas por escolha com recomendação, funciona
-  em greenfield (propõe de best-practices + a intenção do usuário) ou brownfield
-  (deriva do código), e entrega uma rule SEMENTE enxuta + material de ADR pronto.
-  Agnóstico de stack. NÃO invoca curate/adr-create — recomenda rodá-las manualmente.
-  Skill standalone, invocada pelo usuário.
-when_to_use: |
-  - Início de arquitetura: estabelecer convenções de um tema ANTES de codar a
-    primeira feature (DB, DI, estado, erro, logging, validação, feature flags…).
-  - Você quer uma rule de um tema específico e não sabe por onde começar.
-  - Já existe uma rule do tema mas está incompleta/defasada (modo enriquecimento).
-do_not_invoke_for: |
-  - Julgar se um item pronto merece virar rule / definir escopo-matcher dele
-    (use sda-curate-project-rules).
-  - Registrar uma decisão arquitetural única no formato Nygard (use sda-adr-create).
-  - Descobrir e gerar a rule de STACK DE TESTE (use sda-testing-stack-bootstrap).
-  - Escrever PRD/spec/tech-spec/taskcard (conteúdo de feature, não convenção de projeto).
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "<tema arquitetural> — ex.: \"injeção de dependência\", \"acesso a banco com repository\""
+description: Cria uma regra de projeto curta, verificável e corretamente delimitada por paths.
 ---
 
 # sda-rule-create
@@ -50,7 +28,7 @@ argument-hint: "<tema arquitetural> — ex.: \"injeção de dependência\", \"ac
 
 ## Saída desta skill
 
-1. **Rule semente enxuta** — `.claude/rules/{nome}.md` (ou o diretório/convenção de rules do host). Marcada como **provisória** quando greenfield (compromisso sobre como o código *vai* ser escrito, não retrato do que existe).
+1. **Rule semente enxuta** — `.agents/rules/{nome}.md` (ou o diretório/convenção de rules do host). Marcada como **provisória** quando greenfield (compromisso sobre como o código *vai* ser escrito, não retrato do que existe).
 2. **Material de ADR** — bloco pronto (decisão + alternativas consideradas) para o usuário colar/rodar em `sda-adr-create`. Opcional: só quando o tema envolve uma decisão cross-cutting que vale registrar.
 
 > **Não** entram no escopo: scaffold de código, execução de `curate`/`adr-create`, edição de fonte.
@@ -90,7 +68,7 @@ Diferente de um tema fixo, aqui você **infere** os eixos a partir da "superfíc
 Para CADA eixo, e cada ponto de decisão dentro dele, gere **exatamente 3 alternativas** (A/B/C) com trade-off curto e **recomende uma**:
 
 - **Brownfield** (tema tem código): a Opção A é o padrão detectado (recomendada); B/C são alternativas. `[derivado]` → não force pergunta, salvo ambiguidade real.
-- **Greenfield** (sem código): as 3 alternativas são uma **escolha real** — leve ao usuário via `AskUserQuestion` (recomendada em primeiro). A recomendação vem de best-practice + a intenção que o usuário declarou.
+- **Greenfield** (sem código): as 3 alternativas são uma **escolha real** — leve ao usuário via `interação com o usuário` (recomendada em primeiro). A recomendação vem de best-practice + a intenção que o usuário declarou.
 
 **Forma canônica do nó:**
 
@@ -138,7 +116,7 @@ Varredura curta (≤90s). Descubra **sem perguntar**:
 
 | O que | Onde olhar | Para quê |
 |---|---|---|
-| **Convenção de rules do host** | `.claude/rules/`, `.cursor/rules/`, `CLAUDE.md`, `AGENTS.md`, `docs/rules/` — o que existir + frontmatter (`paths`/`globs`/`applies_to`) | Replicar a convenção do host; decidir destino e matcher. Não invente diretório. |
+| **Convenção de rules do host** | `.agents/rules/`, `.cursor/rules/`, `AGENTS.md`, `AGENTS.md`, `docs/rules/` — o que existir + frontmatter (`paths`/`globs`/`applies_to`) | Replicar a convenção do host; decidir destino e matcher. Não invente diretório. |
 | **Stack do projeto** | manifests (`package.json`, `go.mod`, `pyproject.toml`, `pubspec.yaml`, `Cargo.toml`, `pom.xml`/`build.gradle`, `*.csproj`…) | Adaptar exemplos à stack real; nunca assumir. |
 | **Pegada do tema** | código/dirs relacionados ao tema (ex.: para "DB": migrations, repositories, configs de conexão) | Decidir GREENFIELD vs BROWNFIELD. |
 | **Rule do tema já existe?** | dir de rules do host | Decidir bootstrap vs enriquecimento. |
@@ -156,7 +134,7 @@ Mostre os **3 a 5 eixos** inferidos do tema, cada um marcado `[derivado]` (brown
 ### 1b — Detalhe cada eixo (Nível 2 — 3 alternativas por nó)
 Percorra eixo por eixo, na forma canônica do nó:
 - **`[derivado]`**: declare A (detectada, recomendada) + B/C, siga **sem perguntar** (salvo ambiguidade).
-- **`[a decidir]`**: pergunte via `AskUserQuestion`, 3 alternativas (recomendada em primeiro; a tool adiciona "Other"). Agrupe nós relacionados (até 4 por chamada).
+- **`[a decidir]`**: pergunte via `interação com o usuário`, 3 alternativas (recomendada em primeiro; a tool adiciona "Other"). Agrupe nós relacionados (até 4 por chamada).
 
 **Regra de ouro**: nó `[derivado]` nunca vira pergunta. Cada folha escolhida → 1 convenção + seu micro-exemplo de forma na rule + 1 "alternativa considerada" no ADR.
 
@@ -188,7 +166,7 @@ Percorra eixo por eixo, na forma canônica do nó:
 1. **Folhas da árvore → convenções enxutas + exemplo de forma.** Cada folha vira **uma convenção** (não um parágrafo) **acompanhada de um micro-exemplo de forma inline** (✅ correto; ❌ incorreto quando for anti-padrão). O racional vai para o ADR; o exemplo fica na rule (Princípio 4).
 
 2. **Decisão de artefato — nome + caminho + path match** (SEMPRE confirmado e editável):
-   - **Diretório + frontmatter**: use a convenção do host (Fase 0). Não force a do framework. **Atenção**: se o host roda o framework sda, só `.claude/rules/` e `CLAUDE.md` são vistos pelos gates (QA/Tech Review) — destinos como `.cursor/rules/`, `docs/rules/` ou `AGENTS.md` não auto-carregam no contexto deles; avise o usuário desse trade-off ao gravar fora de `.claude/rules/`.
+   - **Diretório + frontmatter**: use a convenção do host (Fase 0). Não force a do framework. **Atenção**: se o host roda o framework sda, só `.agents/rules/` e `AGENTS.md` são vistos pelos validation (QA/Tech Review) — destinos como `.cursor/rules/`, `docs/rules/` ou `AGENTS.md` não auto-carregam no contexto deles; avise o usuário desse trade-off ao gravar fora de `.agents/rules/`.
    - **Nome (PROPOSTO e EDITÁVEL)**: derive do tema (ex.: `database-access.md`, `dependency-injection.md`, `state-management.md`). Apresente como sugestão — o usuário renomeia se quiser.
    - **Path match (DERIVADO do host + eixo de aplicação)**: antes do glob, decida **em que momentos** a rule precisa carregar. Toda convenção tem dois eixos: *onde* se aplica (paths de código) e *quando* precisa estar no contexto — na **geração** (a tech-spec/scope/tasks pré-decidem nomes, idioma, assinaturas, estrutura) e/ou na **execução** (o código é escrito).
 
@@ -201,15 +179,15 @@ Percorra eixo por eixo, na forma canônica do nó:
      Decisão: quando/onde esta rule deve carregar?
        ├─ A (rule de produção — recomendada quando guia a geração): código + geração + artefatos
        │     - "<glob de código onde o tema vive>"          # execução
-       │     - ".claude/skills/sda-*generate*/**"     # geração da spec/scope/tasks (carrega cedo)
-       │     - ".claude/skills/sda-*-run*/**"         # execução orquestrada
+       │     - ".agents/skills/sda-*generate*/**"     # geração da spec/scope/tasks (carrega cedo)
+       │     - ".agents/skills/sda-*-run*/**"         # execução orquestrada
        │     - "docs/specs/**"                               # artefatos (cinto-e-suspensório)
        │     - "docs/prds/**"
        ├─ B (rule local): só os paths de código do tema (ex.: `services/payments/**`, `**/*.sql`, `**/*.handler.*`)
-       └─ C (transversal): sem matcher de path — global (CLAUDE.md ou rule global do host)
+       └─ C (transversal): sem matcher de path — global (AGENTS.md ou rule global do host)
      → mostre o glob final; o usuário edita. NUNCA use `**` como matcher (se vale sempre, é global — opção C).
      ```
-     > Os paths de geração (`sda-*generate*`, `docs/specs/**`) **só fazem sentido quando o host roda o framework sda** (detectado na Fase 0) — é o mesmo mecanismo que faz as próprias rules do framework carregarem na geração (elas casam `.claude/skills/sda-*/**`). Em host que não roda sda, use o gatilho de carregamento que aquele host expõe para a fase de planejamento/spec. O glob de skill carrega a rule **cedo** (assim que a geradora é invocada); `docs/specs/**` é a rede de segurança quando o artefato é lido/escrito.
+     > Os paths de geração (`sda-*generate*`, `docs/specs/**`) **só fazem sentido quando o host roda o framework sda** (detectado na Fase 0) — é o mesmo mecanismo que faz as próprias rules do framework carregarem na geração (elas casam `.agents/skills/sda-*/**`). Em host que não roda sda, use o gatilho de carregamento que aquele host expõe para a fase de planejamento/spec. O glob de skill carrega a rule **cedo** (assim que a geradora é invocada); `docs/specs/**` é a rede de segurança quando o artefato é lido/escrito.
    - **Nunca grave** sem o usuário ver nome final + glob final.
 
 3. **Status** (greenfield): marque a rule como `status: provisória` no corpo — o exemplo de forma já existe (ilustrativo); vira `estável` quando a primeira feature confirmar a forma contra o código real.
@@ -245,8 +223,8 @@ description: Convenções de {tema} neste projeto — {1 linha do que cobre + qu
 paths:
   - "{glob de código onde o tema vive}"           # execução
   # Só se rule de PRODUÇÃO e host roda sda (a convenção também molda a spec/scope/tasks):
-  - ".claude/skills/sda-*generate*/**"      # geração
-  - ".claude/skills/sda-*-run*/**"
+  - ".agents/skills/sda-*generate*/**"      # geração
+  - ".agents/skills/sda-*-run*/**"
   - "docs/specs/**"
   - "docs/prds/**"
 ---
@@ -267,7 +245,7 @@ paths:
 
 ### Exemplo preenchido (greenfield)
 
-> O template acima, agora **preenchido** para "injeção de dependência" — é isto que entra em `.claude/rules/dependency-injection.md` e que o usuário aprova. Os snippets usam **sintaxe ilustrativa neutra** (pseudocódigo); numa rule real eles aparecem na sintaxe do host (Go, Dart, TS, Kotlin…):
+> O template acima, agora **preenchido** para "injeção de dependência" — é isto que entra em `.agents/rules/dependency-injection.md` e que o usuário aprova. Os snippets usam **sintaxe ilustrativa neutra** (pseudocódigo); numa rule real eles aparecem na sintaxe do host (Go, Dart, TS, Kotlin…):
 
 ````markdown
 ---
@@ -275,7 +253,7 @@ description: Convenções de injeção de dependência — mecanismo, escopo e c
 paths:
   - "**/di/**"                                  # execução: onde o wiring vive
   - "**/*provider*"
-  - ".claude/skills/sda-*generate*/**"   # geração: a tech-spec/scope já decidem o mecanismo de DI
+  - ".agents/skills/sda-*generate*/**"   # geração: a tech-spec/scope já decidem o mecanismo de DI
   - "docs/specs/**"                             # artefatos da spec
 ---
 
@@ -313,7 +291,7 @@ Quando algum eixo é uma **decisão cross-cutting** que vale registrar, monte o 
 - {Opção C} — {…}
 **Tags**: {1-3 de architecture, data, http, state-management, auth, …}
 
-→ Para registrar: rode `/sda-adr-create` e cole este material.
+→ Para registrar: rode `sda-adr-create` e cole este material.
 ````
 
 ---
@@ -329,8 +307,8 @@ Quando algum eixo é uma **decisão cross-cutting** que vale registrar, monte o 
    - **Procedência**: o que foi `[derivado]` vs `[usuário]`.
    - **Em ENRIQUECIMENTO**: o que foi enriquecido vs preservado; se o matcher mudou.
 2. **Recomende os passos manuais** (você não os executa):
-   - *"Rode `/sda-curate-project-rules` para avaliar escopo/matcher/bloat desta rule."*
-   - *"Se quiser registrar a decisão, rode `/sda-adr-create` — o material está pronto acima."*
+   - *"Rode `sda-curate-project-rules` para avaliar escopo/matcher/bloat desta rule."*
+   - *"Se quiser registrar a decisão, rode `sda-adr-create` — o material está pronto acima."*
 
 ---
 

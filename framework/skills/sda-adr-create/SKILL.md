@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-adr-create
-description: Cria uma nova Architecture Decision Record (ADR) — registro curto e versionado de uma decisão arquitetural transversal e evergreen. Coleta interativamente Context, Decision, Consequences, Alternatives e Tags, salva o arquivo `{id}-{slug}.md` em `docs/adr/` e regenera o INDEX.md. Skill standalone, invocada exclusivamente pelo usuário.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "[titulo-sugerido]"
+description: Cria uma ADR para decisão transversal, cara de reverter e com trade-off real. Use após decisão explícita.
 ---
 
 PERSONA: Você é um Arquiteto de Software Senior responsável por capturar decisões arquiteturais **transversais e evergreen** em ADRs no padrão **Nygard enxuto**. Seu papel é garantir que toda decisão técnica que se aplica a múltiplas features ou tem custo-de-reversao alto fique documentada UMA ÚNICA VEZ, e que a ADR seja descobrível via INDEX.md sem forçar leitura linear.
@@ -11,22 +8,22 @@ PERSONA: Você é um Arquiteto de Software Senior responsável por capturar deci
 Princípios invioláveis:
 
 1. **Single source of truth** — ADR NUNCA duplica conteúdo de PRD / Tech Alignment (`tech-alignment.md`) / Tech Spec. Apenas captura a decisão transversal; artefatos de feature apenas referenciam.
-2. **Decisão com confirmação humana** — toda informação da ADR vem do usuário via `AskUserQuestion`. NUNCA invente, deduza ou assuma.
-3. **Recursos canônicos centralizados** — esta skill é a **dona do template canônico** (`assets/adr-template.md`, referenciado por `adr.template` em `.claude/rules/sda-adr-workflow-rules.md`). O script de reindex canônico vive em `sda-adr-reindex` (referenciado por `adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt).
+2. **Decisão com confirmação humana** — toda informação da ADR vem do usuário via `interação com o usuário`. NUNCA invente, deduza ou assuma.
+3. **Recursos canônicos centralizados** — esta skill é a **dona do template canônico** (`assets/adr-template.md`, referenciado por `adr.template` em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`). O script de reindex canônico vive em `sda-adr-reindex` (referenciado por `adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
 4. **Token-efficient by design** — o próximo ID vem do **nome dos arquivos** (`ls {adr.dir}` — o ID está codificado em `{id}-{slug}.md`); não abra arquivos individuais nem dependa do INDEX (pode estar stale) para isso.
 
 ---
 
 # Paths
 
-> Todos os paths resolvidos por `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt). Esta skill **não** depende do `config.yaml`.
+> Todos os paths resolvidos por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Esta skill **não** depende do `config.yaml`.
 
 | Artefato | Origem | Uso |
 |----------|--------|-----|
 | Diretório ADR | `adr.dir` (sda-adr-workflow-rules.md) → `/docs/adr` | onde salvar `{id}-{slug}.md` |
 | INDEX.md | `adr.index_file` (sda-adr-workflow-rules.md) → `/docs/adr/INDEX.md` | regenerado pelo script reindex |
-| Template ADR (canônico) | `adr.template` (sda-adr-workflow-rules.md) → `.claude/skills/sda-adr-create/assets/adr-template.md` | **dono** — esta skill carrega o template canônico em `assets/`, leitura para preencher a ADR |
-| Script reindex (canônico) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.claude/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
+| Template ADR (canônico) | `adr.template` (sda-adr-workflow-rules.md) → `.agents/skills/sda-adr-create/assets/adr-template.md` | **dono** — esta skill carrega o template canônico em `assets/`, leitura para preencher a ADR |
+| Script reindex (canônico) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.agents/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
 
 ---
 
@@ -50,7 +47,7 @@ error-handling, cross-cutting
 
 # Critérios de Existência (TODOS devem ser verdadeiros)
 
-Antes de criar uma ADR, confirme que a decisão satisfaz **todos os 5 critérios canônicos** definidos na seção **"ADR — Critérios Canônicos de Criação (Fonte Única)"** em `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt):
+Antes de criar uma ADR, confirme que a decisão satisfaz **todos os 5 critérios canônicos** definidos na seção **"ADR — Critérios Canônicos de Criação (Fonte Única)"** em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar):
 
 | # | Critério | Pergunta | OK se |
 |---|----------|----------|-------|
@@ -96,7 +93,7 @@ Se a ADR passa de ~60 linhas, algo está errado — provavelmente virou tech_spe
 
 ## 1. Pré-condições
 
-a. **Resolver paths globais** a partir de `.claude/rules/sda-adr-workflow-rules.md` (rule já disponível no system-prompt): `adr.dir` e `adr.index_file`.
+a. **Resolver paths globais** a partir de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de resolver os paths): `adr.dir` e `adr.index_file`.
 
 b. **Garantir diretório e INDEX**:
    - Se `{adr.dir}` não existe, criar.
@@ -112,7 +109,7 @@ b. **Garantir diretório e INDEX**:
 
 ## 2. Validar critérios de existência
 
-Antes de coletar dados, valide com o usuário (via `AskUserQuestion` se necessário) **os 5 critérios canônicos** (C1 transversal, C2 tag-alvo, C3 custo de reversão alto, C4 surpreendente sem contexto, C5 trade-off real). Faça **uma pergunta por critério** que ainda não foi confirmado pelo contexto. Se qualquer critério falhar, encerre orientando o usuário a colocar a decisão no artefato de feature apropriado e indique **qual critério falhou** para fechar o loop.
+Antes de coletar dados, valide com o usuário (via `interação com o usuário` se necessário) **os 5 critérios canônicos** (C1 transversal, C2 tag-alvo, C3 custo de reversão alto, C4 surpreendente sem contexto, C5 trade-off real). Faça **uma pergunta por critério** que ainda não foi confirmado pelo contexto. Se qualquer critério falhar, encerre orientando o usuário a colocar a decisão no artefato de feature apropriado e indique **qual critério falhou** para fechar o loop.
 
 ## 3. Determinar próximo ID
 
@@ -120,11 +117,11 @@ Antes de coletar dados, valide com o usuário (via `AskUserQuestion` se necessá
 2. Extrair o maior `id` do **nome dos arquivos** listados (`adr.file_pattern` = `{id}-{slug}.md` — um `ls` resolve, sem abrir arquivo nem depender de INDEX possivelmente stale) e somar 1.
 3. Formatar em **4 dígitos** (`0001`, `0002`...). Se diretório vazio, começar em `0001`.
 
-## 4. Coletar campos via AskUserQuestion (UMA pergunta por vez)
+## 4. Coletar campos via interação com o usuário (UMA pergunta por vez)
 
 Coletar nesta ordem, **sempre uma pergunta por vez**:
 
-1. **Título** — se não foi passado em `$ARGUMENTS`. Curto, uma frase.
+1. **Título** — se não foi passado em `[entrada atual da solicitação]`. Curto, uma frase.
 2. **Context** — problema concreto + restrições (3-5 linhas). Foco na questão técnica, não em produto.
 3. **Decision** — o que foi decidido (1-2 frases no indicativo, sem rodeios).
 4. **Consequences** — Pros / Cons / Neutros em bullets curtos.
@@ -140,7 +137,7 @@ Slug em **kebab-case** do título: minúsculas, sem acentos, ≤ 60 chars.
 
 ## 6. Preencher template e salvar
 
-1. **Ler template** de `{adr.template}` (`.claude/skills/sda-adr-create/assets/adr-template.md` — esta skill é a dona canônica).
+1. **Ler template** de `{adr.template}` (`.agents/skills/sda-adr-create/assets/adr-template.md` — esta skill é a dona canônica).
 2. **Preencher**:
    - Frontmatter: `id` (4 dígitos), `title`, `status: accepted`, `date` (hoje, `YYYY-MM-DD`), `tags` (lista canônica).
    - `## Context`: 3-5 linhas com o problema.
@@ -155,10 +152,10 @@ Slug em **kebab-case** do título: minúsculas, sem acentos, ≤ 60 chars.
 
 > Este passo é crítico. O INDEX.md é a fonte de descoberta de todas as ADRs. Criar um arquivo ADR sem atualizar o INDEX é deixar a ADR invisível. **Não encerre a task sem rodar o reindex.**
 
-Execute via Bash, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.claude/rules/sda-adr-workflow-rules.md`):
+Execute via terminal, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`):
 
 ```
-node .claude/skills/sda-adr-reindex/scripts/reindex.cjs
+node .agents/skills/sda-adr-reindex/scripts/reindex.cjs
 ```
 
 - Se o script retornar erro, investigue e corrija antes de confirmar ao usuário.
@@ -180,16 +177,16 @@ INDEX.md atualizado.
 
 ## DEVE
 
-1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.template`, `adr.reindex_script`) via **`.claude/rules/sda-adr-workflow-rules.md`** (rule global no system-prompt). Esta skill é a dona do template canônico (`assets/adr-template.md`); o script canônico vive em `sda-adr-reindex/scripts/reindex.cjs`.
+1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.template`, `adr.reindex_script`) via **`.agents/skills/_shared/rules/sda-adr-workflow-rules.md`** (referência lazy; leia antes de usar). Esta skill é a dona do template canônico (`assets/adr-template.md`); o script canônico vive em `sda-adr-reindex/scripts/reindex.cjs`.
 2. Validar os **5 critérios canônicos de existência** (`require_all`: C1 transversal, C2 tag-alvo, C3 custo de reversão alto, C4 surpreendente sem contexto, C5 trade-off real — definidos em `sda-adr-workflow-rules.md`) antes de coletar dados.
-3. Usar `AskUserQuestion` para coletar **cada campo** — uma pergunta por vez.
+3. Usar `interação com o usuário` para coletar **cada campo** — uma pergunta por vez.
 4. ID em **4 dígitos** (`0001`, não `1`).
-5. **Rodar `node .claude/skills/sda-adr-reindex/scripts/reindex.cjs` SEMPRE após salvar a ADR** — sem exceção. Um arquivo ADR salvo sem reindex não aparece no INDEX.md e fica invisível para o restante do framework.
+5. **Rodar `node .agents/skills/sda-adr-reindex/scripts/reindex.cjs` SEMPRE após salvar a ADR** — sem exceção. Um arquivo ADR salvo sem reindex não aparece no INDEX.md e fica invisível para o restante do framework.
 6. Slug em **kebab-case**, sem acentos, minúsculas, ≤ 60 chars.
 7. Tags restritas à lista canônica (14 tags). Nunca inventar tag nova.
 8. **Remover TODOS os comentários `<!-- ... -->`** do template antes de salvar.
 9. Preservar frontmatter YAML válido na ADR salva.
-10. Rodar reindex **UMA VEZ** ao final, via Bash.
+10. Rodar reindex **UMA VEZ** ao final, via terminal.
 11. `Applied in` deve ter formato uniforme: `feature (vN) — path-para-artefato`.
 
 ## NÃO DEVE
@@ -207,4 +204,4 @@ INDEX.md atualizado.
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

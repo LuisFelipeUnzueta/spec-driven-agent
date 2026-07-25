@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-challenge-spec
-description: Stress-test interativo de uma spec técnica (tech_spec.md do SDD ou scope.md do miniSpec) contra o domínio, código e ADRs existentes. Conduz interrogatório estruturado (uma pergunta por vez), explora o codebase quando possível em vez de perguntar, atualiza o artefato inline conforme problemas são resolvidos, mantém o domain-glossary.md vivo e propõe ADRs novas apenas quando os 5 critérios canônicos batem. Inspirada na skill grill-with-docs (Matt Pocock). User-invocable.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: <caminho para tech_spec.md ou scope.md>
+description: Estressa uma Tech Spec ou Scope contra código, domínio e ADRs antes da decomposição em tasks.
 ---
 
 # Skill: sda-challenge-spec
@@ -16,14 +13,14 @@ Estilo: Direto. Cético. Curioso. Faz UMA pergunta por vez. Quando pode responde
 
 ## Visão Geral
 
-O `/sda-challenge-spec` é um **passo opcional de validação pós-criação** que opera entre a geração de uma spec técnica e o início da decomposição em tasks. Ele preenche a lacuna entre "spec gerada" e "execução nos gates", evitando que furos cheguem ao QA/Tech Review quando o custo de correção é alto.
+O `sda-challenge-spec` é um **passo opcional de validação pós-criação** que opera entre a geração de uma spec técnica e o início da decomposição em tasks. Ele preenche a lacuna entre "spec gerada" e "execução nos validation", evitando que furos cheguem ao QA/Tech Review quando o custo de correção é alto.
 
 ```
-[SDD]      tech_spec.md gerado  →  /sda-challenge-spec tech_spec.md  →  task_plan.md
-[miniSpec] scope.md gerado      →  /sda-challenge-spec scope.md      →  task_plan.md
+[SDD]      tech_spec.md gerado  →  sda-challenge-spec tech_spec.md  →  task_plan.md
+[miniSpec] scope.md gerado      →  sda-challenge-spec scope.md      →  task_plan.md
 ```
 
-O `/sda-challenge-spec` responde: **a spec sobrevive a um interrogatório agressivo contra o código real, o glossário de domínio e os ADRs existentes?**
+O `sda-challenge-spec` responde: **a spec sobrevive a um interrogatório agressivo contra o código real, o glossário de domínio e os ADRs existentes?**
 
 > **Por que NÃO opera sobre PRD/Intent**: PRD e Intent são artefatos de produto (o quê / por quê). Não há código nem ADR técnico para confrontá-los — terminologia já é validada na geração via glossário. Rodar challenge neles é overhead sem retorno.
 
@@ -31,7 +28,7 @@ O `/sda-challenge-spec` responde: **a spec sobrevive a um interrogatório agress
 
 ## Paths
 
-Variáveis usadas: `sdd.tech_spec.path`, `minispec.scope.path`, `domain_glossary.global.path`, `domain_glossary.feature.path`, `adr.index_file`, `adr.dir`, `shared.workflow_report.path`. Templates definidos em `.claude/rules/sda-sdd-workflow-rules.md`, `.claude/rules/sda-minispec-workflow-rules.md`, `.claude/rules/sda-workflow-rules.md` e `.claude/rules/sda-adr-workflow-rules.md`.
+Variáveis usadas: `sdd.tech_spec.path`, `minispec.scope.path`, `domain_glossary.global.path`, `domain_glossary.feature.path`, `adr.index_file`, `adr.dir`, `shared.state.path`. Templates definidos em `.agents/skills/_shared/rules/sda-sdd-workflow-rules.md`, `.agents/skills/_shared/rules/sda-minispec-workflow-rules.md`, `.agents/skills/_shared/rules/sda-workflow-rules.md` e `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`.
 
 Resolva `{feature}` e `{version}` do path do artefato recebido como argumento. **NUNCA** use paths hardcoded.
 
@@ -86,7 +83,7 @@ Para cada questão da lista priorizada:
 
 1. **Se a questão pode ser respondida lendo código** → leia o código primeiro. Só pergunte ao usuário se o código for inconclusivo ou se houver decisão de produto envolvida.
 
-2. **Faça UMA pergunta por vez** via `AskUserQuestion`, sempre com:
+2. **Faça UMA pergunta por vez** via `interação com o usuário`, sempre com:
    - Contexto (1-2 linhas explicando o achado).
    - A pergunta direta.
    - **Sua recomendação** com justificativa (não pergunta aberta — pergunta com sugestão).
@@ -107,7 +104,7 @@ Para cada questão da lista priorizada:
 
 4. **Aja sobre a resposta**:
    - Se resolveu um conflito de terminologia → **atualize o artefato inline** (substitua o termo) e **atualize/crie o `domain-glossary.md`** com o termo canônico + aliases a evitar.
-   - Se identificou uma violação/conflito de ADR → **resolva explicitamente, nunca por anotação**: ou (a) **conforme a decisão da spec à ADR** (ajuste o artefato inline), ou (b) se a divergência for deliberada e melhor, **superseda/atualize a ADR primeiro** (`/sda-adr-supersede` ou `/sda-adr-create`) e só então mantenha a spec divergente. Em ambos os casos, registre a ADR na subseção **"ADRs Aplicáveis nesta Feature"** (crie se não existir; formato `ADR-NNNN — descrição`). **Não** deixe um conflito spec×ADR sobreviver como mera observação — foi assim que o caso `arquitetura-projeto` shipou contradizendo a ADR-0003.
+   - Se identificou uma violação/conflito de ADR → **resolva explicitamente, nunca por anotação**: ou (a) **conforme a decisão da spec à ADR** (ajuste o artefato inline), ou (b) se a divergência for deliberada e melhor, **superseda/atualize a ADR primeiro** (`sda-adr-supersede` ou `sda-adr-create`) e só então mantenha a spec divergente. Em ambos os casos, registre a ADR na subseção **"ADRs Aplicáveis nesta Feature"** (crie se não existir; formato `ADR-NNNN — descrição`). **Não** deixe um conflito spec×ADR sobreviver como mera observação — foi assim que o caso `arquitetura-projeto` shipou contradizendo a ADR-0003.
    - Se a resposta canonizou uma decisão técnica → avalie se vira ADR (FASE 4).
    - Se a resposta revelou que a questão era inválida → registre o motivo na seção de Observações do artefato.
 
@@ -123,9 +120,9 @@ Se durante a sessão termos foram canonizados, para **cada termo** decida o nív
 
 ### 3.1 Decisão de Nível — Global vs Feature
 
-Para cada termo canonizado, aplique o critério da rule `sda-workflow-rules.md` (seção "Domain Glossary — Dois Níveis" — tabela "Quando vai pro GLOBAL vs FEATURE" + default GLOBAL em caso de dúvida). A rule já está no system-prompt — **não duplique a tabela aqui**; ela é a fonte única.
+Para cada termo canonizado, aplique o critério da rule `sda-workflow-rules.md` (seção "Domain Glossary — Dois Níveis" — tabela "Quando vai pro GLOBAL vs FEATURE" + default GLOBAL em caso de dúvida). Leia a rule sob demanda e não duplique a tabela aqui; ela é a fonte única.
 
-**Pergunte ao usuário** via `AskUserQuestion` para cada termo cuja classificação não é óbvia:
+**Pergunte ao usuário** via `interação com o usuário` para cada termo cuja classificação não é óbvia:
 
 ```
 Achado: o termo "{Termo}" foi canonizado nesta sessão.
@@ -168,7 +165,7 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
    - C4: surpreendente sem contexto
    - C5: trade-off real
 
-2. **Se TODOS os 5 critérios batem** → ofereça ao usuário (via `AskUserQuestion`):
+2. **Se TODOS os 5 critérios batem** → ofereça ao usuário (via `interação com o usuário`):
    ```
    A decisão "{decisão}" satisfaz os 5 critérios para virar ADR:
    - C1: {breve justificativa}
@@ -177,9 +174,9 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
    - C4: {breve justificativa}
    - C5: {alternativa rejeitada}
 
-   Deseja invocar /sda-adr-create agora para registrá-la?
+   Deseja invocar sda-adr-create agora para registrá-la?
    ```
-   - Se sim → encerre orientando o usuário a rodar `/sda-adr-create` (NÃO crie a ADR diretamente — é responsabilidade da skill `sda-adr-create`, que revalida os critérios com o usuário).
+   - Se sim → encerre orientando o usuário a rodar `sda-adr-create` (NÃO crie a ADR diretamente — é responsabilidade da skill `sda-adr-create`, que revalida os critérios com o usuário).
    - Se não → registre na seção de Observações do artefato como **"Candidato a ADR rejeitado pelo usuário"** + razão.
 
 3. **Se 2-4 critérios batem** → registre como **"Candidato a ADR parcial"** na seção de Observações do artefato + lista dos critérios que falharam.
@@ -195,11 +192,11 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
 2. **Salvar o glossário** se foi criado/modificado.
 
 3. **Atualizar o estado do pipeline** (fecha o step órfão `validation`):
-   - **Fluxo SDD** (artefato é `tech_spec.md`): no `_run/sdd_state.yaml` (path via `sdd.state.path`), marque `steps.validation.status: completed` com `summary: "challenge-spec: N questões, N ajustes inline"`.
-   - **Fluxo miniSpec** (artefato é `scope.md`): idem no `_run/minispec_state.yaml` (`minispec.state.path`), se o step existir.
+   - **Fluxo SDD** (artefato é `tech_spec.md`): no `_run/state.json` (path via `shared.state.path`), marque `steps.validation.status: completed` com `summary: "challenge-spec: N questões, N ajustes inline"`.
+   - **Fluxo miniSpec** (artefato é `scope.md`): idem no `_run/state.json` (`shared.state.path`), se o step existir.
    - Se o arquivo de estado não existir, NÃO crie — apenas registre em `workflow_report`.
 
-4. **Registrar a sessão em `shared.workflow_report.path`** (append) com formato:
+4. **Registrar a sessão em `shared.state.path`** (append) com formato:
    ```
    ## Challenge Session — YYYY-MM-DD HH:MM (artifact: {nome})
 
@@ -216,8 +213,8 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
    ✅ Challenge concluído em {artefato}
    - {N} ajustes inline aplicados
    - Glossário: {criado|atualizado|sem mudança}
-   - ADRs sugeridos: {N} (rode /sda-adr-create para cada)
-   - Próximo passo: {/sda-sdd-generate-task-plan | /sda-minispec-generate-tasks}
+   - ADRs sugeridos: {N} (rode sda-adr-create para cada)
+   - Próximo passo: {sda-sdd-generate-task-plan | sda-minispec-generate-tasks}
    ```
 
 ---
@@ -227,22 +224,22 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
 ### DEVE
 
 1. Operar **APENAS** sobre `tech_spec.md` (SDD) ou `scope.md` (miniSpec). Recusar outros artefatos com mensagem clara.
-2. Fazer **UMA pergunta por vez** via `AskUserQuestion`. NUNCA enfileirar.
+2. Fazer **UMA pergunta por vez** via `interação com o usuário`. NUNCA enfileirar.
 3. **Explorar o código antes de perguntar** quando a questão pode ser respondida pela leitura.
 4. Atualizar o artefato **inline** conforme issues são resolvidos (não acumular para o final).
 5. Aplicar os **5 critérios canônicos de ADR** (definidos em `sda-adr-workflow-rules.md`) antes de sugerir ADR.
-6. **NÃO criar ADR diretamente** — sempre orientar o usuário a rodar `/sda-adr-create` (que revalida os critérios).
+6. **NÃO criar ADR diretamente** — sempre orientar o usuário a rodar `sda-adr-create` (que revalida os critérios).
 7. Atualizar o(s) `domain-glossary.md` (criar se não existir, atualizar se existir) nos **dois níveis**: global (`/docs/specs/domain-glossary.md`) para termos cross-feature; feature (`/docs/specs/features/{feature}/domain-glossary.md`) para termos específicos. Decidir o nível de cada termo seguindo a FASE 3.1.
-8. Registrar a sessão em `_run/workflow-report.md` para rastreabilidade (o `_run/run-report.md` é o relatório humano do run — snapshot regenerável — e seria sobrescrito; a sessão de challenge é telemetria/audit).
+8. Registrar a sessão em `_run/state.json` para rastreabilidade (o `_run/report.md` é o relatório humano do run — snapshot regenerável — e seria sobrescrito; a sessão de challenge é telemetria/audit).
 9. Priorizar as 5-10 questões de maior impacto. Sessão longa demais desengaja o usuário.
-10. **Atualizar o estado do pipeline ao concluir** (FASE 5): marcar `steps.validation.status: completed` no `_run/sdd_state.yaml`/`_run/minispec_state.yaml` — é a única escrita permitida fora dos artefatos listados no NÃO DEVE #2.
+10. **Atualizar o estado do pipeline ao concluir** (FASE 5): marcar `steps.validation.status: completed` no `_run/state.json`/`_run/state.json` — é a única escrita permitida fora dos artefatos listados no NÃO DEVE #2.
 
 ### NÃO DEVE
 
 1. **NUNCA** operar sobre PRD, Intent, Task Plan ou TaskCard — fora de escopo.
-2. **NUNCA** modificar arquivos fora de: o próprio artefato (tech_spec.md/scope.md), os dois `domain-glossary.md` (global em `/docs/specs/` e feature em `/docs/specs/features/{feature}/`), append em `_run/workflow-report.md`, e o campo `steps.validation` do `_run/sdd_state.yaml`/`_run/minispec_state.yaml` (FASE 5 — somente esse campo).
+2. **NUNCA** modificar arquivos fora de: o próprio artefato (tech_spec.md/scope.md), os dois `domain-glossary.md` (global em `/docs/specs/` e feature em `/docs/specs/features/{feature}/`), append em `_run/state.json`, e o campo `steps.validation` do `_run/state.json`/`_run/state.json` (FASE 5 — somente esse campo).
 3. **NUNCA** criar uma ADR diretamente — apenas sugerir; a criação é da `sda-adr-create`.
-4. **NUNCA** prosseguir sem aguardar a resposta do usuário a cada `AskUserQuestion`.
+4. **NUNCA** prosseguir sem aguardar a resposta do usuário a cada `interação com o usuário`.
 5. **NUNCA** ignorar conflitos com ADRs existentes — sinalize sempre, mesmo que o usuário queira manter a divergência (registre como exceção justificada).
 6. **NUNCA** invente termos para o glossário — só registre o que foi explicitamente confirmado pelo usuário durante a sessão.
 7. **NUNCA** crie o glossário se nenhum termo foi canonizado na sessão (não-vazio é regra).
@@ -251,4 +248,4 @@ Para cada **decisão técnica significativa** que foi canonizada/justificada dur
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

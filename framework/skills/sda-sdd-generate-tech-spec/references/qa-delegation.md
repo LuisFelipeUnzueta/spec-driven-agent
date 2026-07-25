@@ -1,4 +1,4 @@
-﻿# Delegação QA — Estratégia de Testes (multi-variante)
+# Delegação QA — Estratégia de Testes (multi-variante)
 
 > Este arquivo é consultado pela skill `sda-sdd-generate-tech-spec` no momento de preencher a **Seção de Estratégia de Testes** do TECH_SPEC. A numeração varia por variante:
 >
@@ -20,8 +20,8 @@ Após coletar todas as decisões técnicas e preencher as seções anteriores à
 
 Monte a lista de `arquivos` que o subagente deve ler. Inclua TODOS os caminhos relevantes:
 
-- **PRD aprovado**: path resolvido a partir de `sdd.prd.path` (`.claude/rules/sda-sdd-workflow-rules.md`)
-- **Regras do projeto**: `CLAUDE.md`, `.claude/rules/*.md` (se existirem)
+- **PRD aprovado**: path resolvido a partir de `sdd.prd.path` (`.agents/skills/_shared/rules/sda-sdd-workflow-rules.md`)
+- **Regras do projeto**: `AGENTS.md`, `.agents/rules/*.md` (se existirem)
 - **Migrações / schema**: arquivos de migração/esquema relacionados à feature, conforme o padrão do codebase (ex.: `*/migrations/*.sql`, `*/migrate/*.go`, `prisma/migrations/*`, `db/migrate/*.rb`, `alembic/versions/*.py`)
 - **Camada de dados**: arquivos de queries/repositories relacionados à feature, conforme a stack (ex.: `*.sql` com SQLC, schema Prisma, repositórios/DAOs)
 - **Testes existentes**: busque arquivos de teste do projeto na convenção da stack (ex.: `*_test.go`, `*.spec.ts`/`*.test.ts`, `test_*.py`, `*_test.dart`, `*Test.java`) para o subagente entender padrões
@@ -56,10 +56,10 @@ Você foi invocado com os seguintes parâmetros:
 2. **arquivos**: [lista de caminhos dos arquivos preparados no Passo 1]
 3. **instrucoes**: [conteúdo preparado no Passo 2]
 
-OBRIGATÓRIO: Antes de gerar casos de teste, leia (Read) a doutrina de testes: `.claude/skills/sda-testing-best-practices/SKILL.md` e `.claude/skills/sda-testing-best-practices/references/ai-escreve-testes.md`. Aplique os 7 gates (Invariant First, Owning Layer, Real Execution, Failure→Fix Production, No Snapshot Without Contract, No Self-Set Mock, Negative Companion). Cada caso de teste DEVE conter os campos `invariant`, `owning_layer`, `existing_suite`, `real_execution_boundary`, `negative_companion` e, quando aplicável, `precondicao_privilegiada`.
+OBRIGATÓRIO: Antes de gerar casos de teste, leia (leitura) a doutrina de testes: `.agents/skills/sda-testing-best-practices/SKILL.md` e `.agents/skills/sda-testing-best-practices/references/ai-escreve-testes.md`. Aplique os 7 validation (Invariant First, Owning Layer, Real Execution, Failure→Fix Production, No Snapshot Without Contract, No Self-Set Mock, Negative Companion). Cada caso de teste DEVE conter os campos `invariant`, `owning_layer`, `existing_suite`, `real_execution_boundary`, `negative_companion` e, quando aplicável, `precondicao_privilegiada`.
 ```
 
-> **Modelo**: não passe `model` no `Agent({...})` — confie no default configurado para o subagente.
+> **Modelo**: não passe `profile` no `Delegue({...})` — confie no default configurado para o subagente.
 
 ### Matriz de stacks de teste por frente
 
@@ -147,7 +147,7 @@ Setup: [extrair de pre_condicoes — DB in-memory, MSW, mocks de hardware, fixtu
 
 ```markdown
 #### Fluxo: [título do CT] (CT-XX)
-- **Framework**: [framework E2E da stack descoberta — rule de testing-stack / CLAUDE.md / testes existentes]
+- **Framework**: [framework E2E da stack descoberta — rule de testing-stack / AGENTS.md / testes existentes]
 - **CA**: CA-XX, CA-YY
 - **Objetivo**: [invariant do JSON]
 - **Pré-condições**: [pre_condicoes — se `precondicao_privilegiada.presente: true`, transcreva o `caminho_legitimo` e o `teste_analogo`]
@@ -191,23 +191,23 @@ Antes de integrar a seção de testes no TECH_SPEC:
 
 1. Verifique **coerência** com as seções anteriores (componentes, fluxos, APIs/telas/integrações mencionados nos testes existem?).
 2. Verifique que **todos os CA-XX** do PRD têm pelo menos um teste na tabela de rastreabilidade — e a **validação reversa**: nenhum CT referencia um CA que **não existe** no PRD (`criterios_aceitacao_validados` alucinado). Se houver CA inexistente, rejeite o JSON e re-dispare com instrução pontual.
-3. Verifique que os **frameworks de teste** propostos batem com a **stack descoberta** (rule `testing-stack.md` → CLAUDE.md → testes existentes do projeto). NÃO imponha frameworks específicos — a matriz do Passo 3 é ilustrativa; a fonte de verdade é o que o projeto já usa.
+3. Verifique que os **frameworks de teste** propostos batem com a **stack descoberta** (rule `testing-stack.md` → AGENTS.md → testes existentes do projeto). NÃO imponha frameworks específicos — a matriz do Passo 3 é ilustrativa; a fonte de verdade é o que o projeto já usa.
 4. Ajuste nomenclatura de componentes se o subagente usou nomes diferentes dos definidos nas seções anteriores.
 5. Complemente se algum cenário crítico ficou de fora.
 6. **Conformidade com `sda-testing-best-practices`** (NOVO):
    - `mock_budget_observado` no JSON é `true`?
-   - `gates_aplicados` contém os 7 gates?
+   - `gates_aplicados` contém os 7 validation?
    - Cada caso de teste tem `invariant`, `owning_layer`, `existing_suite`, `real_execution_boundary`, `negative_companion` preenchidos?
    - Pelo menos um caso por feature tem `real_execution_boundary != "none"`?
    - Cada caso positivo (`categoria: caminho_feliz | interacao_usuario`) tem `negative_companion.presente: true` apontando para um caso negativo?
    - Se algum item falhar, **re-disparar** o subagente com instrução pontual para corrigir, OU rejeitar o JSON e abrir solicitação no chat.
-   - **`stack_discovery.discovery_needed`**: se `true`, o subagente não conseguiu resolver um detalhe **não-derivável do código** (ex.: framework E2E não padronizado). Recomende ao usuário rodar **`/sda-testing-stack-bootstrap`** para descobrir a stack (com questionário do não-derivável) e gerar a rule `.claude/rules/testing-stack.md` — depois reexecute a delegação. Não bloqueie a geração por isso; siga best-effort com o proposto.
+   - **`stack_discovery.discovery_needed`**: se `true`, o subagente não conseguiu resolver um detalhe **não-derivável do código** (ex.: framework E2E não padronizado). Recomende ao usuário rodar **`sda-testing-stack-bootstrap`** para descobrir a stack (com questionário do não-derivável) e gerar a rule `.agents/rules/testing-stack.md` — depois reexecute a delegação. Não bloqueie a geração por isso; siga best-effort com o proposto.
 
 ---
 
 ## Passo 5.5: Persistir o JSON em `shared.test_cases.path` (OBRIGATÓRIO)
 
-Após a validação do Passo 5 (JSON aceito), persista o retorno do subagente **integralmente** no path resolvido via `shared.test_cases.path` (`.claude/rules/sda-workflow-rules.md`). A renderização markdown da seção de testes é **lossy** (comprime `pre_condicoes`, `passos`, `negative_companion`, `precondicao_privilegiada` em células de tabela); o JSON persistido é a fonte **lossless** que o `sda-sdd-generate-task-plan` consome na redistribuição heurística — sem re-parse de markdown e sem re-invocação do generator.
+Após a validação do Passo 5 (JSON aceito), persista o retorno do subagente **integralmente** no path resolvido via `shared.test_cases.path` (`.agents/skills/_shared/rules/sda-workflow-rules.md`). A renderização markdown da seção de testes é **lossy** (comprime `pre_condicoes`, `passos`, `negative_companion`, `precondicao_privilegiada` em células de tabela); o JSON persistido é a fonte **lossless** que o `sda-sdd-generate-task-plan` consome na redistribuição heurística — sem re-parse de markdown e sem re-invocação do generator.
 
 Formato do arquivo (envelope do orquestrador em volta do schema canônico do agente):
 
@@ -231,7 +231,7 @@ Regras:
 - `task_id: null` em todos os casos — nesta fase as tasks ainda não existem; o `sda-sdd-generate-task-plan` preenche na distribuição.
 - Se o arquivo já existe (re-execução da skill), **sobrescreva** — nesta fase o tech_spec ainda é o documento em construção e o JSON acompanha sua última geração.
 - Se você re-disparou o subagente (Passo 5, item 6) e fez merge de correções, persista o resultado final consolidado.
-- **Canonicidade**: este arquivo é artefato de geração forward-only — depois que os CTs forem destrinchados nas tasks pelo task-plan, a task markdown é canônica e os gates leem só ela (ver bloco em `sda-workflow-rules.md`).
+- **Canonicidade**: este arquivo é artefato de geração forward-only — depois que os CTs forem destrinchados nas tasks pelo task-plan, a task markdown é canônica e os validation leem só ela (ver bloco em `sda-workflow-rules.md`).
 
 ---
 

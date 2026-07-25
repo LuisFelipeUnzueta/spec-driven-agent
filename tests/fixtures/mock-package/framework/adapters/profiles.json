@@ -1,0 +1,6 @@
+{
+  "providers": {
+    "claude": { "profiles": { "review": { "model": "sonnet", "effort": "high" } } },
+    "codex": { "profiles": { "review": { "model": "gpt-test", "effort": "high" } } }
+  }
+}

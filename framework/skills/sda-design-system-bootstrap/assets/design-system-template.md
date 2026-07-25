@@ -1,4 +1,4 @@
-﻿# Design System — {Produto}
+# Design System — {Produto}
 
 > Gerado por `sda-design-system-bootstrap` em {DATA}. Atualize via a mesma skill (enriquecimento) ou via promoções da `sda-generate-design`.
 > Fonte canônica da identidade visual do produto — consumida por `sda-generate-design`, tech-spec, scope, geradores de tasks e `sda-qa-validator` (Camada 4).
@@ -124,8 +124,8 @@
 
 ## 8. Governança
 
-- **Promover token/componente novo ao global**: via `/sda-generate-design` (FASE 3 — promoção confirmada) ou via enriquecimento desta skill. Update sempre cirúrgico.
-- **Decisões transversais com trade-off real**: candidatas a ADR (tag `ui`) — registre via `/sda-adr-create`.
+- **Promover token/componente novo ao global**: via `sda-generate-design` (FASE 3 — promoção confirmada) ou via enriquecimento desta skill. Update sempre cirúrgico.
+- **Decisões transversais com trade-off real**: candidatas a ADR (tag `ui`) — registre via `sda-adr-create`.
 - **Divergências código × design system aceitas como débito**: <!-- lista ou "nenhuma" -->
 
 ---

@@ -1,4 +1,4 @@
-﻿# Padrões positivos — 14 práticas que sobrevivem a refactor
+# Padrões positivos — 14 práticas que sobrevivem a refactor
 
 > Reference de `sda-testing-best-practices`. Pseudo-código agnóstico de linguagem; adapte ao framework do projeto.
 
@@ -177,7 +177,7 @@ Meta razoável: 70-80% mutation kill rate em código de regra de negócio. Não 
 
 ---
 
-## 12. Page Object Model collapsado
+## 12. Page Object profile collapsado
 
 POM ajuda quando há **reuso real** (muitos testes usando o mesmo fluxo). Sem reuso, POM é **abstração prematura** que ofusca o teste.
 

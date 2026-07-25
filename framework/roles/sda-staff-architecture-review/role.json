@@ -1,0 +1,5 @@
+{
+  "name": "sda-staff-architecture-review",
+  "description": "Revisa arquitetura, segurança profunda, ADRs e qualidade estrutural após aprovação funcional do QA.",
+  "profile": "review"
+}

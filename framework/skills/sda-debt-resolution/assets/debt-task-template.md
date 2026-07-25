@@ -1,4 +1,4 @@
-﻿# T{{n}} — Resolver D-{{id_debito}}: {{titulo}}
+# T{{n}} — Resolver D-{{id_debito}}: {{titulo}}
 
 <!-- Numeração de seções espelha o template canônico do miniSpec
      (sda-minispec-generate-tasks/assets/task_template.md):
@@ -9,9 +9,8 @@
 
 - **ID**: T{{n}}
 - **Nome da Task**: Resolver D-{{id_debito}} — {{titulo}}
-- **model**: sonnet
 - **risk**: {{risk}}
-- **gates**: {{gates}}
+- **validation**: {{validation}}
 - **Status**: A Fazer
 - **Fase**: 1
 - **Dependências**: Nenhuma
@@ -46,7 +45,7 @@ _Nenhum._
 
 ### 3.3 Arquivos de Referência
 
-- `docs/specs/features/{{feature}}/{{parent_version}}/_run/run-report.md` — débito original.
+- `docs/specs/features/{{feature}}/{{parent_version}}/_run/report.md` — débito original.
 - `docs/specs/features/{{feature}}/{{parent_version}}/tasks/T{{origem_task_parent}}.md` — task que gerou o débito.
 
 ---
@@ -55,7 +54,7 @@ _Nenhum._
 
 ### 4.1 Contexto do Débito
 
-**Origem**: task `T{{origem_task_parent}}` da `{{parent_version}}` — registrado em `docs/specs/features/{{feature}}/{{parent_version}}/_run/run-report.md` (linha {{origem_linha}}).
+**Origem**: task `T{{origem_task_parent}}` da `{{parent_version}}` — registrado em `docs/specs/features/{{feature}}/{{parent_version}}/_run/report.md` (linha {{origem_linha}}).
 
 **Descrição original**: {{descricao}}
 
@@ -76,7 +75,7 @@ _Nenhum._
 
 **DEVE**:
 
-- Ler `docs/specs/features/{{feature}}/{{parent_version}}/_run/run-report.md` ao redor da linha {{origem_linha}} para entender o contexto original do débito.
+- Ler `docs/specs/features/{{feature}}/{{parent_version}}/_run/report.md` ao redor da linha {{origem_linha}} para entender o contexto original do débito.
 - Aplicar a `correcao_sugerida` literalmente.
 - Rodar a suíte completa de testes da feature antes de retornar a task como concluída.
 - Reportar regressão imediatamente — NÃO tente "consertar a regressão também", isso vira refactor não autorizado.
@@ -99,7 +98,7 @@ O Gate 1 (QA) DEVE executar a **suíte completa** da feature após a modificaç�
 - ✅ Todos os testes existentes continuam passando.
 - ❌ Qualquer teste regredindo → task rejeitada (sinal de que o débito carregava lógica relevante e não pode ser corrigido isoladamente).
 
-Comando de teste: o canônico da stack, resolvido pela precedência de descoberta (rule `.claude/rules/testing-stack.md` → CLAUDE.md/rules → manifesto do projeto).
+Comando de teste: o canônico da stack, resolvido pela precedência de descoberta (rule `.agents/rules/testing-stack.md` → AGENTS.md/rules → manifesto do projeto).
 
 ---
 
@@ -107,7 +106,7 @@ Comando de teste: o canônico da stack, resolvido pela precedência de descobert
 
 _Vazio. Tasks de débito não geram débito novo (seria meta-débito sem fim)._
 
-> Se durante execução você identificar OUTROS débitos relacionados não listados, **NÃO os resolva** — registre em `docs/specs/features/{{feature}}/{{parent_version}}/_run/workflow-report.md` como nota e siga adiante. Eles entrarão numa eventual `v{{N+2}}-debits/`.
+> Se durante execução você identificar OUTROS débitos relacionados não listados, **NÃO os resolva** — registre em `docs/specs/features/{{feature}}/{{parent_version}}/_run/state.json` como nota e siga adiante. Eles entrarão numa eventual `v{{N+2}}-debits/`.
 
 ---
 
@@ -117,4 +116,3 @@ _Vazio. Tasks de débito não geram débito novo (seria meta-débito sem fim)._
 - [ ] Diff afeta APENAS o arquivo listado em §3.2
 - [ ] Suíte completa passa sem regressão
 - [ ] Gate 1 (QA) aprovou
-- [ ] Staged para commit (git add pelo orquestrador)

@@ -1,16 +1,16 @@
 {
-  "skill_name": "agent-spec-debt-resolution",
+  "skill_name": "sda-debt-resolution",
   "evals": [
     {
       "id": 1,
-      "prompt": "Tem um _run/run-report.md em docs/specs/features/cadastro-pratos-franquia/v1/ com vários débitos MED/BAIXO acumulados depois que rodei a feature inteira. Quero limpar — gera uma versão de cleanup que eu possa rodar pelo /agent-spec-minispec-run-tasks.",
-      "expected_output": "A skill /agent-spec-debt-resolution deve: (a) ler _run/run-report.md, (b) classificar débitos via agente especialista, (c) apresentar interativamente quais incluir, (d) gerar docs/specs/features/cadastro-pratos-franquia/v2-debits/ com intent.md + scope.md + task_plan.md + tasks/T{n}.md prontos para /agent-spec-minispec-run-tasks.",
-      "files": ["docs/specs/features/cadastro-pratos-franquia/v1/_run/run-report.md"]
+      "prompt": "Tem um _run/report.md em docs/specs/features/cadastro-pratos-franquia/v1/ com vários débitos MED/BAIXO acumulados depois que rodei a feature inteira. Quero limpar — gera uma versão de cleanup que eu possa rodar pelo sda-minispec-run-tasks.",
+      "expected_output": "A skill sda-debt-resolution deve: (a) ler _run/report.md, (b) classificar débitos via agente especialista, (c) apresentar interativamente quais incluir, (d) gerar docs/specs/features/cadastro-pratos-franquia/v2-debits/ com intent.md + scope.md + task_plan.md + tasks/T{n}.md prontos para sda-minispec-run-tasks.",
+      "files": ["docs/specs/features/cadastro-pratos-franquia/v1/_run/report.md"]
     },
     {
       "id": 2,
       "prompt": "Roda a skill de débitos na feature catalogo-digital v1 — quero ver o que sobrou pra limpar antes de começar a v2.",
-      "expected_output": "Skill identifica _run/run-report.md em docs/specs/features/catalogo-digital/v1/. Se não houver débitos elegíveis, aborta limpamente sem criar v2-debits/. Se houver, segue o fluxo normal.",
+      "expected_output": "Skill identifica _run/report.md em docs/specs/features/catalogo-digital/v1/. Se não houver débitos elegíveis, aborta limpamente sem criar v2-debits/. Se houver, segue o fluxo normal.",
       "files": []
     },
     {

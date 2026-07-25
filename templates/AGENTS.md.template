@@ -1,22 +1,11 @@
-# AGENTS.md
+<!-- sda:start -->
+## SpecDrivenAgent v2
 
-<!-- Gerado por SpecDrivenAgent — consulte VERSION no repositorio fonte -->
-
-## Visao Geral
-Framework de desenvolvimento assistido por IA (SpecDrivenAgent).
-Workflows: SDD (features grandes), miniSpec (features medias), TaskCard (tarefas pontuais).
-
-## Regras do Projeto
-- Consulte `.claude/rules/` para regras de arquitetura e coding standards
-
-## Skills Disponiveis
-### Framework (SpecDrivenAgent)
-- `/sda-guide` - Guia completo do framework
-- `/sda-pre-refinement` - Discovery antes de qualquer workflow
-
-### Especificas do Projeto
-(adicione suas skills aqui)
-
-## Agents (Gates)
-- `sda-qa-validator` - Gate 1: validacao funcional + testes
-- `sda-staff-architecture-review` - Gate 2: review arquitetural
+- Workflows: SDD para mudanças grandes/críticas, miniSpec para mudanças médias e TaskCard para alterações pontuais.
+- Skills são descobertas nativamente pelo host. No Claude, use `/sda-*`; no Codex, use `$sda-*` ou descreva o objetivo.
+- Tasks usam apenas `risk: low|medium|high` e `validation: none|qa|full`.
+- `validation: none` vale somente para conteúdo sem efeito executável; `full` é obrigatório para risco alto, áreas críticas ou mudanças cross-module.
+- Implemente no agente principal por padrão. Delegue apenas revisão independente, trabalho realmente paralelo ou pedido explícito.
+- Leia regras específicas em `.agents/rules/` somente quando forem relevantes ao escopo atual.
+- Não faça stage ou commit automaticamente; use a skill de commit quando o usuário solicitar.
+<!-- sda:end -->

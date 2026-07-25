@@ -1,32 +1,9 @@
-﻿---
+---
 name: sda-mine-rule-candidates
-description: |
-  Consolida sinais coletados em `shared.rule_candidates.path` ao longo dos
-  últimos N runs do framework sda e produz uma lista enxuta de
-  candidatos a regra (com evidência de repetição em features distintas),
-  pronta para entrega ao `sda-curate-project-rules`. Use SEMPRE que o usuário
-  pedir para "minerar regras", "ver o que tem virado pergunta repetida",
-  "quais convenções precisam virar regra", "rodar a mineração", "olhar os
-  rule_candidates", "consolidar candidatos a regra" ou variações — também
-  antes de release / sprint review, quando quiser pagar débito de
-  convenção implícita antes que apodreça. Acione também quando o usuário
-  descrever "toda hora preciso explicar a mesma coisa pro executor" e
-  pedir para descobrir o que é.
-when_to_use: |
-  - Depois de ≥3 features concluídas, para ver o que repetiu.
-  - Antes de release, como parte do passe de "saúde do framework".
-  - Quando rules existentes parecem incompletas (executor ainda pergunta muito).
-  - Quando staff-review repete o mesmo `convention_drift` em features diferentes.
-  - Quando o usuário suspeita de convenção implícita que ninguém escreveu.
-do_not_invoke_for: |
-  - Decidir o destino/forma de UMA regra específica → use `sda-curate-project-rules`.
-  - Coletar sinais em tempo real → quem coleta são os agentes, não esta skill.
-  - Auditar rules existentes em busca de bloat/duplicação → use `sda-curate-project-rules` (passe de auditoria).
-  - Identificar bugs ou regressões → use Tech Review / sda-qa-validator.
-disable-model-invocation: true
+description: Extrai padrões recorrentes dos runs como candidatos revisáveis a regras de projeto.
 ---
 
-# /sda-mine-rule-candidates — mineração de candidatos a regra
+# sda-mine-rule-candidates — mineração de candidatos a regra
 
 > Consolida o que **já foi capturado** durante os runs. Esta skill **não decide** se algo vira regra; só agrupa, filtra por repetição e entrega para `sda-curate-project-rules` (que aplica teste de fricção, escolhe escopo e forma).
 
@@ -38,14 +15,14 @@ A regra do framework é simples: **um sinal isolado não vira regra**. Se um pad
 
 Antes de minerar, garanta que o cenário faz sentido:
 
-1. **Confirme o caminho canônico**: `shared.rule_candidates.path` em [`sda-workflow-rules.md`](../../rules/sda-workflow-rules.md). Não invente diretório.
+1. **Confirme o caminho canônico**: `shared.rule_candidates.path` em [`sda-workflow-rules.md`](../_shared/rules/sda-workflow-rules.md). Não invente diretório.
 2. **Descubra quais features têm o arquivo**:
    ```
    docs/specs/features/*/v*/_run/rule-candidates.md
    ```
    (use glob compatível com a stack — a estrutura é a do framework sda)
 3. **Se não houver nenhum arquivo**: pare e explique ao usuário que nenhum run ainda emitiu sinais. Possíveis causas: (a) instrumentação dos agentes ainda não rodou; (b) features recentes não acionaram `*-run-tasks`. **Não invente candidatos lendo PRDs/specs** — tech-spec é fonte fraca (ver doutrina em `sda-curate-project-rules`).
-4. **Pergunte o escopo da varredura via `AskUserQuestion`**:
+4. **Pergunte o escopo da varredura via `interação com o usuário`**:
    - Quantos runs recentes considerar (default = 5).
    - Se restringir por path da feature (ex.: só backend, só web).
 
@@ -106,7 +83,7 @@ Um cluster só vira candidato se:
 
 1. **Aparece em ≥2 features DISTINTAS**. Repetição no mesmo run **não conta** (pode ser sintoma de uma única task mal-estruturada, não de convenção ausente).
 2. **Tem evidência citável**: pelo menos 1 linha do cluster com `path:linha` ou ID de task referenciável.
-3. **Não está coberto por rule existente**: faça um grep rápido (`.claude/rules/`, `CLAUDE.md`, e — se o host usa outra convenção — os destinos equivalentes do discovery da Fase 0, mesmo procedimento da curate) procurando termo-chave do cluster. Se já há rule, marque o cluster como **`coverage_check_failed`** e descarte (com nota).
+3. **Não está coberto por rule existente**: faça um grep rápido (`.agents/rules/`, `AGENTS.md`, e — se o host usa outra convenção — os destinos equivalentes do discovery da Fase 0, mesmo procedimento da curate) procurando termo-chave do cluster. Se já há rule, marque o cluster como **`coverage_check_failed`** e descarte (com nota).
 
 > **Por que descartar quando já há rule**: significa que a rule existe mas o agente que emitiu o sinal **não a aplicou**. Isso é problema de matcher (rule não está carregando no escopo certo) ou de fraseado (rule não está convincente). Esse é caso para `sda-curate-project-rules` no modo auditoria, não para criar regra nova.
 
@@ -127,7 +104,7 @@ Para cada cluster aprovado, monte um cartão — **um tópico por candidato**, c
 - **Evidências**:
   - {feature-A}/v1 — T03 — "evidence literal"
   - {feature-B}/v2 — T07 — "evidence literal"
-- **Escopo sugerido (palpite)**: global / por path (`globs sugeridos`) / inline em CLAUDE.md. Se a convenção guia **produção de código** (naming, idioma, arquitetura, contrato) → anote "carregar também na geração" (a `curate` decide o eixo geração/execução).
+- **Escopo sugerido (palpite)**: global / por path (`globs sugeridos`) / inline em AGENTS.md. Se a convenção guia **produção de código** (naming, idioma, arquitetura, contrato) → anote "carregar também na geração" (a `curate` decide o eixo geração/execução).
 - **Próximo passo**: `sda-curate-project-rules` aplica o teste de fricção e decide a forma.
 ```
 
@@ -159,16 +136,16 @@ Para cada cluster aprovado, monte um cartão — **um tópico por candidato**, c
 
 ## Fase 5 — Handoff para `sda-curate-project-rules`
 
-Apresente os cartões ao usuário em ordem decrescente de ocorrências e colete a decisão via **`AskUserQuestion`** (pergunta única):
+Apresente os cartões ao usuário em ordem decrescente de ocorrências e colete a decisão via **`interação com o usuário`** (pergunta única):
 
 - Pergunta: "Encontrei {K} candidatos a regra. Como prefere selecionar?"
 - Opções (4): `Todos` / `Selecionar individualmente` / `Só os top-N` / `Salvar a lista e decidir depois`.
 - Se "Selecionar individualmente": perguntas seguintes com `multiSelect: true`, em blocos de até 4 cartões.
 
-Para os candidatos selecionados, **NÃO invoque** a curate (ela é manual — `disable-model-invocation: true`, mesma convenção registrada na `sda-rule-create`). Em vez disso:
+Para os candidatos selecionados, **NÃO invoque** a curate (ela é manual — `disable-profile-invocation: true`, mesma convenção registrada na `sda-rule-create`). Em vez disso:
 
 1. Salve o relatório de mineração (seção "Saída sempre persistível" abaixo) com os cartões selecionados marcados.
-2. Encerre recomendando ao usuário: *"Para aplicar o teste de fricção e definir colocação, rode `/sda-curate-project-rules` passando o relatório: `/sda-curate-project-rules /docs/specs/.rule-mining/{YYYY-MM-DD}-mining-report.md`"*. A pergunta-âncora para a curate já vai embutida em cada cartão: "Este candidato passa no teste de fricção? Se sim, qual escopo e forma?"
+2. Encerre recomendando ao usuário: *"Para aplicar o teste de fricção e definir colocação, rode `sda-curate-project-rules` passando o relatório: `sda-curate-project-rules /docs/specs/.rule-mining/{YYYY-MM-DD}-mining-report.md`"*. A pergunta-âncora para a curate já vai embutida em cada cartão: "Este candidato passa no teste de fricção? Se sim, qual escopo e forma?"
 
 **Esta skill não escreve em rules e não invoca a curate.** Toda gravação é do `sda-curate-project-rules`, rodada manualmente pelo usuário.
 
@@ -182,7 +159,7 @@ Salve o relatório de mineração em:
 /docs/specs/.rule-mining/{YYYY-MM-DD}-mining-report.md
 ```
 
-(`.rule-mining/` listado em `.gitignore` é OK — relatórios são efêmeros; o que importa é o que vira regra, registrado em `.claude/rules/` ou `CLAUDE.md`.)
+(`.rule-mining/` listado em `.gitignore` é OK — relatórios são efêmeros; o que importa é o que vira regra, registrado em `.agents/rules/` ou `AGENTS.md`.)
 
 Conteúdo do relatório:
 1. Escopo da varredura (features cobertas, janela temporal).
@@ -197,7 +174,7 @@ Conteúdo do relatório:
 - **Não substitui post-mortem**: mineração olha sinais agregados; post-mortem olha um run específico em profundidade. São complementares.
 - **Não infere regras de código**: leitor preguiçoso que tenta extrair regra direto do diff erra (não há prova de repetição). Use a fila de sinais — quem instrumenta sabe o que é convenção implícita.
 - **Não decide colocação**: escopo (global, matcher, inline) é responsabilidade do `sda-curate-project-rules`. A skill só sugere palpite.
-- **Não dispara automaticamente**: `disable-model-invocation: true`. Roda só quando o usuário a invoca por slash command.
+- **Não dispara automaticamente**: `disable-profile-invocation: true`. Roda só quando o usuário a invoca por slash command.
 
 ---
 

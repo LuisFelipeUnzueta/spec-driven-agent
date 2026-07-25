@@ -1,0 +1,18 @@
+{
+  "providers": {
+    "claude": {
+      "profiles": {
+        "normal": { "model": "sonnet", "effort": "medium" },
+        "review": { "model": "sonnet", "effort": "high" },
+        "critical": { "model": "opus", "effort": "xhigh" }
+      }
+    },
+    "codex": {
+      "profiles": {
+        "normal": { "model": "gpt-5.6-terra", "effort": "medium" },
+        "review": { "model": "gpt-5.6", "effort": "high" },
+        "critical": { "model": "gpt-5.6", "effort": "xhigh" }
+      }
+    }
+  }
+}

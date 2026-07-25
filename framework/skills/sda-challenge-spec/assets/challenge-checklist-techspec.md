@@ -1,4 +1,4 @@
-﻿# Checklist de Challenge — `tech_spec.md` (SDD)
+# Checklist de Challenge — `tech_spec.md` (SDD)
 
 > Use este checklist na FASE 1 da skill `sda-challenge-spec` para construir a lista priorizada de questões. **Não escreva o checklist no chat com o usuário** — é um plano interno. Cada item vira potencialmente uma pergunta na FASE 2.
 
@@ -57,7 +57,7 @@
 
 ## G. Reuso
 
-- [ ] A spec aproveita explicitamente padrões do `CLAUDE.md` e regras do projeto?
+- [ ] A spec aproveita explicitamente padrões do `AGENTS.md` e regras do projeto?
 - [ ] A spec referencia código existente nas "Definições Técnicas" quando aplicável?
 - [ ] Há padrões/módulos no projeto que a spec poderia usar mas não menciona?
 

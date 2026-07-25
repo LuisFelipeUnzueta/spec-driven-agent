@@ -1,11 +1,10 @@
-﻿# TASK – Detalhamento da Task
+# TASK – Detalhamento da Task
 
 ## 1. Identificação
 - **ID**:
 - **Nome da Task**:
-- **model**: sonnet            <!-- sonnet (default) | opus (área crítica/alta complexidade). Ver sda-sdd-generate-task-plan/SKILL.md → "Heurística de modelo e risk". NUNCA haiku aqui. -->
 - **risk**: low                 <!-- low | medium | high. Ver SKILL.md → mesma seção. -->
-- **gates**: [qa, tech_review]  <!-- [qa, tech_review] (default) | [qa] (pula Tech Review) | none (task trivial, só docs/config). Ver SKILL.md → "Fast-path gates". -->
+- **validation**: full  <!-- full (default) | qa (pula Tech Review) | none (task trivial, só docs/config). Ver SKILL.md → "Fast-path validation". -->
 - **Responsável**:
 - **Status**: A Fazer | Em Progresso | Bloqueado | Concluído  <!-- enum canônico. Em Progresso: setado pelo orquestrador na pré-execução. Bloqueado: 3 tentativas esgotadas OU dependência bloqueada. -->
 - **Fase**:
@@ -191,4 +190,3 @@ Anotações técnicas, decisões, pontos relevantes.
 - [ ] Rastreabilidade Aceite → Testes preenchida (seção 6.5)
 - [ ] Detalhamento dos Casos de Teste preenchido (seção 6.6 — 1 card por CT)
 - [ ] Revisada
-- [ ] Staged para commit (`git add` feito pelo orquestrador — o pipeline NUNCA commita)

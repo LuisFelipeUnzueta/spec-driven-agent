@@ -1,4 +1,4 @@
-﻿# TECH_SPEC -- Especificação Técnica (Backend)
+# TECH_SPEC -- Especificação Técnica (Backend)
 
 ## 1. Identificação
 - **Feature/Projeto**:
@@ -326,7 +326,7 @@ Regra: campos não enviados permanecem inalterados. Request struct: SEM binding/
 ## 16. Deploy e Infraestrutura
 
 ### 16.1 Pipeline
-(CI/CD, etapas, gates de aprovação, ambiente de staging.)
+(CI/CD, etapas, validation de aprovação, ambiente de staging.)
 
 ### 16.2 Empacotamento
 (Container, runtime, base image, dependências.)

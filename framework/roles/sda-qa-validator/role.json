@@ -1,0 +1,5 @@
+{
+  "name": "sda-qa-validator",
+  "description": "Valida critérios de aceite, executa testes e retorna achados estruturados sem repetir revisão arquitetural.",
+  "profile": "review"
+}

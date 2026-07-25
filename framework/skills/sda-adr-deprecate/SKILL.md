@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-adr-deprecate
-description: Marca uma Architecture Decision Record (ADR) existente como `deprecated` (sem substituta direta). Atualiza o frontmatter, registra o motivo na seção Consequences, preserva o histórico de `Applied in`, regenera o INDEX.md e gera relatório de features que ainda referenciam a ADR. Skill standalone, invocada exclusivamente pelo usuário.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "<id>"
+description: Depreca uma ADR sem substituta e atualiza o índice. Use quando a decisão deixou de se aplicar.
 ---
 
 PERSONA: Você é um Arquiteto de Software Senior responsável por manter o ciclo de vida das ADRs. Seu papel ao depreciar uma ADR é registrar de forma rastreável que a decisão **não é mais válida** — sem apagar a história — e dar visibilidade sobre features que ainda apontam para ela, para que sejam revisadas humanamente.
@@ -11,22 +8,22 @@ PERSONA: Você é um Arquiteto de Software Senior responsável por manter o cicl
 Princípios invioláveis:
 
 1. **Não apague história** — `Applied in` e o conteúdo original da ADR permanecem. Depreciação **acrescenta**, não remove. ADR deprecated continua referenciável (convenção `deprecated_allows_reference: true`).
-2. **Motivo é obrigatório** — sem motivo claro, depreciar é ruído. Sempre coletar via `AskUserQuestion`.
-3. **Recursos canônicos centralizados** — esta skill **não** carrega cópia própria do script de reindex. Usa o canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt).
+2. **Motivo é obrigatório** — sem motivo claro, depreciar é ruído. Sempre coletar via `interação com o usuário`.
+3. **Recursos canônicos centralizados** — esta skill **não** carrega cópia própria do script de reindex. Usa o canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
 4. **Token-efficient by design** — abrir apenas o arquivo da ADR alvo + uma varredura focada de `docs/specs/**/*.md` para o relatório final. Nunca abrir todas as ADRs.
 
 ---
 
 # Paths
 
-> Paths globais resolvidos por `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
+> Paths globais resolvidos por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
 
 | Artefato | Origem | Uso |
 |----------|--------|-----|
 | Diretório ADR | `adr.dir` (sda-adr-workflow-rules.md) → `/docs/adr` | localizar `{id}-*.md` |
 | INDEX.md | `adr.index_file` (sda-adr-workflow-rules.md) → `/docs/adr/INDEX.md` | regenerado pelo script reindex |
 | Specs (varredura) | `/docs/specs/**/*.md` | grep para detectar features que ainda referenciam |
-| Script reindex (canônico de `sda-adr-reindex`) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.claude/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
+| Script reindex (canônico de `sda-adr-reindex`) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.agents/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
 
 ---
 
@@ -41,10 +38,10 @@ Toda saída e edição feita por esta skill é em português brasileiro. Título
 | Estado | Significado | Pode ser referenciada? |
 |--------|-------------|------------------------|
 | `accepted` | decisão ativa | sim |
-| `deprecated` | decisão **não recomendada**, sem substituta direta | **sim** (com warning humano em `/sda-adr-review`) |
+| `deprecated` | decisão **não recomendada**, sem substituta direta | **sim** (com warning humano em `sda-adr-review`) |
 | `superseded-by:NNNN` | substituída pela ADR `NNNN` | sim (com aviso para migrar) |
 
-Esta skill opera **exclusivamente** na transição `accepted → deprecated`. ADR com `status: superseded-by:NNNN` já está em estado terminal — depreciá-la apagaria o único registro estruturado do link com a substituta (a relação vive exclusivamente no campo `status` da OLD). Se o usuário pedir para depreciar uma ADR superseded, encerre explicando isso e oriente a manter o status atual. Para transição com substituta, use `/sda-adr-supersede`.
+Esta skill opera **exclusivamente** na transição `accepted → deprecated`. ADR com `status: superseded-by:NNNN` já está em estado terminal — depreciá-la apagaria o único registro estruturado do link com a substituta (a relação vive exclusivamente no campo `status` da OLD). Se o usuário pedir para depreciar uma ADR superseded, encerre explicando isso e oriente a manter o status atual. Para transição com substituta, use `sda-adr-supersede`.
 
 ---
 
@@ -66,15 +63,15 @@ Se o INDEX.md ou os marcadores estiverem ausentes, o script falha com erro claro
 
 ## 1. Pré-condições
 
-a. **Resolver paths globais** a partir de `.claude/rules/sda-adr-workflow-rules.md` (rule já disponível no system-prompt): `adr.dir` e `adr.index_file`.
+a. **Resolver paths globais** a partir de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de resolver os paths): `adr.dir` e `adr.index_file`.
 
-b. **Validar `<id>`** em `$ARGUMENTS`:
-   - Se ausente ou vazio → encerrar com mensagem orientando a passar o ID (ex.: `/sda-adr-deprecate 0003`) ou rodar `/sda-adr-list` para descobrir.
+b. **Validar `<id>`** em `[entrada atual da solicitação]`:
+   - Se ausente ou vazio → encerrar com mensagem orientando a passar o ID (ex.: `sda-adr-deprecate 0003`) ou rodar `sda-adr-list` para descobrir.
    - Normalizar para **4 dígitos** (se o usuário passou `3`, tratar como `0003`).
 
 c. **Localizar o arquivo da ADR**:
    - Listar `{adr.dir}/*.md` e encontrar o arquivo cujo nome casa com `{id}-*.md`.
-   - Se não achou → encerrar com mensagem orientando `/sda-adr-list` (não tente "criar" a ADR).
+   - Se não achou → encerrar com mensagem orientando `sda-adr-list` (não tente "criar" a ADR).
 
 d. **Ler o arquivo da ADR** uma única vez. Validar:
    - Frontmatter YAML está bem formado.
@@ -82,7 +79,7 @@ d. **Ler o arquivo da ADR** uma única vez. Validar:
 
 ## 2. Coletar motivo da depreciação
 
-Usar `AskUserQuestion` para perguntar:
+Usar `interação com o usuário` para perguntar:
 
 > **Por que esta ADR está sendo depreciada?** (1-2 frases — obrigatório)
 
@@ -126,7 +123,7 @@ Acrescentar **uma única linha** ao final da seção, antes da próxima seção 
 
 ### 3.3 Seção `## Applied in`
 
-**NÃO modificar.** Convenção `deprecated_allows_reference: true`: o histórico de adoção fica preservado para que `/sda-adr-review` consiga sinalizar features que ainda apontam.
+**NÃO modificar.** Convenção `deprecated_allows_reference: true`: o histórico de adoção fica preservado para que `sda-adr-review` consiga sinalizar features que ainda apontam.
 
 ### 3.4 Salvar
 
@@ -134,12 +131,12 @@ Reescrever o arquivo da ADR com as 2 alterações acima e mais nada.
 
 ## 4. Reindex — OBRIGATÓRIO, não pule
 
-> O INDEX.md é a fonte de descoberta. Marcar `status: deprecated` no arquivo sem reindexar deixa o INDEX desatualizado e quebra `/sda-adr-list` por status. **Não encerre a task sem rodar o reindex.**
+> O INDEX.md é a fonte de descoberta. Marcar `status: deprecated` no arquivo sem reindexar deixa o INDEX desatualizado e quebra `sda-adr-list` por status. **Não encerre a task sem rodar o reindex.**
 
-Executar via Bash, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.claude/rules/sda-adr-workflow-rules.md`):
+Executar via terminal, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`):
 
 ```
-node .claude/skills/sda-adr-reindex/scripts/reindex.cjs
+node .agents/skills/sda-adr-reindex/scripts/reindex.cjs
 ```
 
 - Se o script retornar erro, investigue e corrija antes de confirmar ao usuário (não engula falhas).
@@ -170,7 +167,7 @@ Features ainda referenciando esta ADR (revisão humana sugerida):
   - feature-a (v1) — docs/specs/features/feature-a/v1/tech_spec.md
   - feature-b (v2) — docs/specs/features/feature-b/v2/scope.md
 
-Sugestao: rodar `/sda-adr-review` para validar bidirecionalidade apos as features atualizarem.
+Sugestao: rodar `sda-adr-review` para validar bidirecionalidade apos as features atualizarem.
 ```
 
 Se nenhuma feature referencia, substituir o bloco "Features ainda referenciando..." por:
@@ -187,14 +184,14 @@ Nenhuma feature em docs/specs/ ainda referencia esta ADR.
 
 ## DEVE
 
-1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.reindex_script`) via **`.claude/rules/sda-adr-workflow-rules.md`** (rule global no system-prompt). Esta skill **não** mantém cópia interna do script — usa o canônico de `sda-adr-reindex`.
+1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.reindex_script`) via **`.agents/skills/_shared/rules/sda-adr-workflow-rules.md`** (referência lazy; leia antes de usar). Esta skill **não** mantém cópia interna do script — usa o canônico de `sda-adr-reindex`.
 2. Validar que `<id>` foi passado e que o arquivo `{id}-*.md` existe **antes** de qualquer escrita.
-3. Coletar **motivo** via `AskUserQuestion` — obrigatório, 1-2 frases. Se insuficiente, insistir uma vez.
+3. Coletar **motivo** via `interação com o usuário` — obrigatório, 1-2 frases. Se insuficiente, insistir uma vez.
 4. Normalizar `id` para **4 dígitos** (`0003`, não `3`).
 5. Atualizar frontmatter de forma cirúrgica: trocar `status` para `deprecated` e adicionar `deprecated_at: YYYY-MM-DD`. Manter `date` original.
 6. Adicionar **uma única** linha ao final de `## Consequences`: `> Deprecated em YYYY-MM-DD. Motivo: {motivo}.`
 7. **Preservar** integralmente a seção `## Applied in`.
-8. Rodar `node .claude/skills/sda-adr-reindex/scripts/reindex.cjs` (script canônico, path em `adr.reindex_script`) SEMPRE após salvar a ADR — sem exceção.
+8. Rodar `node .agents/skills/sda-adr-reindex/scripts/reindex.cjs` (script canônico, path em `adr.reindex_script`) SEMPRE após salvar a ADR — sem exceção.
 9. Gerar relatório de features referenciando, varrendo `docs/specs/**/*.md` por `ADR-{id}` e `{id}-`.
 10. Tratar idempotência: se status já é `deprecated`, avisar e encerrar sem editar.
 
@@ -205,9 +202,9 @@ Nenhuma feature em docs/specs/ ainda referencia esta ADR.
 3. **NUNCA** sobrescrever o campo `date` original do frontmatter.
 4. **NUNCA** alterar `id`, `title` ou `tags` da ADR.
 5. **NUNCA** modificar arquivos fora de `{adr.dir}` (a subseção "ADRs Aplicáveis nesta Feature" nos artefatos é escrita pelos geradores de spec; ajustá-la após a depreciação é manutenção manual — ver "Rastreabilidade ADR ↔ Feature" na rule).
-6. **NUNCA** transformar depreciação em supersede automaticamente — se o usuário tem substituta, encerre orientando a usar `/sda-adr-supersede`.
+6. **NUNCA** transformar depreciação em supersede automaticamente — se o usuário tem substituta, encerre orientando a usar `sda-adr-supersede`.
 7. **NUNCA** pular o reindex — um arquivo ADR atualizado sem reindex deixa o INDEX dessincronizado.
-8. **NUNCA** sugerir/iniciar outros comandos automaticamente após o término — apenas a dica final de `/sda-adr-review`.
+8. **NUNCA** sugerir/iniciar outros comandos automaticamente após o término — apenas a dica final de `sda-adr-review`.
 9. **NUNCA** abrir ADRs além do alvo. Esta skill opera sobre **uma única** ADR.
 10. **NUNCA** recriar o INDEX.md daqui (responsabilidade de `sda-adr-create`/`sda-adr-bootstrap`). Se faltar marcador ou arquivo, encerre com erro claro.
 
@@ -215,4 +212,4 @@ Nenhuma feature em docs/specs/ ainda referencia esta ADR.
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

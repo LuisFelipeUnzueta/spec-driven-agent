@@ -1,5 +1,5 @@
 {
-  "skill_name": "agent-spec-generate-tech-alignment",
+  "skill_name": "sda-generate-tech-alignment",
   "evals": [
     {
       "id": 1,
@@ -37,16 +37,16 @@
       "id": 3,
       "name": "registro-de-decisoes-e-fronteira-adr",
       "prompt": "/docs/specs/features/auth-oauth2/v1/prd.md quero padronizar autenticação via OAuth2 com tokens JWT para toda a plataforma",
-      "expected_output": "Após convergir, a skill salva o tech-alignment.md (documento LIVRE, sem template) com as soluções registradas (escolhida + rejeitadas + justificativa + trade-off). Como a decisão de auth é transversal/evergreen, marca como candidata a ADR e recomenda /agent-spec-adr-create — sem criar a ADR diretamente.",
+      "expected_output": "Após convergir, a skill salva o tech-alignment.md (documento LIVRE, sem template) com as soluções registradas (escolhida + rejeitadas + justificativa + trade-off). Como a decisão de auth é transversal/evergreen, marca como candidata a ADR e recomenda sda-adr-create — sem criar a ADR diretamente.",
       "files": [],
       "expectations": [
         "A skill salva um arquivo tech-alignment.md no path resolvido via tech_alignment.path",
         "O arquivo é escrito de forma livre (sem preencher um template rígido) mas contém o mínimo: metadados, contexto técnico, soluções decididas, candidatas a ADR, restrições e pontos em aberto",
         "Cada solução registrada traz alternativas avaliadas + decisão + rejeitadas + trade-off aceito (ou marcada como decisão direta)",
         "A decisão de auth transversal é marcada como candidata a ADR",
-        "A skill recomenda /agent-spec-adr-create para a decisão transversal e NÃO cria a ADR diretamente",
+        "A skill recomenda sda-adr-create para a decisão transversal e NÃO cria a ADR diretamente",
         "A skill consulta ADRs ativas (docs/adr/INDEX.md) durante a ancoragem",
-        "A skill NÃO inicia automaticamente o TECH_SPEC nem sugere o próximo comando do framework (exceto /agent-spec-adr-create)",
+        "A skill NÃO inicia automaticamente o TECH_SPEC nem sugere o próximo comando do framework (exceto sda-adr-create)",
         "O arquivo se mantém em alto nível (sem endpoints, sem schema de token, sem nomes de tabela)"
       ]
     },
@@ -57,7 +57,7 @@
       "expected_output": "Se o projeto já usa um banco relacional/Redis e não tem Mongo, a skill NÃO descarta nem aceita cegamente — transforma em ponto de decisão TÉCNICA e apresenta alternativas (seguir o padrão existente vs. introduzir Mongo) com trade-offs e marca a tecnologia nova como hipótese a validar.",
       "files": [],
       "expectations": [
-        "A skill faz a ancoragem no projeto antes de propor (lê CLAUDE.md/rules e detecta a persistência atual)",
+        "A skill faz a ancoragem no projeto antes de propor (lê AGENTS.md/rules e detecta a persistência atual)",
         "Ao detectar que MongoDB não faz parte do stack, a skill levanta o conflito como ponto de decisão técnica (não aceita cegamente nem descarta)",
         "A skill apresenta a alternativa de reusar a persistência existente com trade-offs frente ao Mongo",
         "A introdução de tecnologia nova (Mongo) é marcada como [HIPÓTESE] / requer validação",

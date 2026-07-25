@@ -5,13 +5,13 @@
  * Regenera docs/adr/INDEX.md a partir dos arquivos ADR existentes em
  * `docs/adr/NNNN-slug.md`. Sem dependencias externas (Node puro).
  *
- * Vive dentro da skill `agent-spec-adr-reindex` (skill canonica do reindex). Outras
- * skills do dominio ADR (agent-spec-adr-create, agent-spec-adr-deprecate, agent-spec-adr-supersede,
- * agent-spec-adr-bootstrap) referenciam este script via path resolvido pela rule
- * `.claude/rules/agent-spec-adr-workflow-rules.md` (`adr.reindex_script`).
+ * Vive dentro da skill `sda-adr-reindex` (skill canonica do reindex). Outras
+ * skills do dominio ADR (sda-adr-create, sda-adr-deprecate, sda-adr-supersede,
+ * sda-adr-bootstrap) referenciam este script via path resolvido pela rule
+ * `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (`adr.reindex_script`).
  *
  * Fluxo:
- *   1. Le `.claude/rules/agent-spec-adr-workflow-rules.md` e resolve
+ *   1. Le `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` e resolve
  *      `adr.dir` e `adr.index_file` (paths declarados como linhas
  *      `- **adr.dir**: \`/docs/adr\``).
  *   2. Lista `docs/adr/*.md` excluindo TEMPLATE.md / INDEX.md / README.md.
@@ -24,7 +24,7 @@
  *   6. Atualiza a linha `Ultima atualizacao: ...`.
  *
  * Uso:
- *   node .claude/skills/agent-spec-adr-reindex/scripts/reindex.cjs
+ *   node .agents/skills/sda-adr-reindex/scripts/reindex.cjs
  *
  * Saida: exit 0 em sucesso, exit 1 em qualquer erro com mensagem em stderr.
  */
@@ -37,7 +37,7 @@ const path = require('node:path');
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
 const RULE_PATH = path.join(
   PROJECT_ROOT,
-  '.claude/rules/agent-spec-adr-workflow-rules.md'
+  '.agents/skills/_shared/rules/sda-adr-workflow-rules.md'
 );
 
 const MARK_START = '<!-- ADR-INDEX-START -->';
@@ -52,7 +52,7 @@ const EXCLUDED_FILES = new Set(['TEMPLATE.md', 'INDEX.md', 'README.md']);
  * Extrai o valor de uma linha no formato:
  *   - **adr.dir**: `/docs/adr`
  *   - **adr.index_file**: `/docs/adr/INDEX.md`
- * em `agent-spec-adr-workflow-rules.md`.
+ * em `sda-adr-workflow-rules.md`.
  */
 function ruleBulletValue(content, key) {
   const re = new RegExp(`^- \\*\\*${key}\\*\\*:\\s*\`([^\`]+)\``, 'm');
@@ -183,7 +183,7 @@ function main() {
   try {
     cfg = readAdrConfig();
   } catch (err) {
-    console.error(`[agent-spec-adr-reindex] ${err.message}`);
+    console.error(`[sda-adr-reindex] ${err.message}`);
     process.exit(1);
   }
 
@@ -191,11 +191,11 @@ function main() {
   const indexPath = path.join(PROJECT_ROOT, cfg.indexFile.replace(/^\//, ''));
 
   if (!fs.existsSync(adrDir)) {
-    console.error(`[agent-spec-adr-reindex] Diretorio ADR nao encontrado: ${adrDir}`);
+    console.error(`[sda-adr-reindex] Diretorio ADR nao encontrado: ${adrDir}`);
     process.exit(1);
   }
   if (!fs.existsSync(indexPath)) {
-    console.error(`[agent-spec-adr-reindex] INDEX.md nao encontrado: ${indexPath}`);
+    console.error(`[sda-adr-reindex] INDEX.md nao encontrado: ${indexPath}`);
     process.exit(1);
   }
 
@@ -235,9 +235,9 @@ function main() {
 
   fs.writeFileSync(indexPath, indexContent, 'utf-8');
 
-  const summary = `[agent-spec-adr-reindex] INDEX.md atualizado — ${entries.length} ADR(s) listadas.`;
+  const summary = `[sda-adr-reindex] INDEX.md atualizado — ${entries.length} ADR(s) listadas.`;
   console.log(summary);
-  for (const w of warnings) console.warn(`[agent-spec-adr-reindex] AVISO: ${w}`);
+  for (const w of warnings) console.warn(`[sda-adr-reindex] AVISO: ${w}`);
 }
 
 main();

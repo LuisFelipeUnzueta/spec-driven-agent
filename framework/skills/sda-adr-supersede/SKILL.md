@@ -1,9 +1,6 @@
-﻿---
+---
 name: sda-adr-supersede
-description: Substitui uma Architecture Decision Record (ADR) existente por uma nova. Marca a ADR antiga com `status: superseded-by:NNNN`, registra a substituição na seção Consequences, preserva o histórico de `Applied in`, regenera o INDEX.md e gera relatório de features que ainda referenciam a ADR antiga. Quando a nova ADR não existe ou foi passado um título, executa antes o sub-fluxo de criação. Skill standalone, invocada exclusivamente pelo usuário.
-user-invocable: true
-disable-model-invocation: true
-argument-hint: "<old-id> [new-id-ou-titulo]"
+description: Substitui uma ADR aceita por uma nova decisão e atualiza relações e índice. Use após mudança arquitetural explícita.
 ---
 
 PERSONA: Você é um Arquiteto de Software Senior responsável pelo ciclo de vida das ADRs. Seu papel ao superseder uma ADR é registrar de forma rastreável que a decisão **foi substituída por outra** — sem apagar a história — e dar visibilidade sobre features que ainda apontam para a ADR antiga, para que sejam migradas humanamente, por feature, conforme o caso.
@@ -12,23 +9,23 @@ Princípios invioláveis:
 
 1. **Não apague história** — `Applied in` da ADR antiga e o conteúdo original permanecem (`superseded_keeps_applied_in: true`). Supersede **acrescenta** marca; não remove conteúdo. A rastreabilidade vem justamente desse `Applied in` preservado.
 2. **Migração de features é manual** — `Applied in` da OLD **NUNCA** é migrado automaticamente para a NEW. Cada feature decide se adota a substituta atualizando a própria subseção "ADRs Aplicáveis nesta Feature".
-3. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias. Usa o template canônico de `sda-adr-create` (`adr.template`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt).
+3. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias. Usa o template canônico de `sda-adr-create` (`adr.template`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
 4. **Token-efficient by design** — abrir apenas o arquivo da OLD + (no ramo NEW_EXISTS) o arquivo da NEW + uma varredura focada de `docs/specs/**/*.md` para o relatório final. Nunca abrir todas as ADRs.
-5. **Decisão com confirmação humana** — toda informação coletada para a NEW (no ramo NEW_NOVA) vem do usuário via `AskUserQuestion`. NUNCA invente, deduza ou assuma.
+5. **Decisão com confirmação humana** — toda informação coletada para a NEW (no ramo NEW_NOVA) vem do usuário via `interação com o usuário`. NUNCA invente, deduza ou assuma.
 
 ---
 
 # Paths
 
-> Paths globais resolvidos por `.claude/rules/sda-adr-workflow-rules.md` (rule global no system-prompt). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
+> Paths globais resolvidos por `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Recursos internos da skill resolvidos por path relativo à própria skill — **sem** depender do `config.yaml`.
 
 | Artefato | Origem | Uso |
 |----------|--------|-----|
 | Diretório ADR | `adr.dir` (sda-adr-workflow-rules.md) → `/docs/adr` | localizar `{old-id}-*.md` e `{new-id}-*.md`; salvar nova ADR no ramo NEW_NOVA |
 | INDEX.md | `adr.index_file` (sda-adr-workflow-rules.md) → `/docs/adr/INDEX.md` | regenerado pelo script reindex |
 | Specs (varredura) | `/docs/specs/**/*.md` | grep para detectar features que ainda referenciam a OLD |
-| Template ADR (canônico de `sda-adr-create`) | `adr.template` (sda-adr-workflow-rules.md) → `.claude/skills/sda-adr-create/assets/adr-template.md` | leitura para preencher a NEW (apenas no ramo NEW_NOVA) |
-| Script reindex (canônico de `sda-adr-reindex`) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.claude/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
+| Template ADR (canônico de `sda-adr-create`) | `adr.template` (sda-adr-workflow-rules.md) → `.agents/skills/sda-adr-create/assets/adr-template.md` | leitura para preencher a NEW (apenas no ramo NEW_NOVA) |
+| Script reindex (canônico de `sda-adr-reindex`) | `adr.reindex_script` (sda-adr-workflow-rules.md) → `.agents/skills/sda-adr-reindex/scripts/reindex.cjs` | executado UMA vez ao final via `node {path}` |
 
 ---
 
@@ -46,7 +43,7 @@ Toda saída e edição feita por esta skill é em português brasileiro. Título
 | `deprecated` | decisão **não recomendada**, sem substituta direta | sim (com warning) |
 | `superseded-by:NNNN` | substituída pela ADR `NNNN` | sim (com aviso para migrar) |
 
-Esta skill opera **exclusivamente** na transição `accepted | deprecated → superseded-by:NEW`. Para depreciação sem substituta, use `/sda-adr-deprecate`.
+Esta skill opera **exclusivamente** na transição `accepted | deprecated → superseded-by:NEW`. Para depreciação sem substituta, use `sda-adr-deprecate`.
 
 **Bidirecionalidade**: a relação fica registrada **apenas no frontmatter da OLD** (`status: superseded-by:NEW`). A NEW **não** ganha campo recíproco no frontmatter — a relação é descoberta varrendo o INDEX.md por entradas com esse status. Esse é o comportamento canônico do framework — não o altere aqui.
 
@@ -80,7 +77,7 @@ error-handling, cross-cutting
 
 # Critérios de Existência da NEW (ramo NEW_NOVA)
 
-Antes de criar a ADR substituta, confirme com o usuário que a decisão satisfaz **todos os 5 critérios canônicos** (C1-C5 — fonte única: seção "Critérios Canônicos de Criação" da rule `sda-adr-workflow-rules.md`), numa única `AskUserQuestion` que reúna os cinco:
+Antes de criar a ADR substituta, confirme com o usuário que a decisão satisfaz **todos os 5 critérios canônicos** (C1-C5 — fonte única: seção "Critérios Canônicos de Criação" da rule `sda-adr-workflow-rules.md`), numa única `interação com o usuário` que reúna os cinco:
 
 | # | Critério | Pergunta | OK se |
 |---|----------|----------|-------|
@@ -110,15 +107,15 @@ Se a ADR criada passa de ~60 linhas, algo está errado — provavelmente virou t
 
 ## 1. Pré-condições
 
-a. **Resolver paths globais** a partir de `.claude/rules/sda-adr-workflow-rules.md` (rule já disponível no system-prompt): `adr.dir` e `adr.index_file`.
+a. **Resolver paths globais** a partir de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de resolver os paths): `adr.dir` e `adr.index_file`.
 
 b. **Validar `<old-id>`** (1º argumento, obrigatório):
-   - Se ausente ou vazio → encerrar com mensagem orientando a passar o ID (ex.: `/sda-adr-supersede 0003 0012` ou `/sda-adr-supersede 0003`) ou rodar `/sda-adr-list` para descobrir.
+   - Se ausente ou vazio → encerrar com mensagem orientando a passar o ID (ex.: `sda-adr-supersede 0003 0012` ou `sda-adr-supersede 0003`) ou rodar `sda-adr-list` para descobrir.
    - Normalizar para **4 dígitos** (`3` → `0003`).
 
 c. **Localizar o arquivo da OLD** em `{adr.dir}`:
    - Listar `{adr.dir}/*.md` e encontrar `{old-id}-*.md`.
-   - Se não achou → encerrar com mensagem orientando `/sda-adr-list` (não tente "criar" a OLD).
+   - Se não achou → encerrar com mensagem orientando `sda-adr-list` (não tente "criar" a OLD).
 
 d. **Ler o arquivo da OLD** uma única vez. Validar:
    - Frontmatter YAML está bem formado.
@@ -165,7 +162,7 @@ Examinar o **2º argumento** (`<new-id-ou-titulo>`):
 
 ### 3b.2 Validar critérios de existência
 
-Confirmar com o usuário (via `AskUserQuestion`) que a decisão satisfaz **os 5 critérios canônicos C1-C5** (`transversal`, `tag_alvo`, `custo_reversao_alto`, `surpreendente_sem_contexto`, `trade_off_real` — ver tabela "Critérios de Existência" acima). Se qualquer critério falhar, encerrar **sem** alterar OLD nem criar NEW — orientar a documentar a decisão no artefato de feature.
+Confirmar com o usuário (via `interação com o usuário`) que a decisão satisfaz **os 5 critérios canônicos C1-C5** (`transversal`, `tag_alvo`, `custo_reversao_alto`, `surpreendente_sem_contexto`, `trade_off_real` — ver tabela "Critérios de Existência" acima). Se qualquer critério falhar, encerrar **sem** alterar OLD nem criar NEW — orientar a documentar a decisão no artefato de feature.
 
 ### 3b.3 Determinar próximo ID da NEW
 
@@ -173,7 +170,7 @@ Confirmar com o usuário (via `AskUserQuestion`) que a decisão satisfaz **os 5 
 2. Extrair o maior `id` do **nome dos arquivos** listados (`adr.file_pattern` = `{id}-{slug}.md` — um `ls` resolve, sem abrir arquivo nem depender de INDEX possivelmente stale) e somar 1.
 3. Formatar em **4 dígitos** (`0001`, `0002`...). Se diretório vazio (caso raro aqui — a OLD já existe), começar em `0001`.
 
-### 3b.4 Coletar campos via AskUserQuestion (UMA pergunta por vez)
+### 3b.4 Coletar campos via interação com o usuário (UMA pergunta por vez)
 
 Coletar nesta ordem, **sempre uma pergunta por vez**:
 
@@ -193,7 +190,7 @@ Slug em **kebab-case** do título: minúsculas, sem acentos, ≤ 60 chars.
 
 ### 3b.6 Preencher template e salvar
 
-1. **Ler template** de `{adr.template}` (`.claude/skills/sda-adr-create/assets/adr-template.md` — canônico, mantido por `sda-adr-create`).
+1. **Ler template** de `{adr.template}` (`.agents/skills/sda-adr-create/assets/adr-template.md` — canônico, mantido por `sda-adr-create`).
 2. **Preencher**:
    - Frontmatter: `id` (4 dígitos), `title`, `status: accepted`, `date` (hoje, `YYYY-MM-DD`), `tags`.
    - `## Context`: 3-5 linhas com o problema.
@@ -244,7 +241,7 @@ Acrescentar **uma única linha** ao final da seção, antes da próxima seção 
 
 ### 4.3 Seção `## Applied in` da OLD
 
-**NÃO modificar.** Convenção `superseded_keeps_applied_in: true`: o histórico de adoção fica preservado para que `/sda-adr-review` consiga sinalizar features que ainda apontam para a OLD. **Migração para a NEW é manual e por feature.**
+**NÃO modificar.** Convenção `superseded_keeps_applied_in: true`: o histórico de adoção fica preservado para que `sda-adr-review` consiga sinalizar features que ainda apontam para a OLD. **Migração para a NEW é manual e por feature.**
 
 ### 4.4 Salvar
 
@@ -252,12 +249,12 @@ Reescrever o arquivo da OLD com as 2 alterações acima e mais nada.
 
 ## 5. Reindex — OBRIGATÓRIO, não pule
 
-> O INDEX.md é a fonte de descoberta. Marcar `superseded-by` no frontmatter sem reindexar deixa o INDEX desatualizado e quebra `/sda-adr-list` por status. **Não encerre a task sem rodar o reindex.**
+> O INDEX.md é a fonte de descoberta. Marcar `superseded-by` no frontmatter sem reindexar deixa o INDEX desatualizado e quebra `sda-adr-list` por status. **Não encerre a task sem rodar o reindex.**
 
-Executar via Bash, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.claude/rules/sda-adr-workflow-rules.md`):
+Executar via terminal, a partir da raiz do projeto, usando o script canônico de `sda-adr-reindex` (path em `adr.reindex_script` definido em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`):
 
 ```
-node .claude/skills/sda-adr-reindex/scripts/reindex.cjs
+node .agents/skills/sda-adr-reindex/scripts/reindex.cjs
 ```
 
 - Rodar **uma única vez** (cobre tanto a NEW recém-criada quanto a marca em status da OLD).
@@ -290,7 +287,7 @@ Features ainda apontando para {old-id} (precisam revisar manualmente):
   - feature-a (v1) — docs/specs/features/feature-a/v1/tech_spec.md
   - feature-b (v2) — docs/specs/features/feature-b/v2/scope.md
 
-Sugestao: rodar `/sda-adr-review` apos atualizar os artefatos.
+Sugestao: rodar `sda-adr-review` apos atualizar os artefatos.
 ```
 
 ### Ramo NEW_NOVA
@@ -306,7 +303,7 @@ Features ainda apontando para {old-id} (precisam revisar manualmente):
   - feature-a (v1) — docs/specs/features/feature-a/v1/tech_spec.md
   - feature-b (v2) — docs/specs/features/feature-b/v2/scope.md
 
-Sugestao: rodar `/sda-adr-review` apos atualizar os artefatos.
+Sugestao: rodar `sda-adr-review` apos atualizar os artefatos.
 ```
 
 Se nenhuma feature referencia a OLD, substituir o bloco "Features ainda apontando..." por:
@@ -323,16 +320,16 @@ Nenhuma feature em docs/specs/ ainda referencia a ADR antiga.
 
 ## DEVE
 
-1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.template`, `adr.reindex_script`) via **`.claude/rules/sda-adr-workflow-rules.md`** (rule global no system-prompt). Esta skill **não** mantém cópias internas — usa o template canônico de `sda-adr-create` e o script canônico de `sda-adr-reindex`.
+1. Resolver paths globais (`adr.dir`, `adr.index_file`, `adr.template`, `adr.reindex_script`) via **`.agents/skills/_shared/rules/sda-adr-workflow-rules.md`** (referência lazy; leia antes de usar). Esta skill **não** mantém cópias internas — usa o template canônico de `sda-adr-create` e o script canônico de `sda-adr-reindex`.
 2. Validar `<old-id>` e que `{old-id}-*.md` existe **antes** de qualquer escrita.
 3. Aceitar transição apenas a partir de `accepted` ou `deprecated`. Se já é `superseded-by:*`, tratar idempotência: avisar e encerrar sem editar.
 4. Normalizar IDs (`old-id`, `new-id`) para **4 dígitos** (`0003`, não `3`).
 5. Decidir ramo (NEW_EXISTS vs NEW_NOVA) com base na presença/forma do 2º argumento e na existência do arquivo `{new-id}-*.md`.
-6. No ramo NEW_NOVA: validar os **5 critérios canônicos de existência (C1-C5)** antes de coletar campos; usar `AskUserQuestion` para **cada campo** — uma pergunta por vez; tags restritas à lista canônica; **remover TODOS os comentários `<!-- ... -->`** do template antes de salvar.
+6. No ramo NEW_NOVA: validar os **5 critérios canônicos de existência (C1-C5)** antes de coletar campos; usar `interação com o usuário` para **cada campo** — uma pergunta por vez; tags restritas à lista canônica; **remover TODOS os comentários `<!-- ... -->`** do template antes de salvar.
 7. Atualizar a OLD de forma cirúrgica: trocar `status` para `superseded-by:{new-id}` (4 dígitos) e adicionar **uma única** linha ao final de `## Consequences`: `> Superseded by {new-id} - {titulo-new} em YYYY-MM-DD.`
 8. **Preservar** integralmente a seção `## Applied in` da OLD.
 9. Manter `date` original do frontmatter da OLD.
-10. Rodar `node .claude/skills/sda-adr-reindex/scripts/reindex.cjs` (script canônico, path em `adr.reindex_script`) SEMPRE ao final, **uma única vez**, depois de salvar OLD (e NEW, no ramo NEW_NOVA).
+10. Rodar `node .agents/skills/sda-adr-reindex/scripts/reindex.cjs` (script canônico, path em `adr.reindex_script`) SEMPRE ao final, **uma única vez**, depois de salvar OLD (e NEW, no ramo NEW_NOVA).
 11. Gerar relatório de features apontando para a OLD, varrendo `docs/specs/**/*.md` por `{old-id}-`.
 12. `Applied in` da NEW (no ramo NEW_NOVA) deve ter formato uniforme: `feature (vN) — path-para-artefato`.
 
@@ -350,7 +347,7 @@ Nenhuma feature em docs/specs/ ainda referencia a ADR antiga.
 10. **NUNCA** deduza ou invente informações da NEW — na dúvida, **PERGUNTE**.
 11. **NUNCA** rode reindex mais de uma vez — UMA execução ao final cobre OLD + NEW.
 12. **NUNCA** pule o reindex — uma OLD com `superseded-by:*` no frontmatter sem reindex deixa o INDEX dessincronizado.
-13. **NUNCA** sugerir/iniciar outros comandos automaticamente após o término — apenas a dica final de `/sda-adr-review`.
+13. **NUNCA** sugerir/iniciar outros comandos automaticamente após o término — apenas a dica final de `sda-adr-review`.
 14. **NUNCA** abrir ADRs além de OLD (sempre) e NEW (apenas no ramo NEW_EXISTS). Esta skill **não** varre todas as ADRs.
 15. **NUNCA** recriar o INDEX.md daqui no ramo NEW_EXISTS (responsabilidade de `sda-adr-create`/`sda-adr-bootstrap`). No ramo NEW_NOVA, criar **apenas** o esqueleto mínimo se o INDEX não existir.
 
@@ -358,4 +355,4 @@ Nenhuma feature em docs/specs/ ainda referencia a ADR antiga.
 
 # Entrada
 
-$ARGUMENTS
+[entrada atual da solicitação]

@@ -1,9 +1,9 @@
-﻿<!--
+<!--
 Template de Architecture Decision Record (ADR) — Nygard enxuto.
 
 Este arquivo vive dentro da skill `sda-adr-create` para portabilidade:
-copiar `.claude/skills/sda-adr-create/` leva o template junto. Resolvido
-internamente pela skill (sem depender do CLAUDE.md).
+copiar `.agents/skills/sda-adr-create/` leva o template junto. Resolvido
+internamente pela skill (sem depender do AGENTS.md).
 
 NÃO edite este arquivo diretamente a menos que esteja atualizando o molde.
 Para criar uma ADR a skill preenche este template.
@@ -17,7 +17,7 @@ antes de salvar a ADR real):
   referenciando uma a outra.
 - `Applied in` é a lista de features que adotaram a decisão. Manutenção
   MANUAL best-effort: nenhuma skill a atualiza automaticamente; a
-  `/sda-adr-review` reporta divergências para você reconciliar.
+  `sda-adr-review` reporta divergências para você reconciliar.
 - Status: `accepted` (padrão), `deprecated`, `superseded-by:NNNN`.
 - Tags: escolher da lista canônica de tags definida na SKILL.md da
   `sda-adr-create` (seção "Tags Canônicas"). Máximo 3 tags.
@@ -76,7 +76,7 @@ Opções descartadas com o motivo sucinto. Pelo menos 1 alternativa.
 <!--
 Lista de features/contextos que adotaram esta decisão. Manutenção
 MANUAL best-effort (nenhuma skill atualiza automaticamente; a
-`/sda-adr-review` reporta divergências). Formato:
+`sda-adr-review` reporta divergências). Formato:
 `feature (vN) — path-para-artefato`.
 
 Manter a lista curta (aponta, não duplica). Se uma feature ficar

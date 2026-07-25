@@ -127,7 +127,7 @@ Sempre comece pela fonte mais formal e desça:
 
 - Rotas: `routes/api.php`, `routes/web.php` — `Route::get`, `Route::resource`, `Route::middleware`.
 - DTOs: `FormRequest` (`app/Http/Requests/`), API Resources (`app/Http/Resources/`).
-- Auth: `auth` middleware, Sanctum (`auth:sanctum`), Passport, Gates, Policies (`app/Policies/`).
+- Auth: `auth` middleware, Sanctum (`auth:sanctum`), Passport, validation, Policies (`app/Policies/`).
 - Migrations: `database/migrations/*.php` (Eloquent).
 
 ### Mobile como backend (Local SDK)

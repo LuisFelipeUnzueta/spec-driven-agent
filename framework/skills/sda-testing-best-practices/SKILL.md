@@ -1,21 +1,6 @@
-﻿---
+---
 name: sda-testing-best-practices
-description: |
-  Doutrina de testes agnóstica de stack (backend/frontend/mobile) — Iron Laws,
-  padrões positivos, antipadrões, gates obrigatórios para agentes que escrevem
-  testes, disciplina de flaky/CI. Use SEMPRE que for gerar casos de teste
-  (sda-qa-test-generator) ou revisar/executar testes (sda-qa-validator).
-when_to_use: |
-  - Gerar casos de teste para a Estratégia de Testes do TECH_SPEC, T{N}.md §6, TaskCard §10
-    (sda-qa-test-generator).
-  - Validar implementação de testes em Gate 1 do pipeline (sda-qa-validator).
-  - Auditar suíte existente com suspeita de fragilidade ou flakiness.
-  - Decidir placement de um teste novo (unit, integration, route, e2e).
-do_not_invoke_for: |
-  - Revisão geral de código (use sda-staff-architecture-review / Gate 2).
-  - Debug de biblioteca de terceiros.
-  - Design de pipeline CI fora de testes.
-  - Observabilidade em produção.
+description: Fornece padrões e antipadrões para testes confiáveis, observáveis e resistentes a falsos positivos.
 ---
 
 # sda-testing-best-practices
@@ -87,7 +72,7 @@ Padrões que sobrevivem a refactor. Aplicação em [references/padroes.md](refer
 9. **Real systems on the critical path** — pelo menos 1 teste por feature atravessa fronteira real.
 10. **Contract tests** — provider e consumer compartilham contrato versionado (OpenAPI, Pact, protobuf).
 11. **Mutation score** — meça quão bem os testes detectam mutações; cobertura sozinha mente.
-12. **Page Object Model collapsado** — POM é ferramenta, não religião. Inline simples > POM complexo quando reuso é baixo.
+12. **Page Object profile collapsado** — POM é ferramenta, não religião. Inline simples > POM complexo quando reuso é baixo.
 13. **Repository sobre query layer** — nunca mocke o próprio Repository para testar Repository. Extraia interface mínima sobre a query layer gerada (SQLC/Prisma/jOOQ) no próprio repository; teste mocka a interface, SUT é o Repository real.
 14. **Fail-fast testável** — extraia validação de boot como função pura que retorna erro/resultado (ex.: `validateConfig(cfg) -> error`); o caller decide abortar (log + exit não-zero). Nunca aborte o processo inline dentro do construtor (`log.Fatal`/`os.Exit`/`exit()`/`throw` não-capturável no boot) — torna o caminho intestável sem fork de subprocesso. Vale em qualquer stack (Go, Node, Python, Dart, JVM).
 
@@ -101,11 +86,11 @@ Catálogo completo em [references/antipadroes.md](references/antipadroes.md). Re
 - **Flakiness** (3) — `sleep`/timeout fixo, dependência de ordem, inputs não-determinísticos (`Date.now()`, RNG, locale).
 - **Mock misuse** (6) — **assertion em mock auto-setado** (mock-driven confidence), mock drift, over-mock de filhos, mock incompleto, mock em camada errada, **mock do próprio repository (AP-27)**.
 - **Process** (12) — coverage como vaidade, happy-path only, beforeAll eterno, cleanup em afterEach, magic strings, testar third-party, quarentena-cemitério, **retry-as-fix**, duplicação cross-layer, enfraquecer teste para passar, **duplicata semântica (AP-26)**, **fail-fast intestável (AP-28)**.
-- **AI-specific** — absorvidos nos 7 gates de `references/ai-escreve-testes.md`.
+- **AI-specific** — absorvidos nos 7 validation de `references/ai-escreve-testes.md`.
 
 ---
 
-## Gates obrigatórios para agentes (7)
+## validation obrigatórios para agentes (7)
 
 Conteúdo verbatim em [references/ai-escreve-testes.md](references/ai-escreve-testes.md). Cada caso de teste gerado por agente DEVE atravessar:
 

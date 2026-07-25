@@ -1,30 +1,6 @@
-﻿---
+---
 name: sda-curate-project-rules
-description: |
-  Decide se uma convenção, decisão ou padrão merece virar regra de projeto
-  (em CLAUDE.md, em `.claude/rules/*.md` ou equivalente do projeto host) —
-  e, se merece, com que escopo, matcher e forma. Use SEMPRE que o usuário
-  for adicionar, atualizar ou auditar regras do projeto; perguntar "vale
-  uma regra?", "documenta isso no CLAUDE.md?", "isso é regra?", "adiciona
-  ao .claude/rules"; revisar diff de CLAUDE.md ou rules procurando bloat,
-  redundância ou conteúdo apodrecido; ou estiver prestes a escrever uma
-  linha nova em qualquer rule. Acione também quando ele descrever uma
-  convenção/decisão e pedir para "deixar isso registrado" — mesmo sem
-  usar a palavra "regra".
-when_to_use: |
-  - Decidir se um item entra em rule global, rule com escopo, ou em lugar nenhum.
-  - Escrever uma linha nova em CLAUDE.md ou em rule do projeto host.
-  - Definir/ajustar o matcher (escopo de carregamento) de uma rule.
-  - Revisar/limpar rules existentes (auditoria, "isso ainda faz sentido?").
-  - Receber feedback "X foi feito errado" e decidir se vira regra.
-  - Migrar conteúdo entre rule global ↔ rule de escopo.
-do_not_invoke_for: |
-  - Estabelecer do zero as convenções de um TEMA arquitetural inteiro (DB, HTTP, testes...) — isso é a `sda-rule-create` (autoria greenfield guiada); a curate cura regras que emergem de fatos/feedback.
-  - Escrever PRD, spec, tech-spec, ADR, taskcard (conteúdo de feature, não regra global).
-  - Atualizar README ou docs do site.
-  - Editar memória (memória é estado, não regra).
-  - Configurações de hook, permissões ou settings.json.
-disable-model-invocation: true
+description: Avalia candidatos a regras e promove apenas padrões recorrentes, verificáveis e úteis ao projeto.
 ---
 
 # sda-curate-project-rules
@@ -41,7 +17,7 @@ Antes de propor qualquer coisa, faça uma varredura rápida (≤60s) para descob
 
 | O que descobrir | Onde olhar | Por quê |
 |---|---|---|
-| **Onde moram as rules** | `.claude/rules/`, `.cursor/rules/`, `.windsurfrules`, `CLAUDE.md`, `AGENTS.md`, `docs/rules/` — o que existir | Convenção do host. Não invente diretório novo. **Se o host roda o framework sda**: só `.claude/rules/` e `CLAUDE.md` são vistos pelos gates (QA/Tech Review) — gravar noutro destino significa que os gates não aplicarão a regra; sinalize o trade-off. |
+| **Onde moram as rules** | `.agents/rules/`, `.cursor/rules/`, `.windsurfrules`, `AGENTS.md`, `AGENTS.md`, `docs/rules/` — o que existir | Convenção do host. Não invente diretório novo. **Se o host roda o framework sda**: só `.agents/rules/` e `AGENTS.md` são vistos pelos validation (QA/Tech Review) — gravar noutro destino significa que os validation não aplicarão a regra; sinalize o trade-off. |
 | **Que frontmatter as rules usam** | Abra 1–2 rules existentes e leia o YAML do topo | Replicar o estilo. Campos comuns: `description`, `paths`/`globs`/`applies_to`, `when_to_use`, `auto-load`. |
 | **Como expressam matchers** | Mesmo frontmatter — campo de glob/path | Decide se a próxima rule vai precisar/herdar esse campo. |
 | **Que rules são globais vs com escopo** | Quais não têm matcher (ou têm matcher trivial tipo `"**"`) vs quais têm globs específicos | Você precisa saber em qual bucket sua rule cai. |
@@ -59,7 +35,7 @@ Três camadas, cada uma com dono:
 
 | Camada | Onde mora (típico) | Estabilidade | Função |
 |---|---|---|---|
-| **Modelo mental + decisões + comandos globais** | `CLAUDE.md` (raiz) | Estável (meses) | Orientação que todo agente precisa em toda sessão. |
+| **Modelo mental + decisões + comandos globais** | `AGENTS.md` (raiz) | Estável (meses) | Orientação que todo agente precisa em toda sessão. |
 | **Detalhes operacionais por domínio/área** | Rule com matcher (path glob) | Vivo (semanas) | Convenções específicas. Só carrega quando relevante. |
 | **Estado, feature em andamento, contexto efêmero** | Memória, PRD, spec, ADR, git log | Volátil (dias) | Não é regra. Não entra. |
 
@@ -137,13 +113,13 @@ Esta é a parte que **mais importa** e que costuma ser ignorada.
 
 | Escopo | O que é | Custo | Quando vale |
 |---|---|---|---|
-| **Global** (sem matcher, ou no CLAUDE.md) | Carrega em **toda** sessão | Polui contexto sempre | Vale só se a regra é mesmo transversal e estável. |
+| **Global** (sem matcher, ou no AGENTS.md) | Carrega em **toda** sessão | Polui contexto sempre | Vale só se a regra é mesmo transversal e estável. |
 | **Por área/path** (matcher com globs) | Carrega **só** quando agente toca o escopo | Não polui fora do escopo, mas pode não disparar quando deveria | Default para detalhes operacionais de um workflow/módulo/domínio. |
-| **Sem rule, apenas link no código/CLAUDE.md** | Não carrega — só é lida quando o agente segue o link | Custo mínimo | Quando o conteúdo é raro de precisar ou já existe em código que o agente vai ler de qualquer forma. |
+| **Sem rule, apenas link no código/AGENTS.md** | Não carrega — só é lida quando o agente segue o link | Custo mínimo | Quando o conteúdo é raro de precisar ou já existe em código que o agente vai ler de qualquer forma. |
 
 ### Eixo de aplicação: geração vs execução (decida ANTES do glob)
 
-> Erro mais comum e mais silencioso: pensar o matcher só como "onde o código mora". Uma convenção que governa **como o código é produzido** já é decidida **na geração** da tech-spec/scope/tasks (nomes, idioma, assinaturas, estrutura) — muito antes de qualquer arquivo de código existir. Se o matcher aponta só para `src/**`, a rule **não carrega na geração** → a spec sai sem a convenção e o executor herda o erro. (Caso real: `code-standards` com `paths: ["src/**"]` mandando "código em inglês" — ignorada ao gerar a tech-spec, porque a geração toca `.claude/skills/sda-*generate*/**` e `docs/specs/**`, nunca `src/**`.)
+> Erro mais comum e mais silencioso: pensar o matcher só como "onde o código mora". Uma convenção que governa **como o código é produzido** já é decidida **na geração** da tech-spec/scope/tasks (nomes, idioma, assinaturas, estrutura) — muito antes de qualquer arquivo de código existir. Se o matcher aponta só para `src/**`, a rule **não carrega na geração** → a spec sai sem a convenção e o executor herda o erro. (Caso real: `code-standards` com `paths: ["src/**"]` mandando "código em inglês" — ignorada ao gerar a tech-spec, porque a geração toca `.agents/skills/sda-*generate*/**` e `docs/specs/**`, nunca `src/**`.)
 
 Classifique a rule por **intenção**:
 
@@ -152,7 +128,7 @@ Classifique a rule por **intenção**:
 | **De produção** | idioma, naming, arquitetura, camadas, error handling, DI, testes, contratos | **geração + execução** | código **+** skills geradoras/executoras **+** artefatos (`docs/specs/**`, `docs/prds/**`) — ou **global** se transversal |
 | **Local** | regra restrita a um módulo/arquivo/borda | só execução, naquele escopo | glob de código estreito |
 
-> O mecanismo é o mesmo que faz as próprias rules do framework carregarem na geração: elas casam `.claude/skills/sda-*/**` (o path da skill ativa), não só os artefatos. Replique isso para rules de produção do host.
+> O mecanismo é o mesmo que faz as próprias rules do framework carregarem na geração: elas casam `.agents/skills/sda-*/**` (o path da skill ativa), não só os artefatos. Replique isso para rules de produção do host.
 
 ### Quando a rule **precisa** de matcher
 
@@ -161,7 +137,7 @@ Classifique a rule por **intenção**:
 - Vale só para um **tipo de arquivo** (ex.: `**/*.handler.go`, `**/*.sql`).
 - Aplica a **paths bem demarcados** que o frontmatter do projeto host suporta expressar.
 
-### Quando a rule **dispensa** matcher (vai global / CLAUDE.md)
+### Quando a rule **dispensa** matcher (vai global / AGENTS.md)
 
 - É **modelo mental** do projeto (mapa de onde mora o quê).
 - É **comando** que todo agente precisa em toda sessão (`make X` antes de Y).
@@ -171,14 +147,14 @@ Classifique a rule por **intenção**:
 
 ### Como escolher os globs do matcher
 
-1. **Comece estreito** (rule local). Glob amplo demais transforma rule de escopo em rule global disfarçada.
+1. **Comece estreito** (rule local). busca por arquivos amplo demais transforma rule de escopo em rule global disfarçada.
 2. **Cubra os caminhos onde a regra realmente se aplica.** Não inclua path "porque pode ser útil".
 3. **Se for rule de produção, cubra a geração — não só o código.** Quando a convenção molda a tech-spec/scope/tasks (idioma, naming, arquitetura, error handling, DI, testes, contratos), o matcher tem de carregar **quando a geradora roda**, senão a spec ignora a regra. Se o host roda sda, some ao glob de código:
    ```yaml
    paths:
      - "<glob de código onde a convenção se aplica>"   # execução
-     - ".claude/skills/sda-*generate*/**"        # geração (carrega cedo, ao invocar a geradora)
-     - ".claude/skills/sda-*-run*/**"            # execução orquestrada
+     - ".agents/skills/sda-*generate*/**"        # geração (carrega cedo, ao invocar a geradora)
+     - ".agents/skills/sda-*-run*/**"            # execução orquestrada
      - "docs/specs/**"                                  # artefatos (rede de segurança)
      - "docs/prds/**"
    ```
@@ -200,10 +176,10 @@ Classifique a rule por **intenção**:
 Depois que o item passou no teste de fricção, decida na ordem:
 
 1. **Já existe rule equivalente?** → propõe **edição** em vez de criar nova.
-2. **A regra é global e estável?** → CLAUDE.md (ou rule global do host, se ele tem essa convenção).
+2. **A regra é global e estável?** → AGENTS.md (ou rule global do host, se ele tem essa convenção).
 3. **A regra pertence a um domínio/workflow já com rule?** → adicione lá; ajuste o matcher se necessário.
 4. **A regra pertence a um domínio/workflow **sem** rule ainda E vai ter ≥3 regras?** → crie rule nova, defina matcher estreito.
-5. **A regra é só uma**? → adicione na rule do domínio mais próximo, ou aceite que vai para CLAUDE.md como item solto. Não crie arquivo para uma linha.
+5. **A regra é só uma**? → adicione na rule do domínio mais próximo, ou aceite que vai para AGENTS.md como item solto. Não crie arquivo para uma linha.
 
 ---
 
@@ -283,7 +259,7 @@ Como as 4 perguntas + escopo se encadeiam num caso real:
 
 **Pedido**: *"documenta que todo handler valida o input e retorna 400 em erro de validação."*
 
-1. **Discovery**: host usa `.claude/rules/` com frontmatter `paths:`; handlers em `api/handlers/**` (conforme layout do host).
+1. **Discovery**: host usa `.agents/rules/` com frontmatter `paths:`; handlers em `api/handlers/**` (conforme layout do host).
 2. **Fricção**: (1) sem isto faria errado? **sim** — hoje uns retornam 422, outros 500. (2) derivável em 1 min? **parcial** → destila a forma num exemplo inline. (3) apodrece? **não** — é invariante de contrato. (4) porquê? **sim** — "400 é recuperável pelo cliente; 500 dispara alarme falso."
 3. **Escopo**: por path dos handlers (`api/handlers/**` conforme o host) — vale só na borda HTTP, não global.
 4. **Rule gravada** (snippet em sintaxe neutra; na rule real, na sintaxe do host):
@@ -307,7 +283,7 @@ Passes ao revisar rules do host:
 | **Sem exemplo** | Regra abstrata sem micro-exemplo de forma inline | **Gerar o exemplo** (✅/❌) destilando a forma; não apontar arquivo. **Exceção — `status: provisória`**: exemplo ilustrativo (greenfield) é válido; quando o código do tema existir, refine o exemplo contra ele e promova a `status: estável`. Provisória antiga sem código é candidata a revisão consciente. |
 | **Sem porquê** | Regra crítica sem racional | Adicionar motivo ou rebaixar para "convenção" sem o tom forte. |
 | **Óbvio do código** | Coisa que `grep` resolve em 30s | Remover. |
-| **Matcher amplo demais** | Glob `**` ou path raiz numa rule de detalhe | Estreitar ou promover a global. |
+| **Matcher amplo demais** | busca por arquivos `**` ou path raiz numa rule de detalhe | Estreitar ou promover a global. |
 | **Matcher estreito demais** | Rule não carrega onde se aplica | Adicionar paths faltantes. |
 | **Produção sem cobertura de geração** | Rule de convenção (idioma/naming/arquitetura) com matcher só de código (`src/**`, `**/*.go`) — não carrega quando a tech-spec/scope é gerada | Adicionar paths de geração (`sda-*generate*`, `docs/specs/**`) ou promover a global. **Pergunta de teste**: "a tech-spec desta feature respeitou esta convenção?" Se não, é este passe. |
 | **Matcher inexistente onde devia existir** | Rule global mas conteúdo é só de um domínio | Mover para rule de escopo ou adicionar matcher. |
