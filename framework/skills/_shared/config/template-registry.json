@@ -1,0 +1,313 @@
+{
+  "version": 1,
+  "description": "Registro canônico de todos os templates do SpecDrivenAgent v2. Usado pela skill sda-template-resolve para resolução em 4 níveis (overrides > presets > extensions > core).",
+  "resolution_order": ["overrides", "presets", "extensions", "core"],
+  "templates": [
+    {
+      "id": "adr",
+      "path": ".agents/skills/sda-adr-create/assets/adr-template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-adr-create",
+      "consumers": ["sda-adr-create", "sda-adr-bootstrap", "sda-adr-supersede"],
+      "description": "Canonical Nygard-style ADR template (86 lines)"
+    },
+    {
+      "id": "challenge-checklist-techspec",
+      "path": ".agents/skills/sda-challenge-spec/assets/challenge-checklist-techspec.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-challenge-spec",
+      "consumers": ["sda-challenge-spec"],
+      "description": "QA checklist for challenging SDD tech specs (80 lines, 8 dimensions A-H)"
+    },
+    {
+      "id": "challenge-checklist-scope",
+      "path": ".agents/skills/sda-challenge-spec/assets/challenge-checklist-scope.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-challenge-spec",
+      "consumers": ["sda-challenge-spec"],
+      "description": "QA checklist for challenging miniSpec scopes (71 lines, 8 dimensions A-H)"
+    },
+    {
+      "id": "design-system",
+      "path": ".agents/skills/sda-design-system-bootstrap/assets/design-system-template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-design-system-bootstrap",
+      "consumers": ["sda-design-system-bootstrap"],
+      "description": "Design system document template (143 lines)"
+    },
+    {
+      "id": "debt-intent",
+      "path": ".agents/skills/sda-debt-resolution/assets/debt-intent-template.md",
+      "syntax": "control-flow",
+      "variables": ["feature", "version", "parent_version", "variant", "data", "count_selecionados", "count_coletado", "count_ignorados", "tempo_estimado_min", "agent_name", "N"],
+      "owner": "sda-debt-resolution",
+      "consumers": ["sda-debt-resolution"],
+      "description": "Intent template for debt-cleanup version"
+    },
+    {
+      "id": "debt-scope",
+      "path": ".agents/skills/sda-debt-resolution/assets/debt-scope-template.md",
+      "syntax": "control-flow",
+      "variables": ["feature", "version", "parent_version", "variant", "data", "count_selecionados", "count_coletado", "debitos_selecionados", "debitos_ignorados", "arquivos_consolidados", "N", "agent_name"],
+      "owner": "sda-debt-resolution",
+      "consumers": ["sda-debt-resolution"],
+      "description": "Scope template for debt-cleanup version. Uses {{#each}}, {{#if}}, {{#unless}}"
+    },
+    {
+      "id": "debt-task-plan",
+      "path": ".agents/skills/sda-debt-resolution/assets/debt-task-plan-template.md",
+      "syntax": "control-flow",
+      "variables": ["feature", "version", "parent_version", "variant", "data", "count_selecionados", "tasks", "N", "agent_name", "arquivos_consolidados"],
+      "owner": "sda-debt-resolution",
+      "consumers": ["sda-debt-resolution"],
+      "description": "Task plan template for debt-cleanup version. Uses {{#each}}"
+    },
+    {
+      "id": "debt-task",
+      "path": ".agents/skills/sda-debt-resolution/assets/debt-task-template.md",
+      "syntax": "control-flow",
+      "variables": ["n", "id_debito", "titulo", "risk", "validation", "feature", "version", "parent_version", "origem_task_parent", "categoria", "severidade", "arquivo", "correcao_sugerida", "correcao_sugerida_curta", "linha", "origem_linha", "descricao", "classificacao_llm", "justificativa_llm", "custo_estimado_min", "risco_regressao", "N"],
+      "owner": "sda-debt-resolution",
+      "consumers": ["sda-debt-resolution"],
+      "description": "Individual debt-resolution task template. Uses {{#if linha}}"
+    },
+    {
+      "id": "generate-claude-md",
+      "path": ".agents/skills/sda-generate-claude-md/assets/project-instructions-template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-generate-claude-md",
+      "consumers": ["sda-generate-claude-md"],
+      "description": "Checklist template for project instructions (30 lines)"
+    },
+    {
+      "id": "design-web",
+      "path": ".agents/skills/sda-generate-design/assets/design_template_web.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-generate-design",
+      "consumers": ["sda-generate-design"],
+      "description": "Visual design spec for web (156 lines)"
+    },
+    {
+      "id": "design-mobile",
+      "path": ".agents/skills/sda-generate-design/assets/design_template_mobile.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-generate-design",
+      "consumers": ["sda-generate-design"],
+      "description": "Visual design spec for mobile (146 lines)"
+    },
+    {
+      "id": "minispec-intent",
+      "path": ".agents/skills/sda-minispec-generate-intent/assets/intent-template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-intent",
+      "consumers": ["sda-minispec-generate-intent"],
+      "description": "Intent document template (45 lines)"
+    },
+    {
+      "id": "minispec-scope-web",
+      "path": ".agents/skills/sda-minispec-generate-scope/assets/scope_template_web.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-scope",
+      "consumers": ["sda-minispec-generate-scope"],
+      "description": "Scope document for web (98 lines)"
+    },
+    {
+      "id": "minispec-scope-mobile",
+      "path": ".agents/skills/sda-minispec-generate-scope/assets/scope_template_mobile.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-scope",
+      "consumers": ["sda-minispec-generate-scope"],
+      "description": "Scope document for mobile (114 lines)"
+    },
+    {
+      "id": "minispec-scope-backend",
+      "path": ".agents/skills/sda-minispec-generate-scope/assets/scope_template_backend.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-scope",
+      "consumers": ["sda-minispec-generate-scope"],
+      "description": "Scope document for backend (138 lines)"
+    },
+    {
+      "id": "minispec-task-plan",
+      "path": ".agents/skills/sda-minispec-generate-tasks/assets/task_plan_template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-tasks",
+      "consumers": ["sda-minispec-generate-tasks"],
+      "description": "miniSpec task plan template (88 lines)"
+    },
+    {
+      "id": "minispec-task",
+      "path": ".agents/skills/sda-minispec-generate-tasks/assets/task_template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-minispec-generate-tasks",
+      "consumers": ["sda-minispec-generate-tasks"],
+      "description": "miniSpec individual task template (175 lines)"
+    },
+    {
+      "id": "pre-refinement",
+      "path": ".agents/skills/sda-pre-refinement/assets/pre-refinement-template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-pre-refinement",
+      "consumers": ["sda-pre-refinement"],
+      "description": "Tree-of-Thought brainstorm template (247 lines)"
+    },
+    {
+      "id": "sdd-prd",
+      "path": ".agents/skills/sda-sdd-generate-prd/assets/prd_template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-prd",
+      "consumers": ["sda-sdd-generate-prd"],
+      "description": "Product Requirements Document template (128 lines)"
+    },
+    {
+      "id": "sdd-task-plan",
+      "path": ".agents/skills/sda-sdd-generate-task-plan/assets/task_plan_template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-task-plan",
+      "consumers": ["sda-sdd-generate-task-plan"],
+      "description": "SDD task plan template (96 lines)"
+    },
+    {
+      "id": "sdd-task",
+      "path": ".agents/skills/sda-sdd-generate-task-plan/assets/task_template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-task-plan",
+      "consumers": ["sda-sdd-generate-task-plan"],
+      "description": "SDD individual task template (192 lines)"
+    },
+    {
+      "id": "tech-spec-web",
+      "path": ".agents/skills/sda-sdd-generate-tech-spec/assets/tech_spec_template_web.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-tech-spec",
+      "consumers": ["sda-sdd-generate-tech-spec"],
+      "description": "Technical specification for web (374 lines, 20 sections)"
+    },
+    {
+      "id": "tech-spec-mobile",
+      "path": ".agents/skills/sda-sdd-generate-tech-spec/assets/tech_spec_template_mobile.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-tech-spec",
+      "consumers": ["sda-sdd-generate-tech-spec"],
+      "description": "Technical specification for mobile (408 lines, 21 sections)"
+    },
+    {
+      "id": "tech-spec-backend",
+      "path": ".agents/skills/sda-sdd-generate-tech-spec/assets/tech_spec_template_backend.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-sdd-generate-tech-spec",
+      "consumers": ["sda-sdd-generate-tech-spec"],
+      "description": "Technical specification for backend (481 lines, 22 sections)"
+    },
+    {
+      "id": "taskcard",
+      "path": ".agents/skills/sda-taskcard-generate/assets/template.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-taskcard-generate",
+      "consumers": ["sda-taskcard-generate"],
+      "description": "Single TaskCard template (216 lines)"
+    },
+    {
+      "id": "readme-base",
+      "path": ".agents/skills/sda-readme-generator/templates/readme-base.md",
+      "syntax": "variable",
+      "variables": ["PROJECT_NAME", "ONE_LINE_DESCRIPTION", "BADGES", "DEMO_PATH", "WHY_PARAGRAPH", "TABLE_OF_CONTENTS", "FEATURE_1", "FEATURE_2", "PREREQ_1", "INSTALL_COMMANDS", "LANGUAGE", "MINIMAL_WORKING_EXAMPLE", "OPT", "DEFAULT", "DESC", "API_OR_LINK", "TEST_COMMAND", "CONTRIBUTING_OR_LINK", "ROADMAP_ITEM", "LICENSE_NAME", "LICENSE_PATH", "CONTACT"],
+      "owner": "sda-readme-generator",
+      "consumers": ["sda-readme-generator"],
+      "description": "Master README template using {{PLACEHOLDER}} syntax (migrating to {{variable}})"
+    },
+    {
+      "id": "readme-service",
+      "path": ".agents/skills/sda-readme-generator/templates/variants/service.md",
+      "syntax": "variable",
+      "variables": ["BUILD_COMMAND", "ARCHITECTURE_OR_DIAGRAM"],
+      "owner": "sda-readme-generator",
+      "consumers": ["sda-readme-generator"],
+      "description": "README variant for backend/API services (48 lines)"
+    },
+    {
+      "id": "readme-library",
+      "path": ".agents/skills/sda-readme-generator/templates/variants/library.md",
+      "syntax": "variable",
+      "variables": ["BUILD_COMMAND"],
+      "owner": "sda-readme-generator",
+      "consumers": ["sda-readme-generator"],
+      "description": "README variant for libraries (46 lines)"
+    },
+    {
+      "id": "readme-cli",
+      "path": ".agents/skills/sda-readme-generator/templates/variants/cli.md",
+      "syntax": "variable",
+      "variables": ["BUILD_COMMAND"],
+      "owner": "sda-readme-generator",
+      "consumers": ["sda-readme-generator"],
+      "description": "README variant for CLI tools (48 lines)"
+    },
+    {
+      "id": "readme-app",
+      "path": ".agents/skills/sda-readme-generator/templates/variants/app.md",
+      "syntax": "variable",
+      "variables": ["BUILD_COMMAND"],
+      "owner": "sda-readme-generator",
+      "consumers": ["sda-readme-generator"],
+      "description": "README variant for UI applications (54 lines)"
+    },
+    {
+      "id": "checklist-prd",
+      "path": ".agents/skills/sda-checklist-generate/assets/checklist-prd.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-checklist-generate",
+      "consumers": ["sda-checklist-generate"],
+      "description": "Checklist de qualidade para PRD (21 itens, 5 dimensões)"
+    },
+    {
+      "id": "checklist-intent",
+      "path": ".agents/skills/sda-checklist-generate/assets/checklist-intent.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-checklist-generate",
+      "consumers": ["sda-checklist-generate"],
+      "description": "Checklist de qualidade para INTENT (13 itens, 4 dimensões)"
+    },
+    {
+      "id": "checklist-tech-spec",
+      "path": ".agents/skills/sda-checklist-generate/assets/checklist-tech-spec.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-checklist-generate",
+      "consumers": ["sda-checklist-generate"],
+      "description": "Checklist de qualidade para Tech Spec (24 itens, 6 dimensões)"
+    },
+    {
+      "id": "checklist-scope",
+      "path": ".agents/skills/sda-checklist-generate/assets/checklist-scope.md",
+      "syntax": "llm-direct",
+      "variables": [],
+      "owner": "sda-checklist-generate",
+      "consumers": ["sda-checklist-generate"],
+      "description": "Checklist de qualidade para SCOPE (16 itens, 5 dimensões)"
+    }
+  ]
+}

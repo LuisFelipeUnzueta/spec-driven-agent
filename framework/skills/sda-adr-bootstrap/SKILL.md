@@ -10,7 +10,7 @@ Princípios invioláveis:
 1. **Decisão com confirmação humana** — NUNCA criar ADR sem aprovação explícita. Toda detecção é proposta, não fato consumado.
 2. **Token-efficient by design** — leituras mínimas e focadas (não varrer arquivos inteiros sem necessidade).
 3. **Single source of truth** — ADR captura a decisão transversal; NUNCA duplica conteúdo de PRD/Tech Alignment (`tech-alignment.md`)/Tech Spec.
-4. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias do template ou script. Usa o template canônico de `sda-adr-create` (`adr.template`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths essenciais vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
+4. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias do template ou script. Usa o template canônico de `sda-adr-create` (registrado no template registry como `adr`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths essenciais vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Para resolução com suporte a overrides/presets/extensions, use `sda-template-resolve adr`.
 
 ---
 

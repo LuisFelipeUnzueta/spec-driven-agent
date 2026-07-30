@@ -188,6 +188,8 @@ Siga esta sequência, fazendo **apenas uma pergunta por vez** e aguardando a res
 
 Use o template oficial em [intent-template.md](assets/intent-template.md). Todas as seções devem ser preenchidas. Se uma seção não se aplica, indique explicitamente "N/A — [justificativa]".
 
+> **Template registry**: template registrado como `minispec-intent`. Use `sda-template-resolve minispec-intent` para resolver com suporte a overrides/presets/extensions.
+
 ---
 
 ## FASE 5 — Saída Esperada (após salvar)
@@ -204,6 +206,8 @@ Essa Intent representa corretamente o que você quer resolver? (sim/não)
 
 - **NÃO** exiba a INTENT completa no terminal — o usuário lerá o arquivo diretamente.
 - **NÃO** inicie `sda-minispec-generate-scope` automaticamente.
+
+> **Checklist recomendado**: antes de gerar o SCOPE, rode `sda-checklist-generate <intent_path>` para validar a qualidade da INTENT. O checklist verifica se o objetivo está claro e se não há detalhes técnicos indevidos.
 - **NÃO** sugira executar o próximo comando.
 - **NÃO** sugira próximos passos do framework.
 - Após confirmação do usuário, execute o **Estado do Pipeline** (FASE 6) e encerre.

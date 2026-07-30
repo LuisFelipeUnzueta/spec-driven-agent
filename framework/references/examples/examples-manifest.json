@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "description": "Catálogo de exemplos canônicos de código por stack. Skills de geração consultam este manifesto via sda-example-lookup para garantir consistência de padrões entre features.",
+  "examples": [
+    {
+      "id": "go-handler",
+      "path": "backend-go/handler-example.go",
+      "tags": ["go", "handler", "result-pattern", "use-case"],
+      "description": "Handler canônico Go com Result pattern, injeção de dependência e tratamento de erro",
+      "context": ["handler-implement", "use-case-implement"],
+      "stack": "go"
+    },
+    {
+      "id": "go-repository",
+      "path": "backend-go/repository-example.go",
+      "tags": ["go", "repository", "persistence", "data-access"],
+      "description": "Repository pattern em Go com interface, implementação concreta e injeção de dependência",
+      "context": ["repository-implement", "data-access"],
+      "stack": "go"
+    },
+    {
+      "id": "go-middleware",
+      "path": "backend-go/middleware-example.go",
+      "tags": ["go", "middleware", "http", "auth", "logging"],
+      "description": "Middleware HTTP em Go com padrão de logging, autenticação e recuperação de panics",
+      "context": ["middleware-implement", "http-handler"],
+      "stack": "go"
+    },
+    {
+      "id": "dotnet-controller",
+      "path": "backend-dotnet/controller-example.cs",
+      "tags": ["dotnet", "controller", "aspnet", "api", "rest"],
+      "description": "Controller ASP.NET Core com injeção de dependência, validação e Result pattern",
+      "context": ["controller-implement", "api-endpoint"],
+      "stack": "dotnet"
+    },
+    {
+      "id": "dotnet-handler",
+      "path": "backend-dotnet/handler-example.cs",
+      "tags": ["dotnet", "handler", "mediator", "cqs", "result-pattern"],
+      "description": "Handler .NET com Command/Query separation, validação e Result<T>",
+      "context": ["handler-implement", "use-case-implement"],
+      "stack": "dotnet"
+    },
+    {
+      "id": "dotnet-repository",
+      "path": "backend-dotnet/repository-example.cs",
+      "tags": ["dotnet", "repository", "efcore", "persistence"],
+      "description": "Repository pattern em .NET com Entity Framework Core, interface e injeção",
+      "context": ["repository-implement", "data-access"],
+      "stack": "dotnet"
+    },
+    {
+      "id": "node-handler",
+      "path": "node-backend/handler-example.ts",
+      "tags": ["node", "typescript", "handler", "express", "result-pattern"],
+      "description": "Handler Node.js/TypeScript com Express, Result pattern e validação",
+      "context": ["handler-implement", "api-endpoint"],
+      "stack": "node"
+    },
+    {
+      "id": "node-repository",
+      "path": "node-backend/repository-example.ts",
+      "tags": ["node", "typescript", "repository", "typeorm", "persistence"],
+      "description": "Repository pattern em Node.js/TypeScript com TypeORM e injeção",
+      "context": ["repository-implement", "data-access"],
+      "stack": "node"
+    },
+    {
+      "id": "flutter-bloc",
+      "path": "flutter-app/bloc-example.dart",
+      "tags": ["flutter", "bloc", "state-management", "dart"],
+      "description": "BLoC pattern em Flutter com estado, eventos e injeção de dependência",
+      "context": ["bloc-implement", "state-management"],
+      "stack": "flutter"
+    },
+    {
+      "id": "flutter-screen",
+      "path": "flutter-app/screen-example.dart",
+      "tags": ["flutter", "screen", "widget", "ui"],
+      "description": "Tela Flutter com LayoutBuilder, BLoC consumer e tratamento de estados",
+      "context": ["screen-implement", "ui-implement"],
+      "stack": "flutter"
+    }
+  ]
+}

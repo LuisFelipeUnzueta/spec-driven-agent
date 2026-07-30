@@ -19,6 +19,36 @@
 - **shared.rule_candidates.path**: `/docs/specs/features/{feature}/{version}/_run/rule-candidates.md`
 - **shared.test_cases.path**: `/docs/specs/features/{feature}/{version}/_run/test-cases.json`
 
+## Template Paths
+
+O template registry centraliza todos os templates canônicos do framework e permite resolução em 4 níveis: **overrides > presets > extensions > core**. Skills NUNCA devem usar paths hardcoded de template — devem SEMPRE consultar o registry via `sda-template-resolve <template-id>`.
+
+- **template_registry.path**: `.agents/skills/_shared/config/template-registry.json`
+- **templates_discovery_order**: `["overrides", "presets", "extensions", "core"]`
+
+### Níveis de Resolução
+
+| Nível | Path | Quem cria |
+|-------|------|-----------|
+| **overrides** | `.agents/templates/<template-id>.md` | Projeto (override total) |
+| **presets** | `.agents/presets/<template-id>.md` | Projeto ou framework (preset reutilizável) |
+| **extensions** | `.agents/extensions.yml` → `templates.<template-id>.strategy` | Projeto (composição) |
+| **core** | `template_registry.json` → `templates[].path` | Framework (path original) |
+
+### Estratégias de Composição (nível extensions)
+
+Quando um template é resolvido via `extensions.yml`, a estratégia determina como o conteúdo do override é combinado com o core:
+
+| Strategy | Comportamento |
+|----------|---------------|
+| `replace` | Substitui o template core completamente pelo override |
+| `prepend` | Insere conteúdo do override antes do template core |
+| `append` | Insere conteúdo do override após o template core |
+| `wrap:before` | Insere marcador de abertura antes do core |
+| `wrap:after` | Insere marcador de fechamento após o core |
+
+> Skills que geram documentos DEVEM usar `sda-template-resolve <template-id>` para obter o path final do template, em vez de referenciar o path do core diretamente.
+
 Substitua todas as variáveis antes de ler ou escrever. Writers usam somente os paths v2; não criam aliases v1.
 
 ## Task v2

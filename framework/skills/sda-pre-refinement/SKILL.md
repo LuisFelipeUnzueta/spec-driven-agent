@@ -188,6 +188,8 @@ A partir das decisões das Fases 1-2, consolide:
 - Toda afirmação do usuário → **FATO**. Toda inferência sua → **`[HIPÓTESE]`**. Toda lacuna → **`[DÚVIDA]`**.
 - Preencha o documento seguindo o [template](assets/pre-refinement-template.md), incluindo a árvore de rumos (seção 4) e a síntese (seção 14).
 
+  > **Template registry**: template registrado como `pre-refinement`. Use `sda-template-resolve pre-refinement` para resolver com suporte a overrides/presets/extensions.
+
 ## Etapa 4 — Recomendação de Framework
 
 Ver seção **Recomendação de Framework** abaixo. Avalie a complexidade que emergiu do brainstorm e preencha a seção 15 do template. É **sugestão, não bloqueio**.

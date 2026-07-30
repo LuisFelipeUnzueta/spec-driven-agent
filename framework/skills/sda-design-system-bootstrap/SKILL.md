@@ -144,7 +144,9 @@ Percorra os 5 eixos na forma canônica do nó (A/B/C + recomendação). Catálog
 
 ## Fase 3 — Gerar o arquivo (com aprovação)
 
-1. **Folhas da árvore → seções do template.** Preencha o [design-system-template.md](assets/design-system-template.md) — toda seção tem valor ou `N/A — [justificativa]`. Seções condicionais por frente (breakpoints só web; classes de tamanho só mobile).
+1. **Folhas da árvore → seções do template.** Preencha o design-system-template.md — toda seção tem valor ou `N/A — [justificativa]`. Seções condicionais por frente (breakpoints só web; classes de tamanho só mobile).
+
+   > **Template registry**: template registrado como `design-system`. Use `sda-template-resolve design-system` para resolver com suporte a overrides/presets/extensions. Path core: `assets/design-system-template.md`.
 2. **Registre a procedência** de cada grupo de valores: `[derivado]` (path no código), `[figma]` (link/frame), `[usuário]` (questionário).
 3. **Remova os comentários `<!-- LLM-ONLY -->`** do template antes de salvar.
 4. **Apresente o arquivo completo** (ou o merge, em enriquecimento) para aprovação. Só grave após o "ok".

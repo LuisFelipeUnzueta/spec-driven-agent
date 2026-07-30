@@ -239,13 +239,15 @@ A skill `sda-minispec-generate-scope` atua como **hook de detecção de candidat
 
 ### Template (selecionado pela variante)
 
+> **Template registry**: templates registrados como `minispec-scope-web`, `minispec-scope-mobile` e `minispec-scope-backend`. Use `sda-template-resolve minispec-scope:<variant>` (ex: `sda-template-resolve minispec-scope:backend`) para resolver com suporte a overrides/presets/extensions.
+
 Carregue o template oficial conforme a variante decidida em **FASE 0.0**:
 
-| Variante | Template |
-|----------|----------|
-| `web` | [scope_template_web.md](assets/scope_template_web.md) |
-| `mobile` | [scope_template_mobile.md](assets/scope_template_mobile.md) |
-| `backend` | [scope_template_backend.md](assets/scope_template_backend.md) |
+| Variante | Template | Registry ID |
+|----------|----------|-------------|
+| `web` | [scope_template_web.md](assets/scope_template_web.md) | `minispec-scope-web` |
+| `mobile` | [scope_template_mobile.md](assets/scope_template_mobile.md) | `minispec-scope-mobile` |
+| `backend` | [scope_template_backend.md](assets/scope_template_backend.md) | `minispec-scope-backend` |
 
 Todas as seções do template selecionado devem ser preenchidas. Se uma seção não se aplica, indique explicitamente "N/A — [justificativa]". Preencha o campo `Variante` no cabeçalho com o valor escolhido (`web`, `mobile` ou `backend`).
 
@@ -266,6 +268,8 @@ Esse escopo está fechado e aprovado? (sim/não)
 - **NÃO** exiba o SCOPE completo no terminal — o usuário lerá o arquivo diretamente.
 - **NÃO** inicie `sda-minispec-generate-tasks` automaticamente.
 - **NÃO** sugira executar o próximo comando.
+
+> **Checklist recomendado**: antes de gerar as tasks, rode `sda-checklist-generate <scope_path>` para validar a qualidade do escopo. O checklist verifica alinhamento com a INTENT, delimitação e completude.
 - **NÃO** sugira próximos passos do framework.
 - **Se "sim"** → execute a FASE 5 (Estado do Pipeline) e encerre.
 - **Se "não"** → **NÃO atualize o estado** (o state não pode registrar `completed` para um scope reprovado). Colete os ajustes do usuário, revise o `scope.md` e repita esta FASE 4.

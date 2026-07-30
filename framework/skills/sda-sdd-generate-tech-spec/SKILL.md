@@ -114,6 +114,7 @@ Identifique a arquitetura real do projeto:
 - Padrões já estabelecidos no codebase
 - Módulos de injeção de dependências, middlewares, interceptors, helpers
 - Componentes, widgets, hooks ou utilitários reutilizáveis
+- **Exemplos canônicos**: consulte `sda-example-lookup <contexto> <stack>` para obter exemplos de código que servem como ground truth para a stack do projeto. Ex: `sda-example-lookup handler-implement go` retorna o handler canônico Go.
 
 ### 1.5 Mapear dependências reais
 - O que já existe vs o que precisa ser criado
@@ -299,13 +300,15 @@ A skill `sda-sdd-generate-tech-spec` é um **hook** de detecção de ADRs. Após
 
 ### Template (selecionado pela variante)
 
+> **Template registry**: templates registrados como `tech-spec-web`, `tech-spec-mobile` e `tech-spec-backend`. Use `sda-template-resolve tech-spec:<variant>` (ex: `sda-template-resolve tech-spec:backend`) para resolver com suporte a overrides/presets/extensions.
+
 Carregue o template oficial conforme a variante decidida em **FASE 0**:
 
-| Variante | Template |
-|----------|----------|
-| `web` | [tech_spec_template_web.md](assets/tech_spec_template_web.md) (21 seções) |
-| `mobile` | [tech_spec_template_mobile.md](assets/tech_spec_template_mobile.md) (22 seções) |
-| `backend` | [tech_spec_template_backend.md](assets/tech_spec_template_backend.md) (23 seções) |
+| Variante | Template | Registry ID |
+|----------|----------|-------------|
+| `web` | [tech_spec_template_web.md](assets/tech_spec_template_web.md) (21 seções) | `tech-spec-web` |
+| `mobile` | [tech_spec_template_mobile.md](assets/tech_spec_template_mobile.md) (22 seções) | `tech-spec-mobile` |
+| `backend` | [tech_spec_template_backend.md](assets/tech_spec_template_backend.md) (23 seções) | `tech-spec-backend` |
 
 Todas as seções do template selecionado devem ser preenchidas. Se uma seção não se aplica, indique explicitamente "N/A — [justificativa]".
 
@@ -343,6 +346,8 @@ Essa especificação técnica está aprovada? (sim/não)
 **IMPORTANTE:**
 - **NÃO** exiba o Tech Spec completo — apenas o resumo.
 - **NÃO** inicie automaticamente a próxima etapa (TASK PLAN).
+
+> **Checklist recomendado**: antes de gerar o Task Plan, rode `sda-checklist-generate <tech_spec_path>` para validar a qualidade da especificação técnica. O checklist verifica rastreabilidade, completude técnica e tratamento de edge cases.
 - **NÃO** sugira executar o próximo comando do framework.
 - Após confirmação do usuário, execute a **FASE 7 (Estado do Pipeline)** e encerre.
 

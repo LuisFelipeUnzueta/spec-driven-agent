@@ -193,6 +193,8 @@ Siga esta sequência, fazendo **apenas uma pergunta por vez** e aguardando a res
 
 Use o template oficial em [prd_template.md](assets/prd_template.md). Todas as 13 seções devem ser preenchidas. Se uma seção não se aplica, indique explicitamente "N/A — [justificativa]".
 
+> **Template registry**: template registrado como `sdd-prd`. Use `sda-template-resolve sdd-prd` para resolver com suporte a overrides/presets/extensions.
+
 ---
 
 ## FASE 5 — Saída Esperada (após salvar)
@@ -216,6 +218,8 @@ Esse PRD representa corretamente o que você quer? (sim/não)
 **IMPORTANTE:**
 - **NÃO** exiba o PRD completo — apenas o resumo.
 - **NÃO** inicie `sda-sdd-generate-tech-spec` automaticamente.
+
+> **Checklist recomendado**: antes de gerar o Tech Spec, rode `sda-checklist-generate <prd_path>` para validar a qualidade do PRD. O checklist verifica completude, clareza, consistência e mensurabilidade dos requisitos.
 - **NÃO** sugira executar o próximo comando.
 - **NÃO** sugira próximos passos do framework.
 - Após confirmação do usuário, execute o fluxo de **Tech Alignment** (FASE 6) e depois o **Estado do Pipeline** (FASE 7).

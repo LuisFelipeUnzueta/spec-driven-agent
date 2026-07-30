@@ -9,7 +9,7 @@ Princípios invioláveis:
 
 1. **Single source of truth** — ADR NUNCA duplica conteúdo de PRD / Tech Alignment (`tech-alignment.md`) / Tech Spec. Apenas captura a decisão transversal; artefatos de feature apenas referenciam.
 2. **Decisão com confirmação humana** — toda informação da ADR vem do usuário via `interação com o usuário`. NUNCA invente, deduza ou assuma.
-3. **Recursos canônicos centralizados** — esta skill é a **dona do template canônico** (`assets/adr-template.md`, referenciado por `adr.template` em `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`). O script de reindex canônico vive em `sda-adr-reindex` (referenciado por `adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
+3. **Recursos canônicos centralizados** — esta skill é a **dona do template canônico** (`assets/adr-template.md`, registrado no template registry como `adr`). O script de reindex canônico vive em `sda-adr-reindex` (referenciado por `adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Para resolução com suporte a overrides/presets/extensions, use `sda-template-resolve adr`.
 4. **Token-efficient by design** — o próximo ID vem do **nome dos arquivos** (`ls {adr.dir}` — o ID está codificado em `{id}-{slug}.md`); não abra arquivos individuais nem dependa do INDEX (pode estar stale) para isso.
 
 ---

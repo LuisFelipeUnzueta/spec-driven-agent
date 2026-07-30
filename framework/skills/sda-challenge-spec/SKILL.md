@@ -30,6 +30,8 @@ O `sda-challenge-spec` responde: **a spec sobrevive a um interrogatório agressi
 
 Variáveis usadas: `sdd.tech_spec.path`, `minispec.scope.path`, `domain_glossary.global.path`, `domain_glossary.feature.path`, `adr.index_file`, `adr.dir`, `shared.state.path`. Templates definidos em `.agents/skills/_shared/rules/sda-sdd-workflow-rules.md`, `.agents/skills/_shared/rules/sda-minispec-workflow-rules.md`, `.agents/skills/_shared/rules/sda-workflow-rules.md` e `.agents/skills/_shared/rules/sda-adr-workflow-rules.md`.
 
+Templates registrados no registry como `challenge-checklist-techspec` e `challenge-checklist-scope`. Use `sda-template-resolve <template-id>` para resolver com suporte a overrides/presets/extensions.
+
 Resolva `{feature}` e `{version}` do path do artefato recebido como argumento. **NUNCA** use paths hardcoded.
 
 ---

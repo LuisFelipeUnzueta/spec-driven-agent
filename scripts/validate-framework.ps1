@@ -11,6 +11,72 @@ $rolesRoot = Join-Path $repoRoot "framework\roles"
 $errors = New-Object System.Collections.Generic.List[string]
 $totalDescriptionChars = 0
 
+# Template registry validation
+$registryPath = Join-Path $skillsRoot "_shared\config\template-registry.json"
+if (-not (Test-Path -LiteralPath $registryPath)) {
+    [void]$errors.Add("Template registry ausente: $registryPath.")
+} else {
+    try {
+        $registry = [IO.File]::ReadAllText($registryPath) | ConvertFrom-Json
+        if (-not $registry.version -or $registry.version -lt 1) {
+            [void]$errors.Add("Template registry version invalida.")
+        }
+        if (-not $registry.templates -or @($registry.templates).Count -lt 25) {
+            [void]$errors.Add("Template registry com menos de 25 templates: $(@($registry.templates).Count).")
+        }
+        $registryIds = [System.Collections.Generic.HashSet[string]]::new()
+        foreach ($tpl in $registry.templates) {
+            if (-not $tpl.id -or -not $tpl.path -or -not $tpl.owner -or -not $tpl.syntax) {
+                [void]$errors.Add("Template registry: entrada incompleta (id='$($tpl.id)').")
+                continue
+            }
+            if (-not $registryIds.Add($tpl.id)) {
+                [void]$errors.Add("Template registry: ID duplicado '$($tpl.id)'.")
+            }
+
+            # Validate that each core template file exists
+            $resolvedPath = [IO.Path]::GetFullPath((Join-Path $repoRoot $tpl.path.Replace('.agents', 'framework')))
+            if (-not (Test-Path -LiteralPath $resolvedPath)) {
+                [void]$errors.Add("Template registry: path nao encontrado para id='$($tpl.id)': $resolvedPath")
+            }
+        }
+        # Validate resolution order
+        $validOrder = @('overrides', 'presets', 'extensions', 'core')
+        if (-not $registry.resolution_order -or @($registry.resolution_order).Count -ne 4) {
+            [void]$errors.Add("Template registry: resolution_order deve ter 4 niveis.")
+        } else {
+            foreach ($level in $registry.resolution_order) {
+                if ($level -notin $validOrder) {
+                    [void]$errors.Add("Template registry: nivel desconhecido em resolution_order: '$level'.")
+                }
+            }
+        }
+    } catch {
+        [void]$errors.Add("Template registry JSON invalido: $($_.Exception.Message)")
+    }
+}
+
+# Validate template-registry references in SKILL.md files
+$expectedRegistryRefs = @(
+    'sda-adr-create', 'sda-adr-bootstrap', 'sda-adr-supersede',
+    'sda-challenge-spec', 'sda-design-system-bootstrap', 'sda-generate-claude-md',
+    'sda-generate-design', 'sda-minispec-generate-intent', 'sda-minispec-generate-scope',
+    'sda-minispec-generate-tasks', 'sda-pre-refinement', 'sda-sdd-generate-prd',
+    'sda-sdd-generate-task-plan', 'sda-sdd-generate-tech-spec', 'sda-taskcard-generate',
+    'sda-debt-resolution', 'sda-readme-generator'
+)
+foreach ($skillName in $expectedRegistryRefs) {
+    $skillPath = Join-Path $skillsRoot "$skillName\SKILL.md"
+    if (-not (Test-Path -LiteralPath $skillPath)) {
+        [void]$errors.Add("Skill esperada nao encontrada: $skillPath")
+        continue
+    }
+    $text = [IO.File]::ReadAllText($skillPath)
+    if ($text -notmatch 'sda-template-resolve') {
+        [void]$errors.Add("Skill nao referencia sda-template-resolve: $skillName")
+    }
+}
+
 foreach ($skill in Get-ChildItem -LiteralPath $skillsRoot -Recurse -File -Filter "SKILL.md") {
     $text = [IO.File]::ReadAllText($skill.FullName)
     $lines = $text -split "\r?\n"
@@ -38,6 +104,56 @@ foreach ($skill in Get-ChildItem -LiteralPath $skillsRoot -Recurse -File -Filter
         $totalDescriptionChars += $length
         if ($length -gt 200) {
             [void]$errors.Add("Description acima de 200 caracteres: $($skill.FullName) ($length).")
+        }
+    }
+}
+
+# Examples repository validation
+$examplesManifestPath = Join-Path $repoRoot "framework\references\examples\examples-manifest.json"
+if (-not (Test-Path -LiteralPath $examplesManifestPath)) {
+    [void]$errors.Add("Examples manifest ausente: $examplesManifestPath.")
+} else {
+    try {
+        $examplesManifest = [IO.File]::ReadAllText($examplesManifestPath) | ConvertFrom-Json
+        if (-not $examplesManifest.version -or $examplesManifest.version -lt 1) {
+            [void]$errors.Add("Examples manifest version invalida.")
+        }
+        if (-not $examplesManifest.examples -or @($examplesManifest.examples).Count -lt 5) {
+            [void]$errors.Add("Examples manifest com menos de 5 exemplos: $(@($examplesManifest.examples).Count).")
+        }
+        $exampleIds = [System.Collections.Generic.HashSet[string]]::new()
+        foreach ($ex in $examplesManifest.examples) {
+            if (-not $ex.id -or -not $ex.path -or -not $ex.stack) {
+                [void]$errors.Add("Examples manifest: entrada incompleta (id='$($ex.id)').")
+                continue
+            }
+            if (-not $exampleIds.Add($ex.id)) {
+                [void]$errors.Add("Examples manifest: ID duplicado '$($ex.id)'.")
+            }
+            # Validate that each example file exists
+            $exPath = [IO.Path]::GetFullPath((Join-Path $repoRoot "framework\references\examples\$($ex.path)"))
+            if (-not (Test-Path -LiteralPath $exPath)) {
+                [void]$errors.Add("Examples manifest: arquivo nao encontrado para id='$($ex.id)': $exPath")
+            }
+        }
+    } catch {
+        [void]$errors.Add("Examples manifest JSON invalido: $($_.Exception.Message)")
+    }
+}
+
+# Checklist validation
+$checklistSkillPath = Join-Path $skillsRoot "sda-checklist-generate\SKILL.md"
+if (-not (Test-Path -LiteralPath $checklistSkillPath)) {
+    [void]$errors.Add("sda-checklist-generate skill ausente: $checklistSkillPath.")
+} else {
+    $checklistAssets = @(
+        "checklist-prd.md", "checklist-intent.md",
+        "checklist-tech-spec.md", "checklist-scope.md"
+    )
+    foreach ($asset in $checklistAssets) {
+        $assetPath = Join-Path (Split-Path $checklistSkillPath -Parent) "assets\$asset"
+        if (-not (Test-Path -LiteralPath $assetPath)) {
+            [void]$errors.Add("Checklist asset ausente: $assetPath")
         }
     }
 }

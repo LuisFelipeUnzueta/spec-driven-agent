@@ -22,13 +22,15 @@ Você **não escreve um README do zero** a cada vez. Isso produz resultados inco
 
 Os templates vivem **fora deste SKILL.md**, em arquivos próprios:
 
-| Arquivo | Quando usar |
-|---|---|
-| `templates/readme-base.md` | Template-mestre completo. Use como fallback ou para monorepos/projetos mistos. |
-| `templates/variants/library.md` | Biblioteca/pacote publicável (npm, PyPI, pub.dev, crates, Go module). |
-| `templates/variants/cli.md` | Ferramenta de linha de comando. |
-| `templates/variants/app.md` | Aplicação com UI (web, mobile, desktop). |
-| `templates/variants/service.md` | Serviço/backend (API REST/gRPC, worker, fila). |
+> **Template registry**: todos registrados com IDs `readme-base`, `readme-service`, `readme-library`, `readme-cli`, `readme-app`. Use `sda-template-resolve <template-id>` para resolver com suporte a overrides/presets/extensions.
+
+| Arquivo | Uso | Registry ID |
+|---------|-----|-------------|
+| `templates/readme-base.md` | Template-mestre completo. Use como fallback ou para monorepos/projetos mistos. | `readme-base` |
+| `templates/variants/library.md` | Biblioteca/pacote publicável (npm, PyPI, pub.dev, crates, Go module). | `readme-library` |
+| `templates/variants/cli.md` | Ferramenta de linha de comando. | `readme-cli` |
+| `templates/variants/app.md` | Aplicação com UI (web, mobile, desktop). | `readme-app` |
+| `templates/variants/service.md` | Serviço/backend (API REST/gRPC, worker, fila). | `readme-service` |
 | `reference/badges.md` | Snippets shields.io por tipo de CI/registry. Leia ao preencher `{{BADGES}}`. |
 
 O fluxo é sempre: **carregar template → preencher placeholders → podar o que não se aplica → limpar comentários-guia.**

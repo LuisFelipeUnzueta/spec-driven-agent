@@ -211,14 +211,14 @@ Crie `<output_dir>` e preencha 4 artefatos.
 
 #### 4.1 `intent.md`
 
-Use [`assets/debt-intent-template.md`](assets/debt-intent-template.md). Conteúdo essencial:
+Use [`assets/debt-intent-template.md`](assets/debt-intent-template.md) (registry ID: `debt-intent`). Conteúdo essencial:
 - **Objetivo**: "Limpar N débitos técnicos acumulados na v{N} da feature {feature}."
 - **Origem**: link para `<feature_path>/_run/report.md`.
 - **Lista resumida** dos débitos selecionados.
 
 #### 4.2 `scope.md`
 
-Use [`assets/debt-scope-template.md`](assets/debt-scope-template.md). Variante = `backend`/`web`/`mobile` herdada da feature original — leia `<feature_path>/scope.md` (miniSpec) ou a seção 1 do `tech_spec.md` (SDD) para detectar; **se nenhum existir (feature TaskCard)**, leia o campo `Variante` da seção 1 de qualquer card em `tasks/task-*.md`. Se ainda assim indeterminada, pergunte ao usuário.
+Use [`assets/debt-scope-template.md`](assets/debt-scope-template.md) (registry ID: `debt-scope`). Variante = `backend`/`web`/`mobile` herdada da feature original — leia `<feature_path>/scope.md` (miniSpec) ou a seção 1 do `tech_spec.md` (SDD) para detectar; **se nenhum existir (feature TaskCard)**, leia o campo `Variante` da seção 1 de qualquer card em `tasks/task-*.md`. Se ainda assim indeterminada, pergunte ao usuário.
 
 Conteúdo:
 - **Inclui**: lista de débitos selecionados com `arquivo:linha` + correção esperada.
@@ -227,7 +227,7 @@ Conteúdo:
 
 #### 4.3 `task_plan.md`
 
-Use [`assets/debt-task-plan-template.md`](assets/debt-task-plan-template.md). Regra de decomposição:
+Use [`assets/debt-task-plan-template.md`](assets/debt-task-plan-template.md) (registry ID: `debt-task-plan`). Regra de decomposição:
 
 - **1 task por débito** (granularidade decidida em FASE 0 do design).
 - Cada task ganha frontmatter:
@@ -248,7 +248,9 @@ Tabela de tasks:
 
 #### 4.4 `tasks/T{n}.md`
 
-Use [`assets/debt-task-template.md`](assets/debt-task-template.md). Cada task:
+Use [`assets/debt-task-template.md`](assets/debt-task-template.md) (registry ID: `debt-task`). Cada task:
+
+> Todos os templates de debt-resolution têm registry IDs. Use `sda-template-resolve <debt-{type}>` para resolver com suporte a overrides/presets/extensions.
 
 - **Objetivo** (§2): 1 linha — "Resolver D-XXX: <descrição do débito>".
 - **Arquivos Impactados** (§3, numeração canônica do miniSpec): §3.1 a criar — geralmente vazio; §3.2 a modificar — exatamente o `arquivo` do débito; §3.3 referência — qa-observations e task de origem.
@@ -335,6 +337,8 @@ NÃO inicie `sda-minispec-run-tasks` automaticamente.
 3. **NUNCA** inventar débitos — se `_run/report.md` está vazio ou sem entradas elegíveis, abortar limpamente.
 4. **NUNCA** classificar débitos sem o especialista — se descoberta interativa retornar "Default" (`__default__`), use Agent sem `subagent_type` (orquestrador genérico). NÃO classifique sozinho.
 5. **SEMPRE** preservar a granularidade "1 task por débito" salvo se usuário explicitamente solicitar agrupamento.
+
+6. **SEMPRE** referenciar exemplos canônicos via `sda-example-lookup <contexto> <stack>` ao especificar correções, para garantir que o código corrigido siga os padrões do projeto.
 6. **SEMPRE** marcar tasks de débito como `validation: qa` (cleanup é categoria `code_review_only`), exceto se path tocar qualquer categoria de Critical Paths da rule (fonte única — não enumere subconjuntos).
 7. **SEMPRE** registrar débitos NÃO selecionados em `scope.md §2 — Fora do escopo` com motivo "não selecionado nesta rodada" (rastreabilidade).
 8. **SEMPRE** logar a execução em `_run/state.json` da v{N} original (FASE 4.6a) e marcar os débitos selecionados na §2 do `_run/report.md` (FASE 4.6b).

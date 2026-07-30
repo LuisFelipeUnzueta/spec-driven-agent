@@ -47,11 +47,22 @@ QA e Tech Review retornam o mesmo schema compacto: `verdict`, `tests`, `criteria
 ## Artefatos
 
 | Workflow | Artefatos principais |
-|---|---|
+|---|---|---|
 | SDD | `docs/prds/features/{feature}/{version}/prd.md`, `tech_spec.md`, `task_plan.md`, `tasks/` |
 | miniSpec | `intent.md`, `scope.md`, `task_plan.md`, `tasks/` |
 | TaskCard | `tasks/task-{nn}-{slug}.md` |
 | Execucao | `_run/state.json`, `_run/report.md`; memoria de retry somente apos rejeicao |
 | ADR | `docs/adr/`, `docs/adr/INDEX.md` |
+
+## Gates de Qualidade (Checklists)
+
+Antes de cada transição de fase, recomenda-se rodar `sda-checklist-generate` para validar a qualidade da especificação:
+
+```
+PRD → [sda-checklist-generate prd.md] → Tech Spec → [sda-checklist-generate tech_spec.md] → Task Plan
+INTENT → [sda-checklist-generate intent.md] → SCOPE → [sda-checklist-generate scope.md] → Tasks
+```
+
+Checklists NÃO bloqueiam o avanço — são **gates não-bloqueantes** que registram o score e permitem avanço mesmo com ressalvas. O score fica em `_run/checklist-<tipo>.md`.
 
 Paths canonicos ficam em `_shared/rules/sda-*-workflow-rules.md`.

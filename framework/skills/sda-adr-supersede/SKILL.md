@@ -9,7 +9,7 @@ Princípios invioláveis:
 
 1. **Não apague história** — `Applied in` da ADR antiga e o conteúdo original permanecem (`superseded_keeps_applied_in: true`). Supersede **acrescenta** marca; não remove conteúdo. A rastreabilidade vem justamente desse `Applied in` preservado.
 2. **Migração de features é manual** — `Applied in` da OLD **NUNCA** é migrado automaticamente para a NEW. Cada feature decide se adota a substituta atualizando a própria subseção "ADRs Aplicáveis nesta Feature".
-3. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias. Usa o template canônico de `sda-adr-create` (`adr.template`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar).
+3. **Recursos canônicos centralizados** — esta skill **não** carrega cópias próprias. Usa o template canônico de `sda-adr-create` (registrado no template registry como `adr`) e o script canônico de `sda-adr-reindex` (`adr.reindex_script`). Paths globais (`adr.dir`, `adr.index_file`) vêm de `.agents/skills/_shared/rules/sda-adr-workflow-rules.md` (referência lazy; leia antes de usar). Para resolução com suporte a overrides/presets/extensions, use `sda-template-resolve adr`.
 4. **Token-efficient by design** — abrir apenas o arquivo da OLD + (no ramo NEW_EXISTS) o arquivo da NEW + uma varredura focada de `docs/specs/**/*.md` para o relatório final. Nunca abrir todas as ADRs.
 5. **Decisão com confirmação humana** — toda informação coletada para a NEW (no ramo NEW_NOVA) vem do usuário via `interação com o usuário`. NUNCA invente, deduza ou assuma.
 

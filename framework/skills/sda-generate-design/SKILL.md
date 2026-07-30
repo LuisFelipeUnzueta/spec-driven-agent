@@ -135,10 +135,12 @@ Decisões de design **transversais com trade-off real** (ex.: "adotar skeleton e
 
 ### Template (selecionado pela frente)
 
-| Frente | Template |
-|---|---|
-| `web` | [design_template_web.md](assets/design_template_web.md) |
-| `mobile` | [design_template_mobile.md](assets/design_template_mobile.md) |
+> **Template registry**: templates registrados como `design-web` e `design-mobile`. Use `sda-template-resolve design:<frente>` (ex: `sda-template-resolve design:web`) para resolver com suporte a overrides/presets/extensions.
+
+| Frente | Template | Registry ID |
+|--------|----------|-------------|
+| `web` | [design_template_web.md](assets/design_template_web.md) | `design-web` |
+| `mobile` | [design_template_mobile.md](assets/design_template_mobile.md) | `design-mobile` |
 
 Todas as seções do template devem ser preenchidas. Se uma seção não se aplica, indique `N/A — [justificativa]` (ex.: "N/A — projeto não suporta dark mode").
 
